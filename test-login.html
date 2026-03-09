@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Login DEMIR</title>
+</head>
+<body style="background:#FAF6F0;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:Arial,sans-serif;">
+<div style="background:white;padding:40px;max-width:350px;width:90%;box-shadow:0 4px 20px rgba(0,0,0,.1);">
+  <h2 style="color:#7B2D42;text-align:center;margin-bottom:24px;">DEMIR · Test</h2>
+  <input type="password" id="pwd" placeholder="Escribe: 1234" 
+    style="width:100%;padding:12px;border:1px solid #ddd;margin-bottom:16px;font-size:16px;box-sizing:border-box;">
+  <button onclick="check()" 
+    style="width:100%;padding:14px;background:#7B2D42;color:white;border:none;font-size:14px;cursor:pointer;">
+    Entrar
+  </button>
+  <p id="msg" style="text-align:center;margin-top:12px;color:red;display:none;">Contraseña incorrecta</p>
+  <p id="ok" style="text-align:center;margin-top:12px;color:green;display:none;">¡Correcto! Login funciona ✓</p>
+</div>
+<script>
+function check() {
+  var val = document.getElementById('pwd').value;
+  if (val === '1234') {
+    document.getElementById('ok').style.display = 'block';
+    document.getElementById('msg').style.display = 'none';
+  } else {
+    document.getElementById('msg').style.display = 'block';
+    document.getElementById('ok').style.display = 'none';
+  }
+}
+document.getElementById('pwd').addEventListener('keydown', function(e){
+  if(e.key==='Enter') check();
+});
+</script>
+</body>
+</html>
