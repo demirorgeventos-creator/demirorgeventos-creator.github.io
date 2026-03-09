@@ -1,0 +1,3038 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEMIR · Mi Agenda</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+/* ══ LOGIN ══ */
+#demir-login{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:#FAF6F0;position:fixed;inset:0;z-index:99999;
+}
+#demir-login::before{
+  content:'';position:absolute;inset:0;
+  background-image:linear-gradient(rgba(185,148,56,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(185,148,56,.07) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+.dl-box{
+  background:white;padding:52px 44px;max-width:400px;width:90%;
+  position:relative;z-index:1;border:1px solid rgba(185,148,56,.2);
+  box-shadow:0 20px 60px rgba(123,45,66,.08);
+}
+.dl-logo{font-family:"Cormorant Garamond",serif;font-size:30px;font-weight:300;letter-spacing:10px;color:#7B2D42;text-align:center;margin-bottom:6px;}
+.dl-logo span{color:#B99438;}
+.dl-tag{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:#8a7070;text-align:center;margin-bottom:36px;}
+.dl-diamond{text-align:center;color:#B99438;font-size:12px;letter-spacing:12px;margin-bottom:28px;opacity:.5;}
+.dl-couple{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:22px;color:#7B2D42;text-align:center;margin-bottom:28px;}
+.dl-label{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#8a7070;display:block;margin-bottom:10px;font-family:"Montserrat",sans-serif;}
+.dl-input{
+  width:100%;border:none;border-bottom:1px solid #F2EBE0;
+  padding:12px 0;font-family:"Montserrat",sans-serif;font-size:15px;
+  color:#3a2028;background:transparent;outline:none;
+  transition:border-color .3s;letter-spacing:4px;text-align:center;
+}
+.dl-input:focus{border-color:#B99438;}
+.dl-btn{
+  width:100%;margin-top:28px;padding:16px;background:#7B2D42;color:#FAF6F0;
+  border:none;font-family:"Montserrat",sans-serif;font-size:11px;
+  letter-spacing:4px;text-transform:uppercase;cursor:pointer;transition:background .3s;
+}
+.dl-btn:hover{background:#5a1e2e;}
+.dl-error{margin-top:14px;text-align:center;font-size:12px;color:#c0392b;display:none;font-style:italic;}
+
+/* ══ BANNER ══ */
+#demir-banner{
+  display:none;position:fixed;top:0;left:0;right:0;z-index:99998;
+  background:#7B2D42;color:white;
+  align-items:center;justify-content:space-between;
+  padding:8px 20px;font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  font-family:"Montserrat",sans-serif;
+}
+#demir-banner.show{display:flex;}
+#demir-logout{
+  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);
+  color:white;font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  padding:4px 14px;cursor:pointer;font-family:"Montserrat",sans-serif;
+}
+
+/* ══ AGENDA WRAPPER ══ */
+#demir-agenda{display:none;}
+#demir-agenda.show{display:block;padding-top:37px;}
+
+/* ══ READ ONLY ══ */
+#demir-agenda [contenteditable]{pointer-events:none!important;cursor:default!important;}
+#demir-agenda input,#demir-agenda textarea,#demir-agenda select{pointer-events:none!important;}
+#demir-agenda .btn-add,#demir-agenda .btn-icon,#demir-agenda .sheet-pdf{display:none!important;}
+#demir-agenda .modal-bg{display:none!important;}
+
+@keyframes dl-shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+
+
+:root{
+  --wine:#7B2D42;--wine-lt:#A04060;--blush:#F2C4CE;--blush-lt:#FBF0F3;
+  --gold:#C9A84C;--gold-lt:#F5E6C0;--cream:#FAF6F0;--sand:#EDE5D8;
+  --text:#3D2B1F;--muted:#9E8C84;--gray:#F4F1EE;
+  --green-bg:#C6EFCE;--green-ft:#006100;
+  --yel-bg:#FFEB9C;--yel-ft:#9C6500;
+  --red-bg:#FFC7CE;--red-ft:#9C0006;
+  --blue-bg:#DDEEFF;--blue-ft:#003366;
+  --nav-h:62px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;font-family:system-ui,Arial,sans-serif;background:var(--cream);color:var(--text);}
+
+/* ═══ LAYOUT ═══════════════════════════════════════════ */
+.app{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+
+/* ── TOP HEADER ────────────────────────────────────────── */
+.top-bar{
+  flex-shrink:0;background:white;border-bottom:1px solid var(--sand);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;z-index:200;
+}
+.top-bar .logo{font-family:Georgia,'Times New Roman',serif;font-size:20px;color:var(--wine);letter-spacing:3px;}
+.top-bar .days-badge{font-size:11px;color:var(--wine);background:var(--blush-lt);border:1px solid var(--blush);padding:4px 12px;border-radius:20px;font-weight:500;}
+
+/* ── MAIN SCROLL AREA ─────────────────────────────────── */
+.main{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+
+/* ── BOTTOM NAV ───────────────────────────────────────── */
+.bottom-nav{flex-shrink:0;background:white;border-top:1px solid #EDE5D8;display:flex;align-items:stretch;height:62px;z-index:300;position:relative;width:100%;}
+.bnav-item{box-sizing:border-box;
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:3px;cursor:pointer;border:none;
+  background:none;color:var(--muted);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+  transition:color .15s;padding:6px 2px;
+}
+.bnav-item .bic{font-size:21px;line-height:1;}
+.bnav-item .blbl{font-size:9px;font-weight:500;letter-spacing:.2px;}
+.bnav-item.active{color:var(--wine);}
+.bnav-item.active .blbl{font-weight:600;}
+
+/* ── MORE SHEET ───────────────────────────────────────── */
+.sheet-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:400;opacity:0;transition:opacity .25s;}
+.sheet-overlay.open{display:block;opacity:1;}
+.sheet{position:fixed;bottom:0;left:0;right:0;background:white;border-radius:22px 22px 0 0;padding:12px 16px 24px;z-index:500;-webkit-transform:translateY(100%);transform:translateY(100%);-webkit-transition:-webkit-transform .3s ease;transition:transform .3s ease;box-shadow:0 -4px 30px rgba(0,0,0,.15);}
+.sheet.open{-webkit-transform:translateY(0);transform:translateY(0);}
+.sheet-handle{width:40px;height:4px;background:var(--sand);border-radius:2px;margin:0 auto 16px;}
+.sheet-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;text-align:center;}
+.sheet-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.sheet-item{
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  padding:14px 4px;cursor:pointer;border-radius:14px;
+  background:var(--blush-lt);border:1px solid var(--sand);
+  transition:transform .1s;
+}
+.sheet-item:active{transform:scale(.95);}
+.sheet-item .sic{font-size:24px;}
+.sheet-item .slbl{font-size:9px;color:var(--wine);font-weight:600;text-align:center;line-height:1.3;}
+.sheet-pdf{
+  width:100%;background:var(--gold);color:white;border:none;
+  border-radius:12px;padding:13px;font-size:13px;font-weight:600;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+
+/* ═══ VIEWS ════════════════════════════════════════════ */
+.view{display:none;padding:16px 14px 100px;}
+.view.active{display:block;-webkit-animation:fadeIn .2s ease;animation:fadeIn .2s ease;}
+@-webkit-keyframes fadeIn{from{opacity:0;-webkit-transform:translateY(4px)}to{opacity:1;-webkit-transform:translateY(0)}}@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.page-title{font-family:Georgia,'Times New Roman',serif;font-size:28px;color:var(--wine);font-style:italic;margin-bottom:2px;}
+.page-sub{font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:18px;}
+
+/* ═══ COMPONENTS ════════════════════════════════════════ */
+.card{background:white;border:1px solid var(--sand);border-radius:14px;overflow:visible;margin-bottom:14px;}
+.card-hdr{padding:11px 16px;border-bottom:1px solid var(--sand);display:flex;align-items:center;justify-content:space-between;}
+.card-hdr h3{font-family:Georgia,'Times New Roman',serif;font-size:14px;color:var(--text);font-style:italic;}
+
+/* editable inline */
+[contenteditable]{outline:none;border-bottom:1px dashed transparent;transition:border-color .15s;-webkit--webkit-user-select:text;user-select:text;-webkit-user-select:text;user-select:text;}
+[contenteditable]:focus{border-bottom-color:var(--wine);}
+[contenteditable]:empty:before{content:attr(data-ph);color:#bbb;font-style:italic;}
+
+/* status badges */
+.status{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:9px;font-weight:600;cursor:pointer;user-select:none;white-space:nowrap;}
+.s-ok{background:var(--green-bg);color:var(--green-ft);}
+.s-proc{background:var(--yel-bg);color:var(--yel-ft);}
+.s-pend{background:var(--red-bg);color:var(--red-ft);}
+.s-init{background:var(--blue-bg);color:var(--blue-ft);}
+
+/* resp badges */
+.resp{display:inline-block;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:600;cursor:pointer;user-select:none;white-space:nowrap;}
+.r-wp{background:#E8D5F5;color:#6B4C9A;}
+.r-novios{background:#F2C4CE;color:#7B2D42;}
+.r-ambos{background:#F5E6C0;color:#7A5C10;}
+.r-prov{background:#D6E4F0;color:#2D5986;}
+
+/* table rows */
+.trow{display:grid;border-bottom:1px solid var(--blush-lt);align-items:center;}
+.trow:last-child{border-bottom:none;}
+.trow.hdr{background:var(--wine);}
+.trow:not(.hdr):active{background:var(--blush-lt);}
+.tcell{padding:9px 12px;font-size:11px;}
+.trow.hdr .tcell{color:white;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;font-weight:500;}
+
+/* scrollable table wrapper */
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;}.tscroll .card{overflow:hidden;border-radius:14px;}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:9px;border:none;cursor:pointer;font-size:11px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;font-weight:500;transition:all .15s;}
+.btn-wine{background:var(--wine);color:white;}
+.btn-ghost{background:transparent;border:1px solid var(--sand);color:var(--text);}
+.btn-icon{background:none;border:none;cursor:pointer;color:var(--muted);font-size:15px;padding:2px 5px;transition:color .15s;}
+.btn-icon:hover{color:var(--red-ft);}
+.btn-add{background:none;border:none;cursor:pointer;font-size:22px;color:var(--wine);opacity:.6;line-height:1;padding:0;}
+.sect-label{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:14px 14px 6px;display:flex;align-items:center;gap:8px;}
+.sect-label .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+/* ═══ CONTENIDO ════════════════════════════════════════ */
+.couple-banner{background:var(--wine);color:white;border-radius:16px;padding:16px 18px;margin-bottom:18px;}
+.couple-banner .cb-name{font-family:Georgia,'Times New Roman',serif;font-size:18px;font-style:italic;display:block;margin-bottom:2px;}
+.couple-banner .cb-date{font-size:10px;opacity:.75;}
+.couple-banner .cb-days{display:inline-block;background:rgba(255,255,255,.2);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;margin-top:8px;}
+.cont-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px;}
+.cont-card{background:white;border:1px solid var(--sand);border-radius:14px;padding:16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.cont-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;border-radius:4px 0 0 4px;}
+.cont-card:active{transform:scale(.97);}
+.cont-card h3{font-family:Georgia,'Times New Roman',serif;font-size:13px;margin-bottom:4px;color:var(--text);}
+.cont-card p{font-size:10px;color:var(--muted);line-height:1.4;}
+
+/* month chips — horizontal scroll */
+.chips-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px;margin:0 -14px;padding-left:14px;}
+.chips-wrap::-webkit-scrollbar{display:none;}
+.chips-inner{display:flex;gap:8px;width:max-content;padding-right:14px;}
+.mchip{padding:7px 16px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;color:white;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.12);}
+.mchip:active{transform:scale(.95);}
+
+/* ═══ CALENDARIO ═══════════════════════════════════════ */
+.cal-top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:16px;gap:12px;}
+.cal-month-name{font-family:Georgia,'Times New Roman',serif;font-size:40px;color:var(--wine);font-style:italic;line-height:1;}
+.cal-year-lbl{font-size:11px;color:var(--muted);letter-spacing:2px;margin-top:2px;}
+.cal-obj-box{background:white;border:1px solid var(--sand);border-radius:12px;padding:10px 12px;flex:1;min-width:0;}
+.cal-obj-box label{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;}
+.cal-obj-box input{width:100%;border:none;outline:none;font-size:11px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;color:var(--text);background:transparent;}
+.cal-nav{display:flex;align-items:center;gap:8px;margin-bottom:16px;}
+.cal-nav-btn{background:white;border:1px solid var(--sand);border-radius:8px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--wine);cursor:pointer;}
+.cal-nav-lbl{font-family:Georgia,'Times New Roman',serif;font-size:14px;color:var(--text);font-weight:600;}
+.cal-grid-wrap{background:white;border-radius:14px;padding:14px;border:1px solid var(--sand);margin-bottom:12px;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.cal-dow{text-align:center;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:3px 0 8px;font-weight:500;}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:12px;border-radius:7px;cursor:pointer;transition:background .1s;position:relative;}
+.cal-day:active{background:var(--blush-lt);}
+.cal-day.today{background:var(--wine);color:white;font-weight:700;}
+.cal-day.other{color:#ccc;}
+.cal-day.wedding{background:var(--gold-lt);color:var(--wine);font-weight:700;}
+.cal-day.has-event::after{content:'';position:absolute;bottom:2px;width:4px;height:4px;background:var(--gold);border-radius:50%;}
+
+/* ═══ DAILY ════════════════════════════════════════════ */
+.daily-hero{display:flex;align-items:baseline;gap:10px;margin-bottom:16px;}
+.day-num{font-family:Georgia,'Times New Roman',serif;font-size:64px;color:var(--wine);line-height:1;font-style:italic;}
+.day-info .dow{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);}
+.day-info .mon{font-family:Georgia,'Times New Roman',serif;font-size:16px;color:var(--wine);font-style:italic;}
+.mini-cal-wrap{background:white;border:1px solid var(--sand);border-radius:12px;padding:12px;margin-bottom:14px;}
+.mini-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.mini-lbl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.mini-nav{display:flex;gap:4px;}
+.mini-nav button{background:white;border:1px solid var(--sand);border-radius:6px;width:24px;height:24px;font-size:11px;color:var(--wine);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.mc-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;}
+.mc-dow{text-align:center;font-size:7px;color:var(--muted);text-transform:uppercase;padding-bottom:3px;}
+.mc-day{text-align:center;font-size:10px;padding:3px 0;border-radius:4px;cursor:pointer;}
+.mc-day.mc-active{background:var(--wine);color:white;font-weight:700;}
+.mc-day.mc-other{color:#ddd;}
+.task-item{display:flex;align-items:center;gap:9px;padding:9px 14px;border-bottom:1px solid var(--blush-lt);}
+.task-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;cursor:pointer;border:2px solid;transition:all .2s;}
+.task-dot.done-dot{background:currentColor;}
+.task-inp{flex:1;border:none;outline:none;font-size:12px;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:transparent;-webkit--webkit-user-select:text;user-select:text;-webkit-user-select:text;user-select:text;}
+.task-inp.done-txt{text-decoration:line-through;color:var(--muted);}
+.task-del{background:none;border:none;color:#ccc;cursor:pointer;font-size:15px;}
+.notas-lines{background:#FEFCF8;background-image:repeating-linear-gradient(transparent,transparent 23px,#EDE8E0 23px,#EDE8E0 24px);}
+.notas-lines textarea{width:100%;border:none;outline:none;font-family:Georgia,'Times New Roman',serif;font-size:14px;background:transparent;resize:none;line-height:24px;color:var(--text);padding:12px 16px;-webkit--webkit-user-select:text;user-select:text;-webkit-user-select:text;user-select:text;}
+
+/* ═══ CHECKLIST ════════════════════════════════════════ */
+.cl-item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:white;border:1px solid var(--sand);border-radius:10px;margin-bottom:5px;}
+.cl-box{width:18px;height:18px;border:2px solid var(--sand);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:white;cursor:pointer;}
+.cl-lbl{flex:1;font-size:12px;border:none;outline:none;background:transparent;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;color:var(--text);-webkit--webkit-user-select:text;user-select:text;-webkit-user-select:text;user-select:text;}
+.cl-item.cl-done .cl-lbl{text-decoration:line-through;color:var(--muted);}
+.cl-progress{background:var(--wine);color:white;border-radius:20px;padding:5px 14px;font-size:11px;font-weight:500;}
+
+/* ═══ FINANZAS ═════════════════════════════════════════ */
+.fin-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+.fin-card{background:white;border:1px solid var(--sand);border-radius:12px;padding:14px 16px;}
+.fin-card.full{grid-column:1/-1;}
+.fin-card label{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px;}
+.fin-amount{font-family:Georgia,'Times New Roman',serif;font-size:22px;}
+
+/* ═══ INVITADOS ════════════════════════════════════════ */
+.inv-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+.inv-stat{background:white;border:1px solid var(--sand);border-radius:10px;padding:10px 8px;text-align:center;}
+.inv-stat .n{font-family:Georgia,'Times New Roman',serif;font-size:22px;color:var(--wine);display:block;line-height:1;}
+.inv-stat .l{font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:2px;display:block;}
+
+/* ═══ EXPEDIENTE ═══════════════════════════════════════ */
+.exp-section{margin-bottom:20px;overflow:visible;}
+.exp-sect-title{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;font-weight:700;padding-bottom:5px;border-bottom:2px solid;margin-bottom:10px;}
+.exp-row{display:flex;border-bottom:1px solid var(--blush-lt);}
+.exp-row:last-child{border-bottom:none;}
+.exp-key{padding:10px 12px;font-size:10px;font-weight:600;color:var(--muted);min-width:130px;max-width:130px;background:var(--gray);display:flex;align-items:center;flex-shrink:0;}
+.exp-val{
+  padding:10px 12px;font-size:12px;flex:1;
+  border:none;outline:none;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;color:var(--text);
+  background:white;
+  -webkit--webkit-user-select:text;user-select:text;-webkit-user-select:text;user-select:text;
+  cursor:text;min-width:0;
+  /* Critical for iOS/Android input */
+  -webkit-appearance:none;appearance:none;
+  border-radius:0;
+}
+.exp-val:focus{background:var(--blush-lt);}
+.exp-val::placeholder{color:#bbb;font-style:italic;}
+
+/* ═══ MINUTO A MINUTO ══════════════════════════════════ */
+.mam-section{margin-bottom:24px;}
+.mam-section-hdr{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.mam-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.mam-title{font-family:Georgia,'Times New Roman',serif;font-size:16px;color:var(--wine);font-style:italic;flex:1;}
+
+/* ═══ MODAL ════════════════════════════════════════════ */
+.modal-bg{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:600;align-items:flex-end;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:white;border-radius:20px 20px 0 0;padding:20px 18px 32px;width:100%;max-height:85vh;overflow-y:auto;}
+.modal h2{font-family:Georgia,'Times New Roman',serif;font-size:18px;color:var(--wine);font-style:italic;margin-bottom:16px;}
+.mf{margin-bottom:12px;}
+.mf label{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;}
+.mf input,.mf select,.mf textarea{width:100%;padding:10px 12px;border:1px solid var(--sand);border-radius:9px;font-size:13px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;color:var(--text);outline:none;-webkit-appearance:none;background:white;}
+.mf input:focus,.mf select:focus{border-color:var(--wine);}
+.modal-actions{display:flex;gap:10px;margin-top:16px;}
+.modal-actions .btn{flex:1;justify-content:center;padding:12px;}
+
+/* Desktop overrides */
+@media(max-width:900px){
+  .app{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+  .desktop-sidebar{display:none !important;}
+  .month-tabs-desktop{display:none !important;}
+  .top-bar{display:flex;flex-shrink:0;}
+  .bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;height:62px;z-index:400;background:white;border-top:1px solid #EDE5D8;align-items:stretch;}
+  .main{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+  .view{padding:14px 14px 110px;}
+  .sheet-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:450;opacity:0;transition:opacity .25s;}
+  .sheet-overlay.open{display:block;opacity:1;}
+  .sheet{position:fixed;bottom:0;left:0;right:0;background:white;border-radius:22px 22px 0 0;padding:12px 16px 32px;z-index:500;-webkit-transform:translateY(100%);transform:translateY(100%);transition:transform .3s ease;box-shadow:0 -4px 30px rgba(0,0,0,.15);}
+  .sheet.open{-webkit-transform:translateY(0);transform:translateY(0);}
+}
+
+@media(min-width:901px){
+  .app{display:flex;flex-direction:row;height:100vh;overflow:hidden;}
+  .top-bar{display:none !important;}
+  .bottom-nav{display:none !important;}
+  .sheet-overlay,.sheet{display:none !important;}
+  .desktop-sidebar{display:flex;flex-direction:column;width:220px;min-width:220px;flex-shrink:0;background:white;border-right:1px solid var(--sand);overflow-y:auto;box-shadow:2px 0 12px rgba(0,0,0,.05);}
+  .month-tabs-desktop{display:flex !important;position:fixed;right:0;top:50%;-webkit-transform:translateY(-50%);transform:translateY(-50%);flex-direction:column;gap:2px;z-index:200;}
+  .mtab{
+    writing-mode:vertical-rl;
+    -webkit-transform:rotate(180deg);
+    transform:rotate(180deg);
+    width:26px;
+    padding:10px 4px;
+    font-size:8px;
+    font-weight:700;
+    letter-spacing:1.5px;
+    border:none;
+    cursor:pointer;
+    color:white;
+    opacity:.75;
+    transition:opacity .15s, width .15s;
+    border-radius:6px 0 0 6px;
+    font-family:system-ui,Arial,sans-serif;
+  }
+  .mtab:hover{opacity:1;width:30px;}
+  .mtab.active{opacity:1;width:32px;box-shadow:-2px 0 8px rgba(0,0,0,.2);}
+  .main{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-right:36px;}
+  .view{padding:28px 28px 100px;}
+  .nav-item{display:flex;align-items:center;gap:8px;padding:10px 16px;cursor:pointer;font-size:13px;border-radius:10px;margin:1px 8px;color:var(--text);}
+  .nav-item:hover{background:var(--gray);}
+  .nav-item.active{background:var(--blush-lt);color:var(--wine);font-weight:600;}
+  .nav-item .ic{font-size:16px;width:22px;text-align:center;}
+}
+
+
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:Arial,sans-serif;background:white;color:#3D2B1F;padding:20px;}
+    @page{size:A4;margin:15mm 18mm;}
+    .header{text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:3px solid #7B2D42;}
+    .logo{font-size:10px;letter-spacing:5px;text-transform:uppercase;color:#9E8C84;margin-bottom:4px;}
+    .couple{font-size:26px;color:#7B2D42;font-style:italic;margin-bottom:6px;}
+    .meta{font-size:11px;color:#9E8C84;display:flex;justify-content:center;gap:24px;flex-wrap:wrap;}
+    .meta span{display:flex;align-items:center;gap:4px;}
+    table{width:100%;border-collapse:collapse;font-size:12px;}
+    th{background:#7B2D42;color:white;padding:9px 12px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;text-align:left;}
+    .footer{margin-top:20px;text-align:center;font-size:9px;color:#9E8C84;border-top:1px solid #EDE5D8;padding-top:10px;}
+    @media print{body{padding:0;}}
+  
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="demir-login">
+  <div class="dl-box">
+    <div class="dl-logo">D<span>·</span>EMIR</div>
+    <div class="dl-tag">Wedding &amp; Event Planner</div>
+    <div class="dl-diamond">✦ ✦ ✦</div>
+    <div class="dl-couple" id="dl-couple-name"></div>
+    <label class="dl-label">Contraseña de acceso</label>
+    <input class="dl-input" type="password" id="dl-pwd" placeholder="••••••••" autocomplete="off">
+    <button class="dl-btn" id="dl-submit">Acceder a mi agenda</button>
+    <div class="dl-error" id="dl-error">Contraseña incorrecta. Intenta de nuevo.</div>
+  </div>
+</div>
+
+<!-- ══ BANNER ══ -->
+<div id="demir-banner">
+  <span>👁 Modo lectura · Solo visualización</span>
+  <button id="demir-logout">Cerrar sesión</button>
+</div>
+
+<!-- ══ AGENDA ══ -->
+<div id="demir-agenda">
+
+<div class="app" id="app">
+
+  <!-- TOP BAR (mobile only) -->
+  <header class="top-bar">
+    <span class="logo" id="topLogo">DEMIR</span>
+    <span class="days-badge" id="topDays">— días</span>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main" id="mainArea">
+
+<!-- ══ CONTENIDO ═════════════════════════════════════ -->
+<div class="view active" id="view-contenido">
+  <div class="couple-banner">
+    <span class="cb-name" id="cbName">Novios</span>
+    <div class="cb-date" id="cbDate">Fecha de boda</div>
+    <span class="cb-days" id="cbDays">— días para la boda</span>
+  </div>
+  <div style="font-family:Georgia,'Times New Roman',serif;font-size:11px;letter-spacing:5px;color:var(--muted);text-align:center;margin-bottom:4px;">WEDDING PLANNER</div>
+  <div style="font-family:Georgia,'Times New Roman',serif;font-size:38px;color:var(--wine);text-align:center;margin-bottom:4px;font-style:italic;">Contenido</div>
+  <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:22px;font-style:italic;">Tu guía para el día más especial</div>
+  <div class="cont-grid">
+    <div class="cont-card" onclick="go('calendario')"><div style="position:absolute;top:0;left:0;width:4px;height:100%;background:var(--wine);border-radius:4px 0 0 4px;"></div><h3>📅 Calendario</h3><p>Visualiza meses y fechas.</p></div>
+    <div class="cont-card" onclick="go('diario')"><div style="position:absolute;top:0;left:0;width:4px;height:100%;background:var(--gold);border-radius:4px 0 0 4px;"></div><h3>✏️ Planner Diario</h3><p>Tareas y notas del día.</p></div>
+    <div class="cont-card" onclick="go('checklist')"><div style="position:absolute;top:0;left:0;width:4px;height:100%;background:var(--blush);border-radius:4px 0 0 4px;"></div><h3>✅ Checklist</h3><p>Tareas por fase.</p></div>
+    <div class="cont-card" onclick="go('finanzas')"><div style="position:absolute;top:0;left:0;width:4px;height:100%;background:#9ECFE0;border-radius:4px 0 0 4px;"></div><h3>💰 Finanzas</h3><p>Presupuesto y pagos.</p></div>
+    <div class="cont-card" onclick="go('invitados')"><div style="position:absolute;top:0;left:0;width:4px;height:100%;background:var(--wine);border-radius:4px 0 0 4px;"></div><h3>👥 Invitados</h3><p>Lista y confirmaciones.</p></div>
+    <div class="cont-card" onclick="go('proveedores')"><div style="position:absolute;top:0;left:0;width:4px;height:100%;background:var(--gold);border-radius:4px 0 0 4px;"></div><h3>📞 Proveedores</h3><p>Directorio de servicios.</p></div>
+    <div class="cont-card" onclick="go('expediente')"><div style="position:absolute;top:0;left:0;width:4px;height:100%;background:var(--blush);border-radius:4px 0 0 4px;"></div><h3>💍 Expediente</h3><p>Datos de la boda.</p></div>
+    <div class="cont-card" onclick="go('minutominuto')"><div style="position:absolute;top:0;left:0;width:4px;height:100%;background:#9ECFE0;border-radius:4px 0 0 4px;"></div><h3>⏱ Min a Min</h3><p>Programa del día.</p></div>
+  </div>
+  <div style="font-family:Georgia,'Times New Roman',serif;font-size:14px;color:var(--wine);margin-bottom:10px;">Ir al mes →</div>
+  <div class="chips-wrap"><div class="chips-inner" id="monthChips"></div></div>
+</div>
+
+<!-- ══ CALENDARIO ═══════════════════════════════════ -->
+<div class="view" id="view-calendario">
+  <div class="cal-nav">
+    <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+    <span class="cal-nav-lbl" id="calNavLbl"></span>
+    <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+    <button class="cal-nav-btn" style="margin-left:auto;font-size:16px;" onclick="goWedding()" title="Ir a la boda">💍</button>
+  </div>
+  <div class="cal-top">
+    <div>
+      <div class="cal-month-name" id="calMonthName"></div>
+      <div class="cal-year-lbl" id="calYear"></div>
+    </div>
+    <div class="cal-obj-box">
+      <label>OBJETIVO DEL MES</label>
+      <input id="calObj" placeholder="Escribe el objetivo…">
+    </div>
+  </div>
+  <div class="cal-grid-wrap">
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+  <div style="display:flex;gap:16px;font-size:10px;color:var(--muted);padding:0 2px;flex-wrap:wrap;">
+    <span>🟡 Boda</span>
+    <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--wine);"></span>Hoy</span>
+    <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--gold);"></span>Con evento</span>
+  </div>
+</div>
+
+<!-- ══ DIARIO ════════════════════════════════════════ -->
+<div class="view" id="view-diario">
+  <div class="daily-layout">
+    <div>
+      <div class="daily-hero">
+        <div class="day-num" id="dayNum"></div>
+        <div class="day-info">
+          <span class="dow" id="dayDow"></span>
+          <span class="mon" id="dayMonth"></span>
+        </div>
+      </div>
+      <div class="mini-cal-wrap">
+        <div class="mini-hdr">
+          <span class="mini-lbl" id="miniCalLbl"></span>
+          <div class="mini-nav">
+            <button onclick="chDailyM(-1)">‹</button>
+            <button onclick="chDailyM(1)">›</button>
+          </div>
+        </div>
+        <div class="mc-grid" id="miniCal"></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><h3>Tareas del día</h3><button class="btn-add" onclick="addTask()">+</button></div>
+        <div id="taskList"></div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:12px;">
+        <div class="card-hdr"><div style="display:flex;align-items:center;gap:7px;"><div style="width:3px;height:13px;border-radius:2px;background:var(--blush);"></div><h3>Objetivos</h3></div></div>
+        <div style="padding:10px 14px;" id="objetivosList"></div>
+      </div>
+      <div class="card" style="margin-bottom:12px;">
+        <div class="card-hdr"><div style="display:flex;align-items:center;gap:7px;"><div style="width:3px;height:13px;border-radius:2px;background:var(--gold);"></div><h3>Importante</h3></div></div>
+        <div style="padding:12px 14px;background:linear-gradient(135deg,#FFF8F0,white);">
+          <textarea id="importanteTA" style="width:100%;border:none;outline:none;font-size:12px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:transparent;resize:none;min-height:60px;line-height:1.7;-webkit--webkit-user-select:text;user-select:text;-webkit-user-select:text;user-select:text;" placeholder="Algo urgente para hoy…"></textarea>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div style="display:flex;align-items:center;gap:7px;"><div style="width:3px;height:13px;border-radius:2px;background:var(--wine);"></div><h3>Notas</h3></div></div>
+        <div class="notas-lines"><textarea id="notasTA" rows="5" placeholder="Notas libres…"></textarea></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CHECKLIST ══════════════════════════════════════ -->
+<div class="view" id="view-checklist">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+    <div><div class="page-title">Checklist</div><div class="page-sub">Por fase de la boda</div></div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="cl-progress" id="clProgress">0 / 0</div>
+      <button class="btn btn-wine" style="padding:7px 12px;font-size:11px;" onclick="openModal('addSection')">+ Sección</button>
+    </div>
+  </div>
+  <div id="checklistWrap"></div>
+</div>
+
+<!-- ══ FINANZAS ══════════════════════════════════════ -->
+<div class="view" id="view-finanzas">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+    <div><div class="page-title">Finanzas</div><div class="page-sub">Presupuesto y pagos</div></div>
+    <button class="btn btn-wine" style="padding:7px 12px;font-size:11px;" onclick="openModal('addGasto')">+ Gasto</button>
+  </div>
+  <div class="fin-cards">
+    <div class="fin-card full"><label>Presupuesto Total</label><div class="fin-amount" style="color:var(--wine);" id="finTotal">$0</div></div>
+    <div class="fin-card"><label>Total Anticipos</label><div class="fin-amount" style="color:#7B68EE;" id="finAnts">$0</div></div>
+    <div class="fin-card"><label>Pagado completo</label><div class="fin-amount" style="color:#4CAF50;" id="finPagado">$0</div></div>
+    <div class="fin-card"><label>Saldo Pendiente</label><div class="fin-amount" style="color:var(--gold);" id="finPend">$0</div></div>
+  </div>
+  <div class="tscroll"><div class="card" id="finTable"></div></div>
+</div>
+
+<!-- ══ INVITADOS ══════════════════════════════════════ -->
+<div class="view" id="view-invitados">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+    <div><div class="page-title">Invitados</div><div class="page-sub">Lista y confirmaciones</div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn" style="background:var(--gold);color:white;padding:7px 12px;font-size:11px;" onclick="exportInvitadosXLSX()">📥 Excel</button>
+      <button class="btn" style="background:#4CAF50;color:white;padding:7px 12px;font-size:11px;" onclick="document.getElementById('importInvFile').click()">📤 Importar</button>
+      <input type="file" id="importInvFile" accept=".xlsx,.xls" style="display:none" onchange="importInvitadosXLSX(this)">
+      <button class="btn btn-wine" style="padding:7px 12px;font-size:11px;" onclick="openModal('addInvitado')">+ Invitado</button>
+    </div>
+  </div>
+  <div class="inv-stats" id="invStats"></div>
+  <div class="tscroll"><div class="card" id="invTable"></div></div>
+</div>
+
+<!-- ══ PROVEEDORES ════════════════════════════════════ -->
+<div class="view" id="view-proveedores">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+    <div><div class="page-title">Proveedores</div><div class="page-sub">Directorio de servicios</div></div>
+    <button class="btn btn-wine" style="padding:7px 12px;font-size:11px;" onclick="openModal('addProveedor')">+ Proveedor</button>
+  </div>
+  <div class="tscroll"><div class="card" id="provTable"></div></div>
+</div>
+
+<!-- ══ EXPEDIENTE ══════════════════════════════════════ -->
+<div class="view" id="view-expediente">
+  <div class="page-title">Expediente</div>
+  <div class="page-sub" style="margin-bottom:16px;">Toca cualquier campo para editar</div>
+  <div id="expContent"></div>
+</div>
+
+<!-- ══ MINUTO A MINUTO ════════════════════════════════ -->
+<div class="view" id="view-minutominuto">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+    <div><div class="page-title">Minuto a Minuto</div><div class="page-sub">Programa del día</div></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-wine" style="padding:7px 12px;font-size:11px;" onclick="openModal('addMAMSection')">+ Sección</button>
+      <button class="btn" style="padding:7px 12px;font-size:11px;background:var(--gold);color:white;" onclick="printMAM()">🖨 PDF</button>
+    </div>
+  </div>
+  <div id="mamWrap"></div>
+</div>
+
+  </main><!-- end .main -->
+
+  <!-- BOTTOM NAV (mobile) -->
+  <nav class="bottom-nav">
+    <button class="bnav-item active" id="bn-contenido" onclick="go('contenido')"><span class="bic">🗂</span><span class="blbl">Inicio</span></button>
+    <button class="bnav-item" id="bn-calendario" onclick="go('calendario')"><span class="bic">📅</span><span class="blbl">Calendario</span></button>
+    <button class="bnav-item" id="bn-checklist" onclick="go('checklist')"><span class="bic">✅</span><span class="blbl">Checklist</span></button>
+    <button class="bnav-item" id="bn-expediente" onclick="go('expediente')"><span class="bic">💍</span><span class="blbl">Expediente</span></button>
+    <button class="bnav-item" id="bn-more" onclick="openSheet()"><span class="bic">···</span><span class="blbl">Más</span></button>
+  </nav>
+
+  <!-- MORE SHEET (mobile) -->
+  <div class="sheet-overlay" id="sheetOverlay" onclick="closeSheet()"></div>
+  <div class="sheet" id="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">SECCIONES</div>
+    <div class="sheet-grid">
+      <div class="sheet-item" onclick="go('diario');closeSheet()"><span class="sic">✏️</span><span class="slbl">Planner Diario</span></div>
+      <div class="sheet-item" onclick="go('finanzas');closeSheet()"><span class="sic">💰</span><span class="slbl">Finanzas</span></div>
+      <div class="sheet-item" onclick="go('invitados');closeSheet()"><span class="sic">👥</span><span class="slbl">Invitados</span></div>
+      <div class="sheet-item" onclick="go('proveedores');closeSheet()"><span class="sic">📞</span><span class="slbl">Proveedores</span></div>
+      <div class="sheet-item" onclick="go('minutominuto');closeSheet()"><span class="sic">⏱</span><span class="slbl">Min a Min</span></div>
+      <div class="sheet-item" onclick="window.print();closeSheet()"><span class="sic">📄</span><span class="slbl">Imprimir</span></div>
+    </div>
+  </div>
+
+</div><!-- end .app -->
+
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg" onclick="closeModal(event)">
+  <div class="modal" id="modalBox" onclick="e=>e.stopPropagation()">
+    <h2 id="modalTitle">Agregar</h2>
+    <div id="modalBody"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-wine" id="modalSave" onclick="saveModal()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let S = {
+  curM: new Date().getMonth(), curY: new Date().getFullYear(),
+  dailyDate: new Date(), dM: new Date().getMonth(), dY: new Date().getFullYear(),
+  tasks: {}, monthObj: {},
+  weddingDate: null, coupleName: '', coupleDate: '',
+
+  checklist: [
+    { id:1, fase:'🔵 Planificación', color:'#2D5986', items:[
+      {id:101,text:'Definir estilo y concepto de la boda',resp:'Novios',done:false},
+      {id:102,text:'Elegir paleta de colores',resp:'Ambos',done:false},
+      {id:103,text:'Establecer presupuesto total',resp:'Novios',done:false},
+      {id:104,text:'Seleccionar y visitar el venue',resp:'Ambos',done:false},
+      {id:105,text:'Hablar con sacerdote / juez',resp:'Novios',done:false},
+      {id:106,text:'Crear expediente de la boda',resp:'WP',done:false},
+      {id:107,text:'Enviar Save the Date',resp:'Ambos',done:false},
+    ]},
+    { id:2, fase:'🔴 Contratación', color:'#7B2D42', items:[
+      {id:201,text:'Contratar fotógrafo',resp:'Ambos',done:false},
+      {id:202,text:'Contratar DJ / Entretenimiento',resp:'Ambos',done:false},
+      {id:203,text:'Contratar florería',resp:'Ambos',done:false},
+      {id:204,text:'Contratar banquete',resp:'Ambos',done:false},
+      {id:205,text:'Contratar maquillista y estilista',resp:'Novios',done:false},
+      {id:206,text:'Elegir vestido de novia',resp:'Novios',done:false},
+    ]},
+    { id:3, fase:'🟣 Detalles', color:'#6B4C9A', items:[
+      {id:301,text:'Imprimir misales',resp:'WP',done:false},
+      {id:302,text:'Imprimir cartitas para mesas',resp:'WP',done:false},
+      {id:303,text:'Confirmar asistencia invitados',resp:'WP',done:false},
+      {id:304,text:'Prueba de menú',resp:'Ambos',done:false},
+      {id:305,text:'Confirmar todos los proveedores',resp:'WP',done:false},
+    ]},
+    { id:4, fase:'🟡 Día D', color:'#C9A84C', items:[
+      {id:401,text:'WP Team en posición',resp:'WP',done:false},
+      {id:402,text:'Supervisar montaje',resp:'WP',done:false},
+      {id:403,text:'Coordinar getting ready',resp:'WP',done:false},
+      {id:404,text:'Coordinar first looks',resp:'WP',done:false},
+      {id:405,text:'Acomodar cortejo nupcial',resp:'WP',done:false},
+      {id:406,text:'Coordinar entrada de novios',resp:'WP',done:false},
+    ]},
+  ],
+
+  gastos: [
+    {id:1,rubro:'Venue',proveedor:'',costo:0,anticipos:[],estado:'s-pend'},
+    {id:2,rubro:'Fotografía',proveedor:'',costo:0,anticipos:[],estado:'s-pend'},
+    {id:3,rubro:'DJ / Entretenimiento',proveedor:'',costo:0,anticipos:[],estado:'s-pend'},
+    {id:4,rubro:'Florería',proveedor:'',costo:0,anticipos:[],estado:'s-pend'},
+    {id:5,rubro:'Banquete',proveedor:'',costo:0,anticipos:[],estado:'s-pend'},
+    {id:6,rubro:'Maquillaje y Peinado',proveedor:'',costo:0,anticipos:[],estado:'s-pend'},
+    {id:7,rubro:'Wedding Planner',proveedor:'DEMIR',costo:0,anticipos:[],estado:'s-pend'},
+  ],
+
+  invitados: [],
+
+  proveedores: [
+    {id:1,rubro:'Venue',nombre:'',contacto:'',tel:'',horario:'',estado:'s-init'},
+    {id:2,rubro:'Fotografía',nombre:'',contacto:'',tel:'',horario:'Full day',estado:'s-init'},
+    {id:3,rubro:'DJ / Música',nombre:'',contacto:'',tel:'',horario:'',estado:'s-init'},
+    {id:4,rubro:'Florería',nombre:'',contacto:'',tel:'',horario:'',estado:'s-init'},
+    {id:5,rubro:'Banquete',nombre:'',contacto:'',tel:'',horario:'',estado:'s-init'},
+    {id:6,rubro:'Maquillaje',nombre:'',contacto:'',tel:'',horario:'',estado:'s-init'},
+    {id:7,rubro:'Wedding Planner',nombre:'DEMIR',contacto:'',tel:'2214306593',horario:'Full day',estado:'s-ok'},
+  ],
+
+  expediente: {
+    novios:[
+      {key:'Nombre Novia',val:''},
+      {key:'Celular Novia',val:''},
+      {key:'Nombre Novio',val:''},
+      {key:'Celular Novio',val:''},
+    ],
+    generales:[
+      {key:'Fecha de la boda',val:''},
+      {key:'Venue / Salón',val:''},
+      {key:'Dirección',val:''},
+      {key:'Número de invitados',val:''},
+      {key:'Horas de servicio',val:''},
+      {key:'Paleta de colores',val:''},
+      {key:'Mesa de regalos',val:''},
+    ],
+    familia:[
+      {key:'Mamá Novia',val:''},
+      {key:'Tel Mamá Novia',val:''},
+      {key:'Papá Novia',val:''},
+      {key:'Tel Papá Novia',val:''},
+      {key:'Mamá Novio',val:''},
+      {key:'Tel Mamá Novio',val:''},
+      {key:'Papá Novio',val:''},
+      {key:'Tel Papá Novio',val:''},
+    ],
+    ceremonia:[
+      {key:'Tipo de ceremonia',val:''},
+      {key:'Iglesia / Lugar',val:''},
+      {key:'Horario ceremonia',val:''},
+      {key:'Sacerdote / Juez',val:''},
+      {key:'Representante en ausencia novios',val:''},
+    ],
+    civil:[
+      {key:'¿Mismo día?',val:''},
+      {key:'Juez',val:''},
+      {key:'Testigo 1',val:''},
+      {key:'Testigo 2',val:''},
+      {key:'Testigo 3',val:''},
+      {key:'Testigo 4',val:''},
+    ],
+    cortejo:[
+      {key:'Núm. Damas de Honor',val:''},
+      {key:'Núm. Best Men',val:''},
+      {key:'Dama 1',val:''},{key:'Dama 2',val:''},{key:'Dama 3',val:''},
+      {key:'Dama 4',val:''},{key:'Dama 5',val:''},{key:'Dama 6',val:''},
+      {key:'Best Man 1',val:''},{key:'Best Man 2',val:''},{key:'Best Man 3',val:''},
+      {key:'Best Man 4',val:''},{key:'Best Man 5',val:''},{key:'Best Man 6',val:''},
+    ],
+    padrinos:[
+      {key:'Padrino / Madrina Velación',val:''},
+      {key:'Padrino / Madrina Anillos',val:''},
+      {key:'Padrino / Madrina Arras',val:''},
+      {key:'Padrino / Madrina Lazo',val:''},
+      {key:'Padrino / Madrina Libro y Rosario',val:''},
+      {key:'Madrina de Ramo',val:''},
+      {key:'Padrino de Brindis',val:''},
+      {key:'Padrino de Pastel',val:''},
+      {key:'Otros padrinos',val:''},
+    ],
+  },
+
+  mam: [
+    { id:1, titulo:'👰 Novia – Preparativos', color:'#F4A7B3', items:[
+      {id:101,hora:'',actividad:'Se levanta la novia',proveedor:'',notas:''},
+      {id:102,hora:'',actividad:'Maquillaje y peinado',proveedor:'',notas:''},
+      {id:103,hora:'',actividad:'Sesión fotos getting ready',proveedor:'',notas:''},
+      {id:104,hora:'',actividad:'First looks',proveedor:'',notas:''},
+      {id:105,hora:'',actividad:'Traslado a la ceremonia',proveedor:'',notas:''},
+    ]},
+    { id:2, titulo:'🤵 Novio – Preparativos', color:'#F5E6C0', items:[
+      {id:201,hora:'',actividad:'Se levanta el novio',proveedor:'',notas:''},
+      {id:202,hora:'',actividad:'Se viste y arregla',proveedor:'',notas:''},
+      {id:203,hora:'',actividad:'Sesión fotos con bestmen',proveedor:'',notas:''},
+      {id:204,hora:'',actividad:'First looks',proveedor:'',notas:''},
+      {id:205,hora:'',actividad:'Traslado a la ceremonia',proveedor:'',notas:''},
+    ]},
+    { id:3, titulo:'⛪ Ceremonia', color:'#C4A8F2', items:[
+      {id:301,hora:'',actividad:'Acomodo del cortejo',proveedor:'WP Team',notas:''},
+      {id:302,hora:'',actividad:'Llegada del novio',proveedor:'',notas:''},
+      {id:303,hora:'',actividad:'Llegada de la novia',proveedor:'',notas:''},
+      {id:304,hora:'',actividad:'Ceremonia religiosa / civil',proveedor:'',notas:''},
+      {id:305,hora:'',actividad:'Salida de los novios',proveedor:'WP Team',notas:''},
+    ]},
+    { id:4, titulo:'🎉 Recepción y Fiesta', color:'#F5E6C0', items:[
+      {id:401,hora:'',actividad:'Rompe hielo / Cóctel',proveedor:'',notas:''},
+      {id:402,hora:'',actividad:'Ceremonia civil',proveedor:'',notas:''},
+      {id:403,hora:'',actividad:'Entrada de novios',proveedor:'',notas:''},
+      {id:404,hora:'',actividad:'Brindis',proveedor:'',notas:''},
+      {id:405,hora:'',actividad:'Cena',proveedor:'',notas:''},
+      {id:406,hora:'',actividad:'Vals de novios',proveedor:'',notas:''},
+      {id:407,hora:'',actividad:'Vals familiar',proveedor:'',notas:''},
+      {id:408,hora:'',actividad:'Partida de pastel',proveedor:'',notas:''},
+      {id:409,hora:'',actividad:'Hora loca',proveedor:'',notas:''},
+      {id:410,hora:'',actividad:'Protocolo (ramo, víbora…)',proveedor:'',notas:''},
+      {id:411,hora:'',actividad:'Tornaboda',proveedor:'',notas:''},
+    ]},
+  ],
+
+  _nextId: 9000,
+};
+
+function uid(){ return ++S._nextId; }
+
+const MONTHS=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const MONTHS_S=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+const DAYS_S=['D','L','M','Mi','J','V','S'];
+const DAYS_L=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const TAB_C=['#F4A7B3','#F9C5A1','#FAE0A0','#B5D9A0','#9ECFE0','#A5B8F0','#C4A8F2','#F2A8D8','#F07878','#78C8A0','#78A8E0','#C8A078'];
+const RESP_CYCLE=['WP','Novios','Ambos','Proveedor'];
+const STATUS_CYCLE=[['s-init','🔵 Por iniciar'],['s-proc','⏳ En proceso'],['s-ok','✅ Listo'],['s-pend','❌ Pendiente']];
+const PAY_CYCLE=[['s-pend','⏳ Pendiente'],['s-proc','🔄 Anticipo'],['s-ok','✅ Pagado'],['s-init','❌ Cancelado']];
+const CONF_CYCLE=[['s-init','🔵 Sin confirmar'],['s-ok','✅ Confirmado'],['s-pend','❌ No asiste'],['s-proc','🔄 Por confirmar']];
+
+function go(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-item,.bnav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    if(n.getAttribute('onclick')?.includes("'"+id+"'")) n.classList.add('active');
+  });
+  const bn=document.getElementById('bn-'+id);
+  if(bn) bn.classList.add('active');
+  else { const bm=document.getElementById('bn-more'); if(bm) bm.classList.add('active'); }
+  const renders={calendario:renderCal,diario:renderDaily,checklist:renderChecklist,
+    finanzas:renderFinanzas,invitados:renderInvitados,proveedores:renderProveedores,
+    expediente:renderExpediente,minutominuto:renderMAM};
+  if(renders[id]) renders[id]();
+}
+
+function openSheet(){
+  document.getElementById('sheet').classList.add('open');
+  document.getElementById('sheetOverlay').classList.add('open');
+}
+function closeSheet(){
+  document.getElementById('sheet').classList.remove('open');
+  document.getElementById('sheetOverlay').classList.remove('open');
+}
+
+function syncExpField(key, val){
+  // Update state
+  for(const sec of Object.values(S.expediente)){
+    if(Array.isArray(sec)){
+      const f = sec.find(x=>x.key===key);
+      if(f){ f.val=val; break; }
+    }
+  }
+  updateSidebar();
+}
+
+function updateSidebar(){
+  const n=S.expediente.novios;
+  const novia=n.find(x=>x.key==='Nombre Novia')?.val||'';
+  const novio=n.find(x=>x.key==='Nombre Novio')?.val||'';
+  const gen=S.expediente.generales;
+  const fecha=gen.find(x=>x.key==='Fecha de la boda')?.val||'';
+  const coupleFull=(novia||novio)?`${novia} & ${novio}`:'Novios';
+  // Update sidebar inputs (desktop)
+  const sn=document.getElementById('sideNovia'); if(sn&&document.activeElement!==sn) sn.value=novia;
+  const sno=document.getElementById('sideNovio'); if(sno&&document.activeElement!==sno) sno.value=novio;
+  const sf=document.getElementById('sideFecha'); if(sf&&document.activeElement!==sf) sf.value=fecha;
+  const mc=document.getElementById('cbName'); if(mc) mc.textContent=coupleFull;
+  const mcd=document.getElementById('cbDate'); if(mcd) mcd.textContent=fecha||'Fecha de boda';
+  if(fecha){
+    const p=fecha.split('/');
+    if(p.length===3) S.weddingDate=new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));
+  }
+  if(S.weddingDate){
+    const today=new Date(); today.setHours(0,0,0,0);
+    const diff=Math.ceil((S.weddingDate-today)/86400000);
+    const txt=diff>0?String(diff):'🎉';
+    const el=document.getElementById('daysLeft'); if(el) el.textContent=txt;
+    const td=document.getElementById('topDays'); if(td) td.textContent=diff>0?diff+' días':'🎉 Hoy!';
+    const mbd=document.getElementById('cbDays'); if(mbd) mbd.textContent=diff>0?diff+' días para la boda':'🎉 ¡El gran día!';
+  }
+}
+
+function changeMonth(d){ S.curM+=d; if(S.curM>11){S.curM=0;S.curY++;}if(S.curM<0){S.curM=11;S.curY--;} renderCal(); }
+function goWedding(){ if(S.weddingDate){S.curM=S.weddingDate.getMonth();S.curY=S.weddingDate.getFullYear();renderCal();} }
+
+function renderCal(){
+  const m=S.curM,y=S.curY;
+  document.getElementById('calNavLbl').textContent=`${MONTHS[m]} ${y}`;
+  document.getElementById('calMonthName').textContent=MONTHS[m];
+  document.getElementById('calYear').textContent=y;
+  document.querySelectorAll('.mtab').forEach((t,i)=>t.classList.toggle('active',i===m));
+  const objIn=document.getElementById('calObj');
+  const objKey=`${y}-${m}`;
+  objIn.value=S.monthObj[objKey]||'';
+  objIn.oninput=()=>{S.monthObj[objKey]=objIn.value;};
+  const grid=document.getElementById('calGrid');
+  grid.innerHTML='';
+  DAYS_S.forEach(d=>{const c=document.createElement('div');c.className='cal-dow';c.textContent=d;grid.appendChild(c);});
+  const first=new Date(y,m,1).getDay();
+  const dim=new Date(y,m+1,0).getDate();
+  const diprev=new Date(y,m,0).getDate();
+  const today=new Date(); today.setHours(0,0,0,0);
+  for(let i=first-1;i>=0;i--){const d=document.createElement('div');d.className='cal-day other';d.textContent=diprev-i;grid.appendChild(d);}
+  for(let day=1;day<=dim;day++){
+    const d=document.createElement('div'); d.className='cal-day'; d.textContent=day;
+    const dt=new Date(y,m,day);
+    if(dt.getTime()===today.getTime()) d.classList.add('today');
+    if(S.weddingDate&&dt.getTime()===S.weddingDate.getTime()) d.classList.add('wedding');
+    d.onclick=()=>{S.dailyDate=new Date(y,m,day);S.dM=m;S.dY=y;go('diario');};
+    grid.appendChild(d);
+  }
+  const tot=first+dim; const rem=tot%7===0?0:7-(tot%7);
+  for(let i=1;i<=rem;i++){const d=document.createElement('div');d.className='cal-day other';d.textContent=i;grid.appendChild(d);}
+}
+
+// ══ DAILY ═══════════════════════════════════════════════════════════
+function chDailyM(d){ S.dM+=d; if(S.dM>11){S.dM=0;S.dY++;}if(S.dM<0){S.dM=11;S.dY--;} renderMiniCal(); document.getElementById('miniCalLbl').textContent=`${MONTHS[S.dM]} ${S.dY}`; }
+
+function renderDaily(){
+  const d=S.dailyDate;
+  document.getElementById('dayNum').textContent=String(d.getDate()).padStart(2,'0');
+  document.getElementById('dayDow').textContent=DAYS_L[d.getDay()].toUpperCase();
+  document.getElementById('dayMonth').textContent=MONTHS[d.getMonth()];
+  S.dM=d.getMonth(); S.dY=d.getFullYear();
+  document.getElementById('miniCalLbl').textContent=`${MONTHS[S.dM]} ${S.dY}`;
+  renderMiniCal(); renderTasks();
+}
+
+function renderMiniCal(){
+  const m=S.dM,y=S.dY;
+  const grid=document.getElementById('miniCal'); grid.innerHTML='';
+  DAYS_S.forEach(d=>{const c=document.createElement('div');c.className='mc-dow';c.textContent=d;grid.appendChild(c);});
+  const first=new Date(y,m,1).getDay();
+  const dim=new Date(y,m+1,0).getDate();
+  const diprev=new Date(y,m,0).getDate();
+  for(let i=first-1;i>=0;i--){const c=document.createElement('div');c.className='mc-day mc-other';c.textContent=diprev-i;grid.appendChild(c);}
+  for(let day=1;day<=dim;day++){
+    const c=document.createElement('div');c.className='mc-day';c.textContent=day;
+    const dt=new Date(y,m,day);
+    if(dt.toDateString()===S.dailyDate.toDateString()) c.classList.add('mc-active');
+    c.onclick=()=>{S.dailyDate=new Date(y,m,day);renderDaily();};
+    grid.appendChild(c);
+  }
+}
+
+function taskKey(){ const d=S.dailyDate; return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; }
+
+function renderTasks(){
+  const key=taskKey();
+  if(!S.tasks[key]) S.tasks[key]=[{text:'',done:false,color:'#F4A7B3'},{text:'',done:false,color:'#9ECFE0'},{text:'',done:false,color:'#C9A84C'}];
+  const list=document.getElementById('taskList'); list.innerHTML='';
+  const COLORS=['#F4A7B3','#9ECFE0','#C9A84C','#C4A8F2','#B5D9A0','#F9C5A1'];
+  S.tasks[key].forEach((task,i)=>{
+    const item=document.createElement('div'); item.className='task-item';
+    const dot=document.createElement('div');
+    dot.className='task-dot'+(task.done?' done-dot':'');
+    dot.style.color=task.color; dot.style.borderColor=task.color;
+    dot.onclick=()=>{task.done=!task.done;renderTasks();};
+    const inp=document.createElement('input'); inp.type='text';
+    inp.className='task-inp'+(task.done?' done-txt':'');
+    inp.value=task.text; inp.placeholder='Tarea…';
+    inp.oninput=()=>{task.text=inp.value;};
+    const del=document.createElement('button'); del.className='task-del'; del.textContent='×';
+    del.onclick=()=>{S.tasks[key].splice(i,1);renderTasks();};
+    item.appendChild(dot);item.appendChild(inp);item.appendChild(del);
+    list.appendChild(item);
+  });
+  // render objetivos
+  const ol=document.getElementById('objetivosList'); ol.innerHTML='';
+  const ODOTS=['#F4A7B3','#9ECFE0','#C9A84C'];
+  for(let i=0;i<3;i++){
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--blush-lt);';
+    const dot=document.createElement('div');
+    dot.style.cssText=`width:6px;height:6px;border-radius:50%;background:${ODOTS[i]};flex-shrink:0;`;
+    const inp=document.createElement('input');
+    inp.style.cssText='flex:1;border:none;outline:none;font-size:12px;font-family:system-ui,Arial,sans-serif;background:transparent;';
+    inp.placeholder='Objetivo…';
+    if(!S.tasks['obj_'+taskKey()]) S.tasks['obj_'+taskKey()]=['','',''];
+    inp.value=S.tasks['obj_'+taskKey()][i]||'';
+    inp.oninput=()=>{S.tasks['obj_'+taskKey()][i]=inp.value;};
+    row.appendChild(dot);row.appendChild(inp);ol.appendChild(row);
+  }
+  // notas/importante
+  const imp=document.getElementById('importanteTA');
+  const notkey='imp_'+taskKey();
+  if(!S.tasks[notkey]) S.tasks[notkey]='';
+  imp.value=S.tasks[notkey];
+  imp.oninput=()=>{S.tasks[notkey]=imp.value;};
+  const notas=document.getElementById('notasTA');
+  const notkey2='not_'+taskKey();
+  if(!S.tasks[notkey2]) S.tasks[notkey2]='';
+  notas.value=S.tasks[notkey2];
+  notas.oninput=()=>{S.tasks[notkey2]=notas.value;};
+}
+
+function addTask(){ const key=taskKey(); const COLORS=['#F4A7B3','#9ECFE0','#C9A84C','#C4A8F2','#B5D9A0','#F9C5A1']; if(!S.tasks[key])S.tasks[key]=[]; S.tasks[key].push({text:'',done:false,color:COLORS[S.tasks[key].length%COLORS.length]}); renderTasks(); }
+
+// ══ CHECKLIST ═══════════════════════════════════════════════════════
+function cycleResp(item,el){
+  const i=RESP_CYCLE.indexOf(item.resp); item.resp=RESP_CYCLE[(i+1)%RESP_CYCLE.length];
+  el.textContent=item.resp; el.className='resp r-'+item.resp.toLowerCase();
+}
+
+function renderChecklist(){
+  const wrap=document.getElementById('checklistWrap'); wrap.innerHTML='';
+  let total=0,done=0;
+  S.checklist.forEach(sec=>{
+    const secDiv=document.createElement('div'); secDiv.style.marginBottom='24px';
+    const hdr=document.createElement('div'); hdr.className='sect-label';
+    hdr.innerHTML=`<div class="dot" style="background:${sec.color}"></div>${sec.fase}
+      <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="addCheckItem(${sec.id})">+ Tarea</button>
+      <button class="btn-icon" onclick="deleteSection(${sec.id})" title="Eliminar sección">🗑</button>`;
+    secDiv.appendChild(hdr);
+    sec.items.forEach(item=>{
+      total++; if(item.done) done++;
+      const row=document.createElement('div');
+      row.className='cl-item'+(item.done?' cl-done':'');
+      const box=document.createElement('div'); box.className='cl-box';
+      box.style.borderColor=sec.color;
+      if(item.done){box.style.background=sec.color;box.textContent='✓';}
+      box.onclick=()=>{item.done=!item.done;renderChecklist();};
+      const lbl=document.createElement('input'); lbl.type='text'; lbl.className='cl-lbl';
+      lbl.value=item.text; lbl.placeholder='Tarea…';
+      lbl.oninput=()=>{item.text=lbl.value;};
+      lbl.onclick=e=>e.stopPropagation();
+      const rMap={WP:'r-wp',Novios:'r-novios',Ambos:'r-ambos',Proveedor:'r-prov'};
+      const resp=document.createElement('span'); resp.className='resp '+(rMap[item.resp]||'r-wp');
+      resp.textContent=item.resp;
+      resp.onclick=(e)=>{e.stopPropagation();cycleResp(item,resp);};
+      const del=document.createElement('button'); del.className='btn-icon del-row'; del.textContent='×';
+      del.onclick=(e)=>{e.stopPropagation();sec.items=sec.items.filter(x=>x.id!==item.id);renderChecklist();};
+      row.appendChild(box);row.appendChild(lbl);row.appendChild(resp);row.appendChild(del);
+      row.onclick=()=>{item.done=!item.done;box.style.background=item.done?sec.color:'';box.style.borderColor=sec.color;box.textContent=item.done?'✓':'';row.className='cl-item'+(item.done?' cl-done':'');total=total;renderChecklist();};
+      secDiv.appendChild(row);
+    });
+    wrap.appendChild(secDiv);
+  });
+  document.getElementById('clProgress').textContent=`${done} / ${total} completadas`;
+}
+
+function addCheckItem(secId){
+  const sec=S.checklist.find(s=>s.id===secId);
+  if(sec) sec.items.push({id:uid(),text:'Nueva tarea',resp:'WP',done:false});
+  renderChecklist();
+}
+
+function deleteSection(secId){
+  if(confirm('¿Eliminar esta sección?')){
+    S.checklist=S.checklist.filter(s=>s.id!==secId);
+    renderChecklist();
+  }
+}
+
+// ══ FINANZAS ════════════════════════════════════════════════════════
+function totalAnt(g){
+  if(!g.anticipos) return g.anticipo||0;
+  return g.anticipos.reduce((s,a)=>s+(Number(a.monto)||0),0);
+}
+
+function fmtMoney(n){ return '$'+Number(n||0).toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+
+function renderFinanzas(){
+  let total=0,pagado=0,totalAnts=0,pend=0;
+  S.gastos.forEach(g=>{
+    total+=Number(g.costo)||0;
+    const ant=totalAnt(g);
+    totalAnts+=ant;
+    if(g.estado==='s-ok') pagado+=Number(g.costo)||0;
+    else pend+=(Number(g.costo)||0)-ant;
+  });
+  document.getElementById('finTotal').textContent=fmtMoney(total);
+  document.getElementById('finPagado').textContent=fmtMoney(pagado);
+  document.getElementById('finAnts').textContent=fmtMoney(totalAnts);
+  document.getElementById('finPend').textContent=fmtMoney(pend>0?pend:0);
+
+  const tbl=document.getElementById('finTable'); tbl.innerHTML='';
+
+  S.gastos.forEach(g=>{
+    if(!g.anticipos) g.anticipos=[];
+    const antTotal=totalAnt(g);
+    const saldo=(Number(g.costo)||0)-antTotal;
+
+    // ── Main row ──────────────────────────────────
+    const cols='2fr 1.8fr 1fr 1.4fr 1.1fr 36px';
+    if(tbl.children.length===0){
+      const hdr=document.createElement('div'); hdr.className='trow hdr'; hdr.style.gridTemplateColumns=cols;
+      ['Rubro','Proveedor','Costo','Anticipos','Estado',''].forEach(h=>{
+        const c=document.createElement('div');c.className='tcell';c.textContent=h;hdr.appendChild(c);
+      });
+      tbl.appendChild(hdr);
+    }
+
+    const row=document.createElement('div'); row.className='trow'; row.style.gridTemplateColumns=cols;
+
+    // Rubro
+    const r=document.createElement('div'); r.className='tcell';
+    const re=document.createElement('span'); re.contentEditable=true; re.setAttribute('data-ph','Rubro…');
+    re.textContent=g.rubro;
+    re.oninput=()=>{g.rubro=re.textContent;const p=S.proveedores.find(x=>x.id===g.provId);if(p)p.rubro=re.textContent;};
+    r.appendChild(re); row.appendChild(r);
+
+    // Proveedor
+    const pv=document.createElement('div'); pv.className='tcell';
+    const pe=document.createElement('span'); pe.contentEditable=true; pe.setAttribute('data-ph','Proveedor…');
+    pe.textContent=g.proveedor;
+    pe.oninput=()=>{g.proveedor=pe.textContent;const prov=S.proveedores.find(x=>x.id===g.provId);if(prov)prov.nombre=pe.textContent;};
+    pv.appendChild(pe); row.appendChild(pv);
+
+    // Costo
+    makeEditableNumber(row,g,'costo',cols,'fin');
+
+    // Anticipos cell — shows total + add button
+    const ac=document.createElement('div'); ac.className='tcell';
+    ac.style.cssText='display:flex;align-items:center;gap:5px;flex-wrap:wrap;';
+    // Total badge
+    const atot=document.createElement('span');
+    atot.style.cssText='font-weight:700;color:#6B4C9A;font-size:12px;';
+    atot.textContent=fmtMoney(antTotal);
+    ac.appendChild(atot);
+    if(saldo>0){
+      const sal=document.createElement('span');
+      sal.style.cssText='font-size:9px;color:var(--muted);';
+      sal.textContent='(falta '+fmtMoney(saldo)+')';
+      ac.appendChild(sal);
+    } else if(antTotal>0){
+      const sal=document.createElement('span');
+      sal.style.cssText='font-size:9px;color:#4CAF50;font-weight:600;';
+      sal.textContent='✓ Cubierto';
+      ac.appendChild(sal);
+    }
+    // Add anticipo button
+    const addBtn=document.createElement('button');
+    addBtn.className='btn-add'; addBtn.textContent='+'; addBtn.title='Agregar anticipo';
+    addBtn.style.cssText='font-size:16px;margin-left:2px;';
+    addBtn.onclick=()=>openAnticipoModal(g);
+    ac.appendChild(addBtn);
+    // Show detail button if has anticipos
+    if(g.anticipos.length>0){
+      const detBtn=document.createElement('button');
+      detBtn.style.cssText='background:none;border:none;cursor:pointer;font-size:10px;color:var(--wine);text-decoration:underline;padding:0;';
+      detBtn.textContent='ver '+g.anticipos.length;
+      detBtn.onclick=()=>toggleAntDetail(g.id);
+      ac.appendChild(detBtn);
+    }
+    row.appendChild(ac);
+
+    // Estado
+    const sc=document.createElement('div'); sc.className='tcell'; sc.style.cssText='display:flex;align-items:center;gap:4px;';
+    const [cls,lbl]=PAY_CYCLE.find(x=>x[0]===g.estado)||PAY_CYCLE[0];
+    const sb=document.createElement('span'); sb.className='status '+cls; sb.textContent=lbl;
+    sb.onclick=()=>{const i=PAY_CYCLE.findIndex(x=>x[0]===g.estado);const[nc,nl]=PAY_CYCLE[(i+1)%PAY_CYCLE.length];g.estado=nc;sb.className='status '+nc;sb.textContent=nl;renderFinanzas();};
+    sc.appendChild(sb);
+    const lprov=S.proveedores.find(x=>x.id===g.provId);
+    if(lprov){const lk=document.createElement('span');lk.title='Vinculado: '+lprov.nombre;lk.textContent='📞';lk.style.cssText='font-size:11px;';sc.appendChild(lk);}
+    row.appendChild(sc);
+
+    // Del
+    const dc=document.createElement('div'); dc.className='tcell';
+    const db=document.createElement('button'); db.className='btn-icon'; db.textContent='×';
+    db.onclick=()=>{S.proveedores=S.proveedores.filter(x=>x.id!==g.provId);S.gastos=S.gastos.filter(x=>x.id!==g.id);renderFinanzas();};
+    dc.appendChild(db); row.appendChild(dc);
+    tbl.appendChild(row);
+
+    // ── Anticipos detail rows (collapsible) ───────
+    const detId='ant-detail-'+g.id;
+    const detDiv=document.createElement('div');
+    detDiv.id=detId; detDiv.style.display='none';
+    detDiv.style.cssText='background:#F8F4FF;border-bottom:2px solid #C4A8F2;';
+    if(g.anticipos.length>0){
+      // Header mini
+      const dh=document.createElement('div');
+      dh.style.cssText='display:grid;grid-template-columns:80px 1fr 120px 30px;background:#6B4C9A;';
+      ['Fecha','Nota','Monto',''].forEach(h=>{
+        const c=document.createElement('div');c.style.cssText='padding:6px 10px;color:white;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;';c.textContent=h;dh.appendChild(c);
+      });
+      detDiv.appendChild(dh);
+      g.anticipos.forEach(ant=>{
+        const ar=document.createElement('div');
+        ar.style.cssText='display:grid;grid-template-columns:80px 1fr 120px 30px;border-bottom:1px solid #E8D5F5;align-items:center;';
+        // Fecha editable
+        const fc=document.createElement('div'); fc.style.cssText='padding:7px 10px;';
+        const fi=document.createElement('input'); fi.type='date';
+        // Convert stored date to YYYY-MM-DD for input
+        fi.style.cssText='border:none;outline:none;font-size:11px;background:transparent;width:100%;color:#6B4C9A;font-weight:600;cursor:pointer;';
+        if(ant.fecha && ant.fecha.includes('/')){
+          const p=ant.fecha.split('/');
+          if(p.length===3) fi.value=p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0');
+        } else { fi.value=ant.fecha||''; }
+        fi.onchange=()=>{
+          if(fi.value){const[y,m,d]=fi.value.split('-');ant.fecha=d+'/'+m+'/'+y;}
+          renderFinanzas();
+        };
+        fc.appendChild(fi); ar.appendChild(fc);
+        // Nota editable
+        const nc=document.createElement('div'); nc.style.cssText='padding:7px 10px;';
+        const ni=document.createElement('input'); ni.type='text';
+        ni.style.cssText='border:none;outline:none;font-size:11px;background:transparent;width:100%;';
+        ni.value=ant.nota||''; ni.placeholder='Nota…';
+        ni.oninput=()=>{ant.nota=ni.value;};
+        nc.appendChild(ni); ar.appendChild(nc);
+        // Monto editable
+        const mc2=document.createElement('div'); mc2.style.cssText='padding:7px 10px;';
+        const mi=document.createElement('input'); mi.type='number';
+        mi.style.cssText='border:none;outline:none;font-size:12px;font-weight:700;color:#6B4C9A;background:transparent;width:100%;';
+        mi.value=ant.monto||0;
+        mi.oninput=()=>{ant.monto=parseFloat(mi.value)||0;renderFinanzas();};
+        mc2.appendChild(mi); ar.appendChild(mc2);
+        // Del anticipo
+        const xc=document.createElement('div'); xc.style.cssText='padding:4px;display:flex;align-items:center;justify-content:center;';
+        const xb=document.createElement('button'); xb.className='btn-icon'; xb.textContent='×';
+        xb.onclick=()=>{g.anticipos=g.anticipos.filter(a=>a.id!==ant.id);renderFinanzas();};
+        xc.appendChild(xb); ar.appendChild(xc);
+        detDiv.appendChild(ar);
+      });
+      // Total row
+      const tr2=document.createElement('div');
+      tr2.style.cssText='display:grid;grid-template-columns:80px 1fr 120px 30px;background:#EDE5F5;';
+      const t1=document.createElement('div');t1.style.cssText='padding:7px 10px;font-size:9px;color:#6B4C9A;font-weight:600;grid-column:1/3;';t1.textContent='TOTAL ANTICIPOS';
+      const t2=document.createElement('div');t2.style.cssText='padding:7px 10px;font-size:13px;font-weight:700;color:#6B4C9A;';t2.textContent=fmtMoney(antTotal);
+      tr2.appendChild(t1);tr2.appendChild(t2);
+      detDiv.appendChild(tr2);
+    }
+    tbl.appendChild(detDiv);
+  });
+}
+
+function makeEditableNumber(row,obj,field){
+  const c=document.createElement('div'); c.className='tcell';
+  const e=document.createElement('span'); e.contentEditable=true; e.setAttribute('data-ph','$0');
+  e.textContent=obj[field]||''; e.style.cursor='text';
+  e.oninput=()=>{obj[field]=parseFloat(e.textContent.replace(/[^0-9.]/g,''))||0;};
+  e.onblur=()=>{if(obj[field])e.textContent=obj[field];renderFinanzas();};
+  c.appendChild(e); row.appendChild(c);
+}
+
+// ══ INVITADOS ═══════════════════════════════════════════════════════
+function renderInvitados(){
+  const conf=S.invitados.filter(i=>i.confirmacion==='s-ok').length;
+  const pend=S.invitados.filter(i=>i.confirmacion==='s-init').length;
+  const noa=S.invitados.filter(i=>i.confirmacion==='s-pend').length;
+  const foraneo=S.invitados.filter(i=>i.tipo==='foraneo').length;
+  // Count total people (adultos + acompañantes)
+  const totalPax=S.invitados.reduce((s,i)=>s+(parseInt(i.adultos)||1),0);
+  document.getElementById('invStats').innerHTML=`
+    <div class="inv-stat"><span class="n">${S.invitados.length}</span><span class="l">Invitaciones</span></div>
+    <div class="inv-stat"><span class="n" style="color:#6B4C9A">${totalPax}</span><span class="l">Personas</span></div>
+    <div class="inv-stat"><span class="n" style="color:#4CAF50">${conf}</span><span class="l">Confirmados</span></div>
+    <div class="inv-stat"><span class="n" style="color:var(--gold)">${pend}</span><span class="l">Pendientes</span></div>
+    <div class="inv-stat"><span class="n" style="color:var(--red-ft)">${noa}</span><span class="l">No asisten</span></div>
+    <div class="inv-stat"><span class="n" style="color:var(--wine)">${foraneo}</span><span class="l">Foráneos</span></div>`;
+
+  const tbl=document.getElementById('invTable'); tbl.innerHTML='';
+  const cols='2fr 1.8fr 0.7fr 1fr 1fr 1fr 36px';
+  const hdr=document.createElement('div'); hdr.className='trow hdr'; hdr.style.gridTemplateColumns=cols;
+  ['Nombre','Acompañantes','#','Menú','Confirmación','Tipo',''].forEach(h=>{
+    const c=document.createElement('div');c.className='tcell';c.textContent=h;hdr.appendChild(c);
+  });
+  tbl.appendChild(hdr);
+
+  if(S.invitados.length===0){
+    const empty=document.createElement('div');
+    empty.style.cssText='padding:32px;text-align:center;color:var(--muted);font-size:12px;font-style:italic;';
+    empty.textContent='Sin invitados. Usa + Invitado o importa desde Excel.';
+    tbl.appendChild(empty); return;
+  }
+
+  S.invitados.forEach(inv=>{
+    const row=document.createElement('div'); row.className='trow'; row.style.gridTemplateColumns=cols;
+    // Nombre
+    const nc=document.createElement('div'); nc.className='tcell';
+    const ne=document.createElement('span'); ne.contentEditable=true; ne.setAttribute('data-ph','Nombre…');
+    ne.textContent=inv.nombre; ne.oninput=()=>{inv.nombre=ne.textContent;}; nc.appendChild(ne); row.appendChild(nc);
+    // Acompañantes
+    const apc=document.createElement('div'); apc.className='tcell';
+    const ape=document.createElement('span'); ape.contentEditable=true; ape.setAttribute('data-ph','Ej. Juan, María…');
+    ape.style.cssText='font-size:11px;color:var(--muted);';
+    ape.textContent=inv.acompanantes||''; ape.oninput=()=>{inv.acompanantes=ape.textContent;}; apc.appendChild(ape); row.appendChild(apc);
+    // Adultos (# invitación)
+    const ac=document.createElement('div'); ac.className='tcell';
+    const ae=document.createElement('span'); ae.contentEditable=true; ae.setAttribute('data-ph','1');
+    ae.textContent=inv.adultos||1; ae.oninput=()=>{inv.adultos=ae.textContent;}; ac.appendChild(ae); row.appendChild(ac);
+    // Menú
+    const mnc=document.createElement('div'); mnc.className='tcell';
+    const mne=document.createElement('span'); mne.contentEditable=true; mne.setAttribute('data-ph','Menú…');
+    mne.textContent=inv.menu||''; mne.oninput=()=>{inv.menu=mne.textContent;}; mnc.appendChild(mne); row.appendChild(mnc);
+    // Confirmación
+    const cc=document.createElement('div'); cc.className='tcell';
+    const [ccls,clbl]=CONF_CYCLE.find(x=>x[0]===inv.confirmacion)||CONF_CYCLE[0];
+    const cb=document.createElement('span'); cb.className='status '+ccls; cb.textContent=clbl;
+    cb.onclick=()=>{const i=CONF_CYCLE.findIndex(x=>x[0]===inv.confirmacion);const[nc2,nl]=CONF_CYCLE[(i+1)%CONF_CYCLE.length];inv.confirmacion=nc2;cb.className='status '+nc2;cb.textContent=nl;renderInvitados();};
+    cc.appendChild(cb); row.appendChild(cc);
+    // Tipo
+    const tc=document.createElement('div'); tc.className='tcell';
+    const tipos=[['foraneo','✈ Foráneo','#F2C4CE','#7B2D42'],['local','📍 Local','#F5E6C0','#7A5C10']];
+    const [,tlbl,tbg,tfg]=tipos.find(t=>t[0]===inv.tipo)||tipos[1];
+    const tb=document.createElement('span'); tb.className='status'; tb.style.background=tbg; tb.style.color=tfg; tb.textContent=tlbl;
+    tb.onclick=()=>{inv.tipo=inv.tipo==='foraneo'?'local':'foraneo';renderInvitados();};
+    tc.appendChild(tb); row.appendChild(tc);
+    // Del
+    const dc=document.createElement('div'); dc.className='tcell';
+    const db=document.createElement('button'); db.className='btn-icon'; db.textContent='×';
+    db.onclick=()=>{S.invitados=S.invitados.filter(x=>x.id!==inv.id);renderInvitados();};
+    dc.appendChild(db); row.appendChild(dc);
+    tbl.appendChild(row);
+  });
+}
+
+// ══ INVITADOS EXCEL EXPORT / IMPORT ═════════════════════════════════
+function exportInvitadosXLSX(){
+  if(typeof XLSX==='undefined'){showImportHelp();return;}
+  const novia=S.expediente.novios.find(x=>x.key==='Nombre Novia')?.val||'Novia';
+  const novio=S.expediente.novios.find(x=>x.key==='Nombre Novio')?.val||'Novio';
+  const confMap={'s-ok':'Confirmado','s-init':'Pendiente','s-pend':'No asiste','s-nd':'Por definir'};
+  const headers=['Nombre','Acompanantes','Mesa','Personas','Menu especial','Confirmacion','Tipo'];
+  const rows=S.invitados.length>0
+    ?S.invitados.map(i=>[i.nombre||'',i.acompanantes||'',i.mesa||'',Number(i.adultos)||1,i.menu||'',confMap[i.confirmacion]||'Pendiente',i.tipo||'local'])
+    :[];
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet([headers,...rows]);
+  ws['!cols']=[{wch:28},{wch:30},{wch:10},{wch:10},{wch:18},{wch:16},{wch:10}];
+  XLSX.utils.book_append_sheet(wb,ws,'Invitados');
+  const fname=S.invitados.length>0
+    ?'Invitados_'+novia.replace(/\s/g,'_')+'_'+novio.replace(/\s/g,'_')+'.xlsx'
+    :'DEMIR_Plantilla_Invitados.xlsx';
+  XLSX.writeFile(wb,fname);
+}
+
+function showImportHelp(){
+  const existing=document.getElementById('importHelpModal');
+  if(existing){existing.style.display='flex';return;}
+  const m=document.createElement('div');
+  m.id='importHelpModal';
+  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;';
+  m.innerHTML=`<div style="background:#fff;border-radius:16px;padding:0;width:100%;max-width:520px;overflow:hidden;font-family:system-ui;">
+    <div style="background:#7B2D42;padding:18px 20px;">
+      <div style="color:#F2C4CE;font-size:11px;letter-spacing:1px;">DEMIR · INVITADOS</div>
+      <div style="color:#fff;font-size:18px;font-weight:700;margin-top:4px;">¿Cómo importar la lista?</div>
+    </div>
+    <div style="padding:20px;display:flex;flex-direction:column;gap:14px;">
+      <div style="background:#FBF0F3;border-radius:10px;padding:14px;">
+        <div style="font-weight:700;color:#7B2D42;font-size:13px;margin-bottom:8px;">✅ Opción recomendada: Google Sheets</div>
+        <div style="font-size:12px;color:#444;line-height:1.7;">
+          1. Descarga la plantilla con el botón <b>📥 Excel</b><br>
+          2. Abre <b>Google Sheets</b> en tu tablet<br>
+          3. Importa el archivo descargado<br>
+          4. Llena los datos y guarda<br>
+          5. Comparte → Descargar → <b>Excel (.xlsx)</b><br>
+          6. Regresa aquí e importa con <b>📤 Importar</b>
+        </div>
+      </div>
+      <div style="background:#F5F5F5;border-radius:10px;padding:14px;">
+        <div style="font-weight:700;color:#555;font-size:13px;margin-bottom:8px;">⚠️ WPS / otras apps</div>
+        <div style="font-size:12px;color:#666;line-height:1.7;">
+          Si usas WPS, al guardar ve a:<br>
+          <b>Guardar como → Formato: xlsx</b><br>
+          (no el formato .wps ni .et)
+        </div>
+      </div>
+      <button onclick="document.getElementById('importHelpModal').style.display='none';" 
+        style="background:#7B2D42;color:#fff;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;width:100%;">
+        Entendido
+      </button>
+    </div>
+  </div>`;
+  document.body.appendChild(m);
+}
+
+function importInvitadosXLSX(input){
+  if(!input||!input.files||!input.files[0]) return;
+  if(typeof XLSX==='undefined'){showImportHelp();return;}
+  const file=input.files[0];
+  const confMap={'confirmado':'s-ok','pendiente':'s-init','no asiste':'s-pend','por definir':'s-nd'};
+  const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+
+  function processRows(rows){
+    let dataStart=0;
+    for(let i=0;i<Math.min(rows.length,5);i++){
+      if(norm(rows[i][0]).startsWith('nombre')){dataStart=i+1;break;}
+    }
+    const imported=[];
+    for(let i=dataStart;i<rows.length;i++){
+      const row=rows[i];
+      const nombre=String(row[0]||'').trim();
+      if(!nombre) continue;
+      imported.push({id:uid(),nombre,
+        acompanantes:String(row[1]||'').trim(),
+        mesa:String(row[2]||'').trim(),
+        adultos:parseInt(row[3])||1,
+        menu:String(row[4]||'').trim(),
+        confirmacion:confMap[norm(row[5])]||'s-init',
+        tipo:norm(row[6]).includes('foraneo')?'foraneo':'local'
+      });
+    }
+    if(!imported.length){alert('No se encontraron invitados.\nVerifica que los nombres estén en la columna A desde la fila 2.');return;}
+    const replace=S.invitados.length>0?confirm('Ya tienes '+S.invitados.length+' invitados.\n¿Reemplazar con los '+imported.length+' nuevos?\n\nCancela para agregar al final.'):true;
+    if(replace) S.invitados=imported; else S.invitados=[...S.invitados,...imported];
+    renderInvitados();
+    alert('✅ '+imported.length+' invitados importados.');
+  }
+
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+      const sName=wb.SheetNames.find(n=>/invitad/i.test(n))||wb.SheetNames[0];
+      const raw=XLSX.utils.sheet_to_json(wb.Sheets[sName],{header:1,defval:''});
+      processRows(raw);
+    }catch(err){
+      showImportHelp();
+    }
+  };
+  reader.onerror=function(){showImportHelp();};
+  reader.readAsArrayBuffer(file);
+  input.value='';
+}
+
+// ══ PROVEEDORES ═════════════════════════════════════════════════════
+function renderProveedores(){
+  const tbl=document.getElementById('provTable'); tbl.innerHTML='';
+  const cols='1.2fr 1.5fr 1.5fr 1.2fr 1.5fr 1fr 36px';
+  const hdr=document.createElement('div'); hdr.className='trow hdr'; hdr.style.gridTemplateColumns=cols;
+  ['Rubro','Nombre / Empresa','Contacto','Teléfono','Horario','Estado',''].forEach(h=>{
+    const c=document.createElement('div');c.className='tcell';c.textContent=h;hdr.appendChild(c);
+  });
+  tbl.appendChild(hdr);
+
+  S.proveedores.forEach(prov=>{
+    const row=document.createElement('div'); row.className='trow'; row.style.gridTemplateColumns=cols;
+    // Campos editables
+    ['rubro','nombre','contacto','tel','horario'].forEach(field=>{
+      const c=document.createElement('div'); c.className='tcell';
+      const e=document.createElement('span'); e.contentEditable=true; e.setAttribute('data-ph',field+'…');
+      e.textContent=prov[field];
+        e.oninput=()=>{
+          prov[field]=e.textContent;
+          // Sync rubro/nombre to linked gasto
+          const g=S.gastos.find(x=>x.provId===prov.id);
+          if(g){
+            if(field==='rubro') g.rubro=e.textContent;
+            if(field==='nombre') g.proveedor=e.textContent;
+          }
+        };
+      c.appendChild(e); row.appendChild(c);
+    });
+    // Estado + link badge
+    const sc=document.createElement('div'); sc.className='tcell'; sc.style.display='flex'; sc.style.alignItems='center'; sc.style.gap='5px';
+    const [scls,slbl]=STATUS_CYCLE.find(x=>x[0]===prov.estado)||STATUS_CYCLE[0];
+    const sb=document.createElement('span'); sb.className='status '+scls; sb.textContent=slbl;
+    sb.onclick=()=>{const i=STATUS_CYCLE.findIndex(x=>x[0]===prov.estado);const[nc,nl]=STATUS_CYCLE[(i+1)%STATUS_CYCLE.length];prov.estado=nc;sb.className='status '+nc;sb.textContent=nl;};
+    sc.appendChild(sb);
+    // Show link icon if linked to finanzas
+    const linked=S.gastos.find(x=>x.provId===prov.id);
+    if(linked){const lk=document.createElement('span');lk.title='Vinculado a Finanzas';lk.textContent='💰';lk.style.cssText='font-size:11px;cursor:default;';sc.appendChild(lk);}
+    row.appendChild(sc);
+    // Del
+    const dc=document.createElement('div'); dc.className='tcell del-row';
+    const db=document.createElement('button'); db.className='btn-icon'; db.textContent='×';
+    db.onclick=()=>{
+      // Also remove linked gasto
+      S.gastos=S.gastos.filter(x=>x.provId!==prov.id);
+      S.proveedores=S.proveedores.filter(x=>x.id!==prov.id);
+      renderProveedores();
+    };
+    dc.appendChild(db); row.appendChild(dc);
+    tbl.appendChild(row);
+  });
+}
+
+// ══ EXPEDIENTE ══════════════════════════════════════════════════════
+function renderExpediente(){
+  const wrap=document.getElementById('expContent'); wrap.innerHTML='';
+  const sections=[
+    {title:'👰🤵 Novios',color:'#7B2D42',fields:S.expediente.novios},
+    {title:'📅 Datos Generales',color:'#C9A84C',fields:S.expediente.generales},
+    {title:'👨‍👩‍👧 Familia',color:'#F4A7B3',fields:S.expediente.familia},
+    {title:'⛪ Ceremonia',color:'#9ECFE0',fields:S.expediente.ceremonia},
+    {title:'📜 Boda Civil',color:'#6B4C9A',fields:S.expediente.civil},
+    {title:'💐 Cortejo',color:'#B5D9A0',fields:S.expediente.cortejo},
+    {title:'🕊️ Padrinos',color:'#F9C5A1',fields:S.expediente.padrinos},
+  ];
+  sections.forEach(sec=>{
+    const div=document.createElement('div'); div.className='exp-section';
+    const lbl=document.createElement('div'); lbl.className='exp-sect-title';
+    lbl.style.color=sec.color; lbl.style.borderBottomColor=sec.color;
+    lbl.textContent=sec.title; div.appendChild(lbl);
+    const card=document.createElement('div'); card.className='card'; div.appendChild(card);
+    sec.fields.forEach((f,i)=>{
+      const row=document.createElement('div'); row.className='exp-row';
+      row.style.background=i%2?'var(--gray)':'white';
+      const key=document.createElement('div'); key.className='exp-key'; key.textContent=f.key;
+      // Use regular INPUT — most reliable across all browsers/mobile
+      const val=document.createElement('input');
+      val.className='exp-val';
+      val.type='text';
+      val.placeholder='Escribe aquí…';
+      val.value=f.val||'';
+      val.autocomplete='off';
+      val.spellcheck=false;
+      // These are critical for Android Chrome
+      val.style.cssText='padding:10px 12px;font-size:16px;flex:1;border:none;outline:none;font-family:system-ui,Arial,sans-serif;color:#3D2B1F;background:white;-webkit--webkit-user-select:text;user-select:text;-webkit-user-select:text;user-select:text;cursor:text;width:100%;min-width:0;-webkit-appearance:none;appearance:none;border-radius:0;';
+      val.addEventListener('input',function(){
+        f.val=this.value;
+        if(f.key==='Nombre Novia'||f.key==='Nombre Novio'||f.key==='Fecha de la boda') updateSidebar();
+      });
+      val.addEventListener('focus',function(){ this.style.background='#FBF0F3'; });
+      val.addEventListener('blur',function(){ this.style.background=''; });
+      row.appendChild(key); row.appendChild(val); card.appendChild(row);
+    });
+    wrap.appendChild(div);
+  });
+}
+
+// ══ MINUTO A MINUTO ═════════════════════════════════════════════════
+function renderMAM(){
+  const wrap=document.getElementById('mamWrap'); wrap.innerHTML='';
+  S.mam.forEach(sec=>{
+    const div=document.createElement('div'); div.style.marginBottom='28px';
+    const hdr=document.createElement('div');
+    hdr.style.cssText='display:flex;align-items:center;gap:10px;margin-bottom:12px;';
+    hdr.innerHTML=`<div style="width:14px;height:14px;border-radius:50%;background:${sec.color};flex-shrink:0;"></div>
+      <span style="font-family:Georgia,'Times New Roman',serif;font-size:18px;color:var(--wine);font-style:italic;">${sec.titulo}</span>
+      <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="addMAMItem(${sec.id})">+ Fila</button>
+      <button class="btn-icon" onclick="deleteMAMSection(${sec.id})" title="Eliminar sección">🗑</button>`;
+    div.appendChild(hdr);
+    const card=document.createElement('div'); card.className='card'; card.style.overflow='hidden';
+    // header row
+    const cols='100px 1fr 1fr 1.5fr 36px';
+    const headerRow=document.createElement('div'); headerRow.className='trow hdr'; headerRow.style.gridTemplateColumns=cols;
+    ['Horario','Actividad','Proveedor','Observaciones / Canción',''].forEach(h=>{
+      const c=document.createElement('div');c.className='tcell';c.textContent=h;headerRow.appendChild(c);
+    });
+    card.appendChild(headerRow);
+    sec.items.forEach((item,idx)=>{
+      const row=document.createElement('div'); row.className='trow'; row.style.gridTemplateColumns=cols;
+      row.style.background=idx%2?'var(--blush-lt)':'white';
+      ['hora','actividad','proveedor','notas'].forEach(field=>{
+        const c=document.createElement('div'); c.className='tcell';
+        const e=document.createElement('span'); e.contentEditable=true; e.setAttribute('data-ph',field+'…');
+        e.textContent=item[field]; e.oninput=()=>{item[field]=e.textContent;};
+        if(field==='hora') e.style.cssText='font-weight:600;color:#7B2D42;font-size:11px;';
+        c.appendChild(e); row.appendChild(c);
+      });
+      const dc=document.createElement('div'); dc.className='tcell del-row';
+      const db=document.createElement('button'); db.className='btn-icon'; db.textContent='×';
+      db.onclick=()=>{sec.items=sec.items.filter(x=>x.id!==item.id);renderMAM();};
+      dc.appendChild(db); row.appendChild(dc);
+      card.appendChild(row);
+    });
+    div.appendChild(card); wrap.appendChild(div);
+  });
+}
+
+function addMAMItem(secId){ const sec=S.mam.find(s=>s.id===secId); if(sec)sec.items.push({id:uid(),hora:'',actividad:'',proveedor:'',notas:''}); renderMAM(); }
+function deleteMAMSection(secId){ if(confirm('¿Eliminar sección?')){S.mam=S.mam.filter(s=>s.id!==secId);renderMAM();} }
+
+// ══ MODAL ═══════════════════════════════════════════════════════════
+let _modalType='';
+function openModal(type){
+  _modalType=type;
+  const bg=document.getElementById('modalBg'); bg.classList.add('open');
+  const box=document.getElementById('modalBox'); box.onclick=e=>e.stopPropagation();
+  const bodies={
+    addSection:`
+      <div class="modal-field"><label>Nombre de la sección</label><input id="mf1" placeholder="Ej. 🟢 Post-Boda" value=""></div>
+      <div class="modal-field"><label>Color</label><input id="mf2" type="color" value="#7B2D42"></div>`,
+    addGasto:`
+      <div class="mf"><label>Rubro / Servicio</label><input id="mf1" placeholder="Ej. Fotografía"></div>
+      <div class="mf"><label>Proveedor / Empresa</label><input id="mf2" placeholder="Nombre del proveedor"></div>
+      <div class="mf"><label>Costo total estimado ($)</label><input id="mf3" type="number" placeholder="0"></div>
+      <div class="mf"><label>Anticipo ($)</label><input id="mf4" type="number" placeholder="0"></div>
+      <div style="background:#FBF0F3;border-radius:10px;padding:12px;margin-top:4px;">
+        <div style="font-size:9px;letter-spacing:1.5px;color:#9E8C84;text-transform:uppercase;margin-bottom:10px;font-weight:600;">📞 Vincular a Proveedores</div>
+        <div class="mf"><label>Teléfono (opcional)</label><input id="mf5" placeholder=""></div>
+        <div class="mf"><label>Horario de servicio (opcional)</label><input id="mf6" placeholder="Ej. Full day"></div>
+      </div>`,
+    addInvitado:`
+      <div class="mf"><label>Nombre completo</label><input id="mf1" placeholder="Nombre Apellido"></div>
+      <div class="mf"><label>Acompañantes (separados por coma)</label><input id="mf2" placeholder="Ej. María López, Juan Pérez"></div>
+      <div class="mf"><label>Mesa #</label><input id="mf3" placeholder="1"></div>
+      <div class="mf"><label>Menú especial</label><input id="mf4" placeholder="Vegetariano, Sin gluten…"></div>
+      <div class="mf"><label>Tipo</label>
+        <select id="mf5" style="width:100%;padding:10px;border:1px solid var(--sand);border-radius:10px;font-size:14px;background:white;">
+          <option value="local">📍 Local</option>
+          <option value="foraneo">✈ Foráneo</option>
+        </select>
+      </div>`,
+    addProveedor:`
+      <div class="mf"><label>Rubro / Servicio</label><input id="mf1" placeholder="Ej. DJ, Florería…"></div>
+      <div class="mf"><label>Nombre / Empresa</label><input id="mf2" placeholder=""></div>
+      <div class="mf"><label>Contacto</label><input id="mf3" placeholder="Nombre del contacto"></div>
+      <div class="mf"><label>Teléfono</label><input id="mf4" placeholder=""></div>
+      <div class="mf"><label>Horario</label><input id="mf5" placeholder="Ej. Full day, 8 hrs"></div>
+      <div style="background:#FBF0F3;border-radius:10px;padding:12px;margin-top:4px;">
+        <div style="font-size:9px;letter-spacing:1.5px;color:#9E8C84;text-transform:uppercase;margin-bottom:10px;font-weight:600;">💰 Vincular a Finanzas</div>
+        <div class="mf"><label>Costo total estimado ($)</label><input id="mf6" type="number" placeholder="0"></div>
+        <div class="mf"><label>Anticipo ($)</label><input id="mf7" type="number" placeholder="0"></div>
+      </div>`,
+    addMAMSection:`
+      <div class="modal-field"><label>Título de la sección</label><input id="mf1" placeholder="Ej. 🌅 Pre-ceremonia"></div>
+      <div class="modal-field"><label>Color</label><input id="mf2" type="color" value="#F4A7B3"></div>`,
+  };
+  const titles={addSection:'Nueva sección de checklist',addGasto:'Nuevo gasto',addInvitado:'Nuevo invitado',addProveedor:'Nuevo proveedor',addMAMSection:'Nueva sección'};
+  document.getElementById('modalTitle').textContent=titles[type]||'Agregar';
+  document.getElementById('modalBody').innerHTML=bodies[type]||'';
+  setTimeout(()=>{const f=document.getElementById('mf1');if(f)f.focus();},100);
+}
+
+function closeModal(e){
+  if(e&&e.target!==document.getElementById('modalBg')) return;
+  document.getElementById('modalBg').classList.remove('open');
+}
+
+function saveModal(){
+  const v=(id)=>{const el=document.getElementById(id);return el?el.value.trim():'';};
+  if(_modalType==='addSection'){
+    const fase=v('mf1'); const color=v('mf2');
+    if(fase) S.checklist.push({id:uid(),fase,color,items:[]});
+    renderChecklist();
+  } else if(_modalType==='addGasto'){
+    const gastoId=uid();
+    const rubro=v('mf1'); const nombreProv=v('mf2');
+    const montoAnticipo=parseFloat(v('mf4'))||0;
+    const today=new Date().toLocaleDateString('es-MX');
+    const initAnt=montoAnticipo>0?[{id:uid(),monto:montoAnticipo,fecha:today,nota:'Anticipo inicial'}]:[];
+    S.gastos.push({id:gastoId,rubro,proveedor:nombreProv,costo:parseFloat(v('mf3'))||0,anticipos:initAnt,estado:'s-pend'});
+    // Auto-create linked proveedor if name given
+    if(nombreProv){
+      const provId=uid();
+      S.proveedores.push({id:provId,gastoId:gastoId,rubro,nombre:nombreProv,contacto:'',tel:v('mf5'),horario:v('mf6'),estado:'s-init'});
+    }
+    renderFinanzas();
+    if(document.getElementById('view-proveedores').classList.contains('active')) renderProveedores();
+  } else if(_modalType==='addInvitado'){
+    const sel5=document.getElementById('mf5');
+    S.invitados.push({id:uid(),nombre:v('mf1'),acompanantes:v('mf2'),mesa:v('mf3'),adultos:1,menu:v('mf4'),confirmacion:'s-init',tipo:sel5?sel5.value:'local'});
+    renderInvitados();
+  } else if(_modalType==='addProveedor'){
+    const provId=uid();
+    S.proveedores.push({id:provId,rubro:v('mf1'),nombre:v('mf2'),contacto:v('mf3'),tel:v('mf4'),horario:v('mf5'),estado:'s-init'});
+    // Auto-create linked gasto
+    const costo=parseFloat(v('mf6'))||0;
+    const anticipo=parseFloat(v('mf7'))||0;
+    const initAntProv=anticipo>0?[{id:uid(),monto:anticipo,fecha:new Date().toLocaleDateString('es-MX'),nota:'Anticipo inicial'}]:[];
+    S.gastos.push({id:uid(),provId:provId,rubro:v('mf1'),proveedor:v('mf2'),costo,anticipos:initAntProv,estado:'s-pend'});
+    renderProveedores();
+    if(document.getElementById('view-finanzas').classList.contains('active')) renderFinanzas();
+  } else if(_modalType==='addMAMSection'){
+    const titulo=v('mf1'); const color=v('mf2');
+    if(titulo) S.mam.push({id:uid(),titulo,color,items:[]});
+    renderMAM();
+  } else if(_modalType==='addAnticipo'&&_anticipo_gasto){
+    const monto=parseFloat(document.getElementById('mf1')?.value)||0;
+    const fechaInput=document.getElementById('mf2')?.value||'';
+    let fechaFmt='';
+    if(fechaInput){const[y,m,d]=fechaInput.split('-');fechaFmt=d+'/'+m+'/'+y;}
+    const nota=document.getElementById('mf3')?.value||'Anticipo';
+    if(monto>0){
+      if(!_anticipo_gasto.anticipos) _anticipo_gasto.anticipos=[];
+      _anticipo_gasto.anticipos.push({id:uid(),monto,fecha:fechaFmt,nota});
+      renderFinanzas();
+      // Auto-expand detail
+      setTimeout(()=>{const el=document.getElementById('ant-detail-'+_anticipo_gasto.id);if(el)el.style.display='block';},50);
+    }
+    _anticipo_gasto=null;
+  }
+  document.getElementById('modalBg').classList.remove('open');
+}
+
+document.getElementById('modalBg').addEventListener('click',function(e){ if(e.target===this) closeModal(e); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(e); if(e.key==='Enter'&&document.getElementById('modalBg').classList.contains('open')){e.preventDefault();saveModal();} });
+
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') closeModal(e);
+  if(e.key==='Enter'&&document.getElementById('modalBg').classList.contains('open')){e.preventDefault();saveModal();}
+});
+
+
+// ══ ANTICIPOS ═══════════════════════════════════════════════════════
+function toggleAntDetail(gastoId){
+  const el=document.getElementById('ant-detail-'+gastoId);
+  if(el) el.style.display=el.style.display==='none'?'block':'none';
+}
+
+function openAnticipoModal(g){
+  _modalType='addAnticipo';
+  _anticipo_gasto=g;
+  document.getElementById('modalTitle').textContent='Agregar Anticipo · '+g.rubro;
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('modalBody').innerHTML=`
+    <div style="background:#F8F4FF;border-radius:12px;padding:14px;margin-bottom:14px;">
+      <div style="font-size:11px;color:#6B4C9A;margin-bottom:10px;">
+        <strong>Proveedor:</strong> ${g.proveedor||'—'}<br>
+        <strong>Costo total:</strong> ${fmtMoney(g.costo)}<br>
+        <strong>Total anticipos entregados:</strong> ${fmtMoney(totalAnt(g))}<br>
+        <strong style="color:${(Number(g.costo)-totalAnt(g))>0?'#C9A84C':'#4CAF50'}">Saldo restante: ${fmtMoney(Math.max(0,Number(g.costo)-totalAnt(g)))}</strong>
+      </div>
+    </div>
+    <div class="mf"><label>Monto del anticipo ($)</label><input id="mf1" type="number" placeholder="0" autofocus></div>
+    <div class="mf"><label>Fecha de pago</label><input id="mf2" type="date" value="${today}"></div>
+    <div class="mf"><label>Nota (opcional)</label><input id="mf3" placeholder="Ej. Transferencia, efectivo…"></div>`;
+  document.getElementById('modalBg').classList.add('open');
+  setTimeout(()=>{const f=document.getElementById('mf1');if(f)f.focus();},150);
+}
+let _anticipo_gasto=null;
+
+// ══ PRINT MAM ═══════════════════════════════════════════════════════
+function printMAM(){
+  // Build a clean print window with only MAM content
+  const mamDiv = document.getElementById('mamWrap');
+  if(!mamDiv || mamDiv.innerHTML.trim()===''){
+    renderMAM();
+  }
+  
+  // Get couple info
+  const novia = S.expediente.novios.find(x=>x.key==='Nombre Novia')?.val||'Novia';
+  const novio = S.expediente.novios.find(x=>x.key==='Nombre Novio')?.val||'Novio';
+  const fecha = S.expediente.generales.find(x=>x.key==='Fecha de la boda')?.val||'';
+  const venue = S.expediente.generales.find(x=>x.key==='Venue / Salón')?.val||'';
+
+  // Build clean HTML table from MAM data
+  let rows = '';
+  S.mam.forEach(sec => {
+    rows += `<tr style="background:#7B2D42;"><td colspan="4" style="padding:10px 14px;color:white;font-size:13px;font-weight:700;letter-spacing:1px;">${sec.titulo}</td></tr>`;
+    sec.items.forEach((item,i) => {
+      const bg = i%2===0 ? '#ffffff' : '#FBF0F3';
+      rows += `<tr style="background:${bg};">
+        <td style="padding:8px 12px;font-weight:700;color:#7B2D42;font-size:12px;white-space:nowrap;border-bottom:1px solid #EDE5D8;min-width:80px;">${item.hora||'—'}</td>
+        <td style="padding:8px 12px;font-size:12px;border-bottom:1px solid #EDE5D8;">${item.actividad||''}</td>
+        <td style="padding:8px 12px;font-size:11px;color:#9E8C84;border-bottom:1px solid #EDE5D8;">${item.proveedor||''}</td>
+        <td style="padding:8px 12px;font-size:11px;color:#9E8C84;border-bottom:1px solid #EDE5D8;">${item.notas||''}</td>
+      </tr>`;
+    });
+  });
+
+  const html = `<!DOCTYPE html><html lang="es"><head>
+  <meta charset="UTF-8">
+  <title>Minuto a Minuto · ${novia} & ${novio}</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:Arial,sans-serif;background:white;color:#3D2B1F;padding:20px;}
+    @page{size:A4;margin:15mm 18mm;}
+    .header{text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:3px solid #7B2D42;}
+    .logo{font-size:10px;letter-spacing:5px;text-transform:uppercase;color:#9E8C84;margin-bottom:4px;}
+    .couple{font-size:26px;color:#7B2D42;font-style:italic;margin-bottom:6px;}
+    .meta{font-size:11px;color:#9E8C84;display:flex;justify-content:center;gap:24px;flex-wrap:wrap;}
+    .meta span{display:flex;align-items:center;gap:4px;}
+    table{width:100%;border-collapse:collapse;font-size:12px;}
+    th{background:#7B2D42;color:white;padding:9px 12px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;text-align:left;}
+    .footer{margin-top:20px;text-align:center;font-size:9px;color:#9E8C84;border-top:1px solid #EDE5D8;padding-top:10px;}
+    @media print{body{padding:0;}}
+  </style>
+  </head><body>
+  <div class="header">
+    <div class="logo">DEMIR · Wedding Planner</div>
+    <div class="couple">${novia} & ${novio}</div>
+    <div class="meta">
+      ${fecha?`<span>📅 ${fecha}</span>`:''}
+      ${venue?`<span>📍 ${venue}</span>`:''}
+    </div>
+  </div>
+  <table>
+    <thead><tr>
+      <th style="min-width:80px;">Horario</th>
+      <th>Actividad</th>
+      <th style="min-width:120px;">Proveedor</th>
+      <th>Observaciones</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="footer">Generado por DEMIR Wedding Planner · Confidencial</div>
+  
+</div>
+
+<script>
+// ════════════════════════════════════
+// CONFIGURACIÓN
+var DEMIR_COUPLE = "Nat & Luis";
+var DEMIR_PWD    = "061126";
+// ════════════════════════════════════
+
+document.getElementById('dl-couple-name').textContent = DEMIR_COUPLE;
+
+function demirLogin() {
+  var val = document.getElementById('dl-pwd').value;
+  var err = document.getElementById('dl-error');
+  if (val === DEMIR_PWD) {
+    document.getElementById('demir-login').style.display = 'none';
+    document.getElementById('demir-banner').classList.add('show');
+    document.getElementById('demir-agenda').classList.add('show');
+    err.style.display = 'none';
+  } else {
+    err.style.display = 'block';
+    document.getElementById('dl-pwd').value = '';
+    document.getElementById('dl-pwd').focus();
+    var box = document.querySelector('.dl-box');
+    box.style.animation = 'dl-shake .4s ease';
+    setTimeout(function(){ box.style.animation = ''; }, 400);
+  }
+}
+
+document.getElementById('dl-submit').addEventListener('click', demirLogin);
+document.getElementById('dl-pwd').addEventListener('keydown', function(e){
+  if (e.key === 'Enter') demirLogin();
+});
+document.getElementById('demir-logout').addEventListener('click', function(){
+  document.getElementById('demir-login').style.display = 'flex';
+  document.getElementById('demir-banner').classList.remove('show');
+  document.getElementById('demir-agenda').classList.remove('show');
+  document.getElementById('dl-pwd').value = '';
+});
+</script>
+
+<script>
+
+let S = {
+  curM: new Date().getMonth(), curY: new Date().getFullYear(),
+  dailyDate: new Date(), dM: new Date().getMonth(), dY: new Date().getFullYear(),
+  tasks: {}, monthObj: {},
+  weddingDate: null, coupleName: '', coupleDate: '',
+
+  checklist: [
+    { id:1, fase:'🔵 Planificación', color:'#2D5986', items:[
+      {id:101,text:'Definir estilo y concepto de la boda',resp:'Novios',done:false},
+      {id:102,text:'Elegir paleta de colores',resp:'Ambos',done:false},
+      {id:103,text:'Establecer presupuesto total',resp:'Novios',done:false},
+      {id:104,text:'Seleccionar y visitar el venue',resp:'Ambos',done:false},
+      {id:105,text:'Hablar con sacerdote / juez',resp:'Novios',done:false},
+      {id:106,text:'Crear expediente de la boda',resp:'WP',done:false},
+      {id:107,text:'Enviar Save the Date',resp:'Ambos',done:false},
+    ]},
+    { id:2, fase:'🔴 Contratación', color:'#7B2D42', items:[
+      {id:201,text:'Contratar fotógrafo',resp:'Ambos',done:false},
+      {id:202,text:'Contratar DJ / Entretenimiento',resp:'Ambos',done:false},
+      {id:203,text:'Contratar florería',resp:'Ambos',done:false},
+      {id:204,text:'Contratar banquete',resp:'Ambos',done:false},
+      {id:205,text:'Contratar maquillista y estilista',resp:'Novios',done:false},
+      {id:206,text:'Elegir vestido de novia',resp:'Novios',done:false},
+    ]},
+    { id:3, fase:'🟣 Detalles', color:'#6B4C9A', items:[
+      {id:301,text:'Imprimir misales',resp:'WP',done:false},
+      {id:302,text:'Imprimir cartitas para mesas',resp:'WP',done:false},
+      {id:303,text:'Confirmar asistencia invitados',resp:'WP',done:false},
+      {id:304,text:'Prueba de menú',resp:'Ambos',done:false},
+      {id:305,text:'Confirmar todos los proveedores',resp:'WP',done:false},
+    ]},
+    { id:4, fase:'🟡 Día D', color:'#C9A84C', items:[
+      {id:401,text:'WP Team en posición',resp:'WP',done:false},
+      {id:402,text:'Supervisar montaje',resp:'WP',done:false},
+      {id:403,text:'Coordinar getting ready',resp:'WP',done:false},
+      {id:404,text:'Coordinar first looks',resp:'WP',done:false},
+      {id:405,text:'Acomodar cortejo nupcial',resp:'WP',done:false},
+      {id:406,text:'Coordinar entrada de novios',resp:'WP',done:false},
+    ]},
+  ],
+
+  gastos: [
+    {id:1,rubro:'Venue',proveedor:'',costo:0,anticipos:[],estado:'s-pend'},
+    {id:2,rubro:'Fotografía',proveedor:'',costo:0,anticipos:[],estado:'s-pend'},
+    {id:3,rubro:'DJ / Entretenimiento',proveedor:'',costo:0,anticipos:[],estado:'s-pend'},
+    {id:4,rubro:'Florería',proveedor:'',costo:0,anticipos:[],estado:'s-pend'},
+    {id:5,rubro:'Banquete',proveedor:'',costo:0,anticipos:[],estado:'s-pend'},
+    {id:6,rubro:'Maquillaje y Peinado',proveedor:'',costo:0,anticipos:[],estado:'s-pend'},
+    {id:7,rubro:'Wedding Planner',proveedor:'DEMIR',costo:0,anticipos:[],estado:'s-pend'},
+  ],
+
+  invitados: [],
+
+  proveedores: [
+    {id:1,rubro:'Venue',nombre:'',contacto:'',tel:'',horario:'',estado:'s-init'},
+    {id:2,rubro:'Fotografía',nombre:'',contacto:'',tel:'',horario:'Full day',estado:'s-init'},
+    {id:3,rubro:'DJ / Música',nombre:'',contacto:'',tel:'',horario:'',estado:'s-init'},
+    {id:4,rubro:'Florería',nombre:'',contacto:'',tel:'',horario:'',estado:'s-init'},
+    {id:5,rubro:'Banquete',nombre:'',contacto:'',tel:'',horario:'',estado:'s-init'},
+    {id:6,rubro:'Maquillaje',nombre:'',contacto:'',tel:'',horario:'',estado:'s-init'},
+    {id:7,rubro:'Wedding Planner',nombre:'DEMIR',contacto:'',tel:'2214306593',horario:'Full day',estado:'s-ok'},
+  ],
+
+  expediente: {
+    novios:[
+      {key:'Nombre Novia',val:''},
+      {key:'Celular Novia',val:''},
+      {key:'Nombre Novio',val:''},
+      {key:'Celular Novio',val:''},
+    ],
+    generales:[
+      {key:'Fecha de la boda',val:''},
+      {key:'Venue / Salón',val:''},
+      {key:'Dirección',val:''},
+      {key:'Número de invitados',val:''},
+      {key:'Horas de servicio',val:''},
+      {key:'Paleta de colores',val:''},
+      {key:'Mesa de regalos',val:''},
+    ],
+    familia:[
+      {key:'Mamá Novia',val:''},
+      {key:'Tel Mamá Novia',val:''},
+      {key:'Papá Novia',val:''},
+      {key:'Tel Papá Novia',val:''},
+      {key:'Mamá Novio',val:''},
+      {key:'Tel Mamá Novio',val:''},
+      {key:'Papá Novio',val:''},
+      {key:'Tel Papá Novio',val:''},
+    ],
+    ceremonia:[
+      {key:'Tipo de ceremonia',val:''},
+      {key:'Iglesia / Lugar',val:''},
+      {key:'Horario ceremonia',val:''},
+      {key:'Sacerdote / Juez',val:''},
+      {key:'Representante en ausencia novios',val:''},
+    ],
+    civil:[
+      {key:'¿Mismo día?',val:''},
+      {key:'Juez',val:''},
+      {key:'Testigo 1',val:''},
+      {key:'Testigo 2',val:''},
+      {key:'Testigo 3',val:''},
+      {key:'Testigo 4',val:''},
+    ],
+    cortejo:[
+      {key:'Núm. Damas de Honor',val:''},
+      {key:'Núm. Best Men',val:''},
+      {key:'Dama 1',val:''},{key:'Dama 2',val:''},{key:'Dama 3',val:''},
+      {key:'Dama 4',val:''},{key:'Dama 5',val:''},{key:'Dama 6',val:''},
+      {key:'Best Man 1',val:''},{key:'Best Man 2',val:''},{key:'Best Man 3',val:''},
+      {key:'Best Man 4',val:''},{key:'Best Man 5',val:''},{key:'Best Man 6',val:''},
+    ],
+    padrinos:[
+      {key:'Padrino / Madrina Velación',val:''},
+      {key:'Padrino / Madrina Anillos',val:''},
+      {key:'Padrino / Madrina Arras',val:''},
+      {key:'Padrino / Madrina Lazo',val:''},
+      {key:'Padrino / Madrina Libro y Rosario',val:''},
+      {key:'Madrina de Ramo',val:''},
+      {key:'Padrino de Brindis',val:''},
+      {key:'Padrino de Pastel',val:''},
+      {key:'Otros padrinos',val:''},
+    ],
+  },
+
+  mam: [
+    { id:1, titulo:'👰 Novia – Preparativos', color:'#F4A7B3', items:[
+      {id:101,hora:'',actividad:'Se levanta la novia',proveedor:'',notas:''},
+      {id:102,hora:'',actividad:'Maquillaje y peinado',proveedor:'',notas:''},
+      {id:103,hora:'',actividad:'Sesión fotos getting ready',proveedor:'',notas:''},
+      {id:104,hora:'',actividad:'First looks',proveedor:'',notas:''},
+      {id:105,hora:'',actividad:'Traslado a la ceremonia',proveedor:'',notas:''},
+    ]},
+    { id:2, titulo:'🤵 Novio – Preparativos', color:'#F5E6C0', items:[
+      {id:201,hora:'',actividad:'Se levanta el novio',proveedor:'',notas:''},
+      {id:202,hora:'',actividad:'Se viste y arregla',proveedor:'',notas:''},
+      {id:203,hora:'',actividad:'Sesión fotos con bestmen',proveedor:'',notas:''},
+      {id:204,hora:'',actividad:'First looks',proveedor:'',notas:''},
+      {id:205,hora:'',actividad:'Traslado a la ceremonia',proveedor:'',notas:''},
+    ]},
+    { id:3, titulo:'⛪ Ceremonia', color:'#C4A8F2', items:[
+      {id:301,hora:'',actividad:'Acomodo del cortejo',proveedor:'WP Team',notas:''},
+      {id:302,hora:'',actividad:'Llegada del novio',proveedor:'',notas:''},
+      {id:303,hora:'',actividad:'Llegada de la novia',proveedor:'',notas:''},
+      {id:304,hora:'',actividad:'Ceremonia religiosa / civil',proveedor:'',notas:''},
+      {id:305,hora:'',actividad:'Salida de los novios',proveedor:'WP Team',notas:''},
+    ]},
+    { id:4, titulo:'🎉 Recepción y Fiesta', color:'#F5E6C0', items:[
+      {id:401,hora:'',actividad:'Rompe hielo / Cóctel',proveedor:'',notas:''},
+      {id:402,hora:'',actividad:'Ceremonia civil',proveedor:'',notas:''},
+      {id:403,hora:'',actividad:'Entrada de novios',proveedor:'',notas:''},
+      {id:404,hora:'',actividad:'Brindis',proveedor:'',notas:''},
+      {id:405,hora:'',actividad:'Cena',proveedor:'',notas:''},
+      {id:406,hora:'',actividad:'Vals de novios',proveedor:'',notas:''},
+      {id:407,hora:'',actividad:'Vals familiar',proveedor:'',notas:''},
+      {id:408,hora:'',actividad:'Partida de pastel',proveedor:'',notas:''},
+      {id:409,hora:'',actividad:'Hora loca',proveedor:'',notas:''},
+      {id:410,hora:'',actividad:'Protocolo (ramo, víbora…)',proveedor:'',notas:''},
+      {id:411,hora:'',actividad:'Tornaboda',proveedor:'',notas:''},
+    ]},
+  ],
+
+  _nextId: 9000,
+};
+
+function uid(){ return ++S._nextId; }
+
+const MONTHS=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const MONTHS_S=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+const DAYS_S=['D','L','M','Mi','J','V','S'];
+const DAYS_L=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const TAB_C=['#F4A7B3','#F9C5A1','#FAE0A0','#B5D9A0','#9ECFE0','#A5B8F0','#C4A8F2','#F2A8D8','#F07878','#78C8A0','#78A8E0','#C8A078'];
+const RESP_CYCLE=['WP','Novios','Ambos','Proveedor'];
+const STATUS_CYCLE=[['s-init','🔵 Por iniciar'],['s-proc','⏳ En proceso'],['s-ok','✅ Listo'],['s-pend','❌ Pendiente']];
+const PAY_CYCLE=[['s-pend','⏳ Pendiente'],['s-proc','🔄 Anticipo'],['s-ok','✅ Pagado'],['s-init','❌ Cancelado']];
+const CONF_CYCLE=[['s-init','🔵 Sin confirmar'],['s-ok','✅ Confirmado'],['s-pend','❌ No asiste'],['s-proc','🔄 Por confirmar']];
+
+function go(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-item,.bnav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    if(n.getAttribute('onclick')?.includes("'"+id+"'")) n.classList.add('active');
+  });
+  const bn=document.getElementById('bn-'+id);
+  if(bn) bn.classList.add('active');
+  else { const bm=document.getElementById('bn-more'); if(bm) bm.classList.add('active'); }
+  const renders={calendario:renderCal,diario:renderDaily,checklist:renderChecklist,
+    finanzas:renderFinanzas,invitados:renderInvitados,proveedores:renderProveedores,
+    expediente:renderExpediente,minutominuto:renderMAM};
+  if(renders[id]) renders[id]();
+}
+
+function openSheet(){
+  document.getElementById('sheet').classList.add('open');
+  document.getElementById('sheetOverlay').classList.add('open');
+}
+function closeSheet(){
+  document.getElementById('sheet').classList.remove('open');
+  document.getElementById('sheetOverlay').classList.remove('open');
+}
+
+function syncExpField(key, val){
+  // Update state
+  for(const sec of Object.values(S.expediente)){
+    if(Array.isArray(sec)){
+      const f = sec.find(x=>x.key===key);
+      if(f){ f.val=val; break; }
+    }
+  }
+  updateSidebar();
+}
+
+function updateSidebar(){
+  const n=S.expediente.novios;
+  const novia=n.find(x=>x.key==='Nombre Novia')?.val||'';
+  const novio=n.find(x=>x.key==='Nombre Novio')?.val||'';
+  const gen=S.expediente.generales;
+  const fecha=gen.find(x=>x.key==='Fecha de la boda')?.val||'';
+  const coupleFull=(novia||novio)?`${novia} & ${novio}`:'Novios';
+  // Update sidebar inputs (desktop)
+  const sn=document.getElementById('sideNovia'); if(sn&&document.activeElement!==sn) sn.value=novia;
+  const sno=document.getElementById('sideNovio'); if(sno&&document.activeElement!==sno) sno.value=novio;
+  const sf=document.getElementById('sideFecha'); if(sf&&document.activeElement!==sf) sf.value=fecha;
+  const mc=document.getElementById('cbName'); if(mc) mc.textContent=coupleFull;
+  const mcd=document.getElementById('cbDate'); if(mcd) mcd.textContent=fecha||'Fecha de boda';
+  if(fecha){
+    const p=fecha.split('/');
+    if(p.length===3) S.weddingDate=new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));
+  }
+  if(S.weddingDate){
+    const today=new Date(); today.setHours(0,0,0,0);
+    const diff=Math.ceil((S.weddingDate-today)/86400000);
+    const txt=diff>0?String(diff):'🎉';
+    const el=document.getElementById('daysLeft'); if(el) el.textContent=txt;
+    const td=document.getElementById('topDays'); if(td) td.textContent=diff>0?diff+' días':'🎉 Hoy!';
+    const mbd=document.getElementById('cbDays'); if(mbd) mbd.textContent=diff>0?diff+' días para la boda':'🎉 ¡El gran día!';
+  }
+}
+
+function changeMonth(d){ S.curM+=d; if(S.curM>11){S.curM=0;S.curY++;}if(S.curM<0){S.curM=11;S.curY--;} renderCal(); }
+function goWedding(){ if(S.weddingDate){S.curM=S.weddingDate.getMonth();S.curY=S.weddingDate.getFullYear();renderCal();} }
+
+function renderCal(){
+  const m=S.curM,y=S.curY;
+  document.getElementById('calNavLbl').textContent=`${MONTHS[m]} ${y}`;
+  document.getElementById('calMonthName').textContent=MONTHS[m];
+  document.getElementById('calYear').textContent=y;
+  document.querySelectorAll('.mtab').forEach((t,i)=>t.classList.toggle('active',i===m));
+  const objIn=document.getElementById('calObj');
+  const objKey=`${y}-${m}`;
+  objIn.value=S.monthObj[objKey]||'';
+  objIn.oninput=()=>{S.monthObj[objKey]=objIn.value;};
+  const grid=document.getElementById('calGrid');
+  grid.innerHTML='';
+  DAYS_S.forEach(d=>{const c=document.createElement('div');c.className='cal-dow';c.textContent=d;grid.appendChild(c);});
+  const first=new Date(y,m,1).getDay();
+  const dim=new Date(y,m+1,0).getDate();
+  const diprev=new Date(y,m,0).getDate();
+  const today=new Date(); today.setHours(0,0,0,0);
+  for(let i=first-1;i>=0;i--){const d=document.createElement('div');d.className='cal-day other';d.textContent=diprev-i;grid.appendChild(d);}
+  for(let day=1;day<=dim;day++){
+    const d=document.createElement('div'); d.className='cal-day'; d.textContent=day;
+    const dt=new Date(y,m,day);
+    if(dt.getTime()===today.getTime()) d.classList.add('today');
+    if(S.weddingDate&&dt.getTime()===S.weddingDate.getTime()) d.classList.add('wedding');
+    d.onclick=()=>{S.dailyDate=new Date(y,m,day);S.dM=m;S.dY=y;go('diario');};
+    grid.appendChild(d);
+  }
+  const tot=first+dim; const rem=tot%7===0?0:7-(tot%7);
+  for(let i=1;i<=rem;i++){const d=document.createElement('div');d.className='cal-day other';d.textContent=i;grid.appendChild(d);}
+}
+
+// ══ DAILY ═══════════════════════════════════════════════════════════
+function chDailyM(d){ S.dM+=d; if(S.dM>11){S.dM=0;S.dY++;}if(S.dM<0){S.dM=11;S.dY--;} renderMiniCal(); document.getElementById('miniCalLbl').textContent=`${MONTHS[S.dM]} ${S.dY}`; }
+
+function renderDaily(){
+  const d=S.dailyDate;
+  document.getElementById('dayNum').textContent=String(d.getDate()).padStart(2,'0');
+  document.getElementById('dayDow').textContent=DAYS_L[d.getDay()].toUpperCase();
+  document.getElementById('dayMonth').textContent=MONTHS[d.getMonth()];
+  S.dM=d.getMonth(); S.dY=d.getFullYear();
+  document.getElementById('miniCalLbl').textContent=`${MONTHS[S.dM]} ${S.dY}`;
+  renderMiniCal(); renderTasks();
+}
+
+function renderMiniCal(){
+  const m=S.dM,y=S.dY;
+  const grid=document.getElementById('miniCal'); grid.innerHTML='';
+  DAYS_S.forEach(d=>{const c=document.createElement('div');c.className='mc-dow';c.textContent=d;grid.appendChild(c);});
+  const first=new Date(y,m,1).getDay();
+  const dim=new Date(y,m+1,0).getDate();
+  const diprev=new Date(y,m,0).getDate();
+  for(let i=first-1;i>=0;i--){const c=document.createElement('div');c.className='mc-day mc-other';c.textContent=diprev-i;grid.appendChild(c);}
+  for(let day=1;day<=dim;day++){
+    const c=document.createElement('div');c.className='mc-day';c.textContent=day;
+    const dt=new Date(y,m,day);
+    if(dt.toDateString()===S.dailyDate.toDateString()) c.classList.add('mc-active');
+    c.onclick=()=>{S.dailyDate=new Date(y,m,day);renderDaily();};
+    grid.appendChild(c);
+  }
+}
+
+function taskKey(){ const d=S.dailyDate; return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; }
+
+function renderTasks(){
+  const key=taskKey();
+  if(!S.tasks[key]) S.tasks[key]=[{text:'',done:false,color:'#F4A7B3'},{text:'',done:false,color:'#9ECFE0'},{text:'',done:false,color:'#C9A84C'}];
+  const list=document.getElementById('taskList'); list.innerHTML='';
+  const COLORS=['#F4A7B3','#9ECFE0','#C9A84C','#C4A8F2','#B5D9A0','#F9C5A1'];
+  S.tasks[key].forEach((task,i)=>{
+    const item=document.createElement('div'); item.className='task-item';
+    const dot=document.createElement('div');
+    dot.className='task-dot'+(task.done?' done-dot':'');
+    dot.style.color=task.color; dot.style.borderColor=task.color;
+    dot.onclick=()=>{task.done=!task.done;renderTasks();};
+    const inp=document.createElement('input'); inp.type='text';
+    inp.className='task-inp'+(task.done?' done-txt':'');
+    inp.value=task.text; inp.placeholder='Tarea…';
+    inp.oninput=()=>{task.text=inp.value;};
+    const del=document.createElement('button'); del.className='task-del'; del.textContent='×';
+    del.onclick=()=>{S.tasks[key].splice(i,1);renderTasks();};
+    item.appendChild(dot);item.appendChild(inp);item.appendChild(del);
+    list.appendChild(item);
+  });
+  // render objetivos
+  const ol=document.getElementById('objetivosList'); ol.innerHTML='';
+  const ODOTS=['#F4A7B3','#9ECFE0','#C9A84C'];
+  for(let i=0;i<3;i++){
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--blush-lt);';
+    const dot=document.createElement('div');
+    dot.style.cssText=`width:6px;height:6px;border-radius:50%;background:${ODOTS[i]};flex-shrink:0;`;
+    const inp=document.createElement('input');
+    inp.style.cssText='flex:1;border:none;outline:none;font-size:12px;font-family:system-ui,Arial,sans-serif;background:transparent;';
+    inp.placeholder='Objetivo…';
+    if(!S.tasks['obj_'+taskKey()]) S.tasks['obj_'+taskKey()]=['','',''];
+    inp.value=S.tasks['obj_'+taskKey()][i]||'';
+    inp.oninput=()=>{S.tasks['obj_'+taskKey()][i]=inp.value;};
+    row.appendChild(dot);row.appendChild(inp);ol.appendChild(row);
+  }
+  // notas/importante
+  const imp=document.getElementById('importanteTA');
+  const notkey='imp_'+taskKey();
+  if(!S.tasks[notkey]) S.tasks[notkey]='';
+  imp.value=S.tasks[notkey];
+  imp.oninput=()=>{S.tasks[notkey]=imp.value;};
+  const notas=document.getElementById('notasTA');
+  const notkey2='not_'+taskKey();
+  if(!S.tasks[notkey2]) S.tasks[notkey2]='';
+  notas.value=S.tasks[notkey2];
+  notas.oninput=()=>{S.tasks[notkey2]=notas.value;};
+}
+
+function addTask(){ const key=taskKey(); const COLORS=['#F4A7B3','#9ECFE0','#C9A84C','#C4A8F2','#B5D9A0','#F9C5A1']; if(!S.tasks[key])S.tasks[key]=[]; S.tasks[key].push({text:'',done:false,color:COLORS[S.tasks[key].length%COLORS.length]}); renderTasks(); }
+
+// ══ CHECKLIST ═══════════════════════════════════════════════════════
+function cycleResp(item,el){
+  const i=RESP_CYCLE.indexOf(item.resp); item.resp=RESP_CYCLE[(i+1)%RESP_CYCLE.length];
+  el.textContent=item.resp; el.className='resp r-'+item.resp.toLowerCase();
+}
+
+function renderChecklist(){
+  const wrap=document.getElementById('checklistWrap'); wrap.innerHTML='';
+  let total=0,done=0;
+  S.checklist.forEach(sec=>{
+    const secDiv=document.createElement('div'); secDiv.style.marginBottom='24px';
+    const hdr=document.createElement('div'); hdr.className='sect-label';
+    hdr.innerHTML=`<div class="dot" style="background:${sec.color}"></div>${sec.fase}
+      <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="addCheckItem(${sec.id})">+ Tarea</button>
+      <button class="btn-icon" onclick="deleteSection(${sec.id})" title="Eliminar sección">🗑</button>`;
+    secDiv.appendChild(hdr);
+    sec.items.forEach(item=>{
+      total++; if(item.done) done++;
+      const row=document.createElement('div');
+      row.className='cl-item'+(item.done?' cl-done':'');
+      const box=document.createElement('div'); box.className='cl-box';
+      box.style.borderColor=sec.color;
+      if(item.done){box.style.background=sec.color;box.textContent='✓';}
+      box.onclick=()=>{item.done=!item.done;renderChecklist();};
+      const lbl=document.createElement('input'); lbl.type='text'; lbl.className='cl-lbl';
+      lbl.value=item.text; lbl.placeholder='Tarea…';
+      lbl.oninput=()=>{item.text=lbl.value;};
+      lbl.onclick=e=>e.stopPropagation();
+      const rMap={WP:'r-wp',Novios:'r-novios',Ambos:'r-ambos',Proveedor:'r-prov'};
+      const resp=document.createElement('span'); resp.className='resp '+(rMap[item.resp]||'r-wp');
+      resp.textContent=item.resp;
+      resp.onclick=(e)=>{e.stopPropagation();cycleResp(item,resp);};
+      const del=document.createElement('button'); del.className='btn-icon del-row'; del.textContent='×';
+      del.onclick=(e)=>{e.stopPropagation();sec.items=sec.items.filter(x=>x.id!==item.id);renderChecklist();};
+      row.appendChild(box);row.appendChild(lbl);row.appendChild(resp);row.appendChild(del);
+      row.onclick=()=>{item.done=!item.done;box.style.background=item.done?sec.color:'';box.style.borderColor=sec.color;box.textContent=item.done?'✓':'';row.className='cl-item'+(item.done?' cl-done':'');total=total;renderChecklist();};
+      secDiv.appendChild(row);
+    });
+    wrap.appendChild(secDiv);
+  });
+  document.getElementById('clProgress').textContent=`${done} / ${total} completadas`;
+}
+
+function addCheckItem(secId){
+  const sec=S.checklist.find(s=>s.id===secId);
+  if(sec) sec.items.push({id:uid(),text:'Nueva tarea',resp:'WP',done:false});
+  renderChecklist();
+}
+
+function deleteSection(secId){
+  if(confirm('¿Eliminar esta sección?')){
+    S.checklist=S.checklist.filter(s=>s.id!==secId);
+    renderChecklist();
+  }
+}
+
+// ══ FINANZAS ════════════════════════════════════════════════════════
+function totalAnt(g){
+  if(!g.anticipos) return g.anticipo||0;
+  return g.anticipos.reduce((s,a)=>s+(Number(a.monto)||0),0);
+}
+
+function fmtMoney(n){ return '$'+Number(n||0).toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+
+function renderFinanzas(){
+  let total=0,pagado=0,totalAnts=0,pend=0;
+  S.gastos.forEach(g=>{
+    total+=Number(g.costo)||0;
+    const ant=totalAnt(g);
+    totalAnts+=ant;
+    if(g.estado==='s-ok') pagado+=Number(g.costo)||0;
+    else pend+=(Number(g.costo)||0)-ant;
+  });
+  document.getElementById('finTotal').textContent=fmtMoney(total);
+  document.getElementById('finPagado').textContent=fmtMoney(pagado);
+  document.getElementById('finAnts').textContent=fmtMoney(totalAnts);
+  document.getElementById('finPend').textContent=fmtMoney(pend>0?pend:0);
+
+  const tbl=document.getElementById('finTable'); tbl.innerHTML='';
+
+  S.gastos.forEach(g=>{
+    if(!g.anticipos) g.anticipos=[];
+    const antTotal=totalAnt(g);
+    const saldo=(Number(g.costo)||0)-antTotal;
+
+    // ── Main row ──────────────────────────────────
+    const cols='2fr 1.8fr 1fr 1.4fr 1.1fr 36px';
+    if(tbl.children.length===0){
+      const hdr=document.createElement('div'); hdr.className='trow hdr'; hdr.style.gridTemplateColumns=cols;
+      ['Rubro','Proveedor','Costo','Anticipos','Estado',''].forEach(h=>{
+        const c=document.createElement('div');c.className='tcell';c.textContent=h;hdr.appendChild(c);
+      });
+      tbl.appendChild(hdr);
+    }
+
+    const row=document.createElement('div'); row.className='trow'; row.style.gridTemplateColumns=cols;
+
+    // Rubro
+    const r=document.createElement('div'); r.className='tcell';
+    const re=document.createElement('span'); re.contentEditable=true; re.setAttribute('data-ph','Rubro…');
+    re.textContent=g.rubro;
+    re.oninput=()=>{g.rubro=re.textContent;const p=S.proveedores.find(x=>x.id===g.provId);if(p)p.rubro=re.textContent;};
+    r.appendChild(re); row.appendChild(r);
+
+    // Proveedor
+    const pv=document.createElement('div'); pv.className='tcell';
+    const pe=document.createElement('span'); pe.contentEditable=true; pe.setAttribute('data-ph','Proveedor…');
+    pe.textContent=g.proveedor;
+    pe.oninput=()=>{g.proveedor=pe.textContent;const prov=S.proveedores.find(x=>x.id===g.provId);if(prov)prov.nombre=pe.textContent;};
+    pv.appendChild(pe); row.appendChild(pv);
+
+    // Costo
+    makeEditableNumber(row,g,'costo',cols,'fin');
+
+    // Anticipos cell — shows total + add button
+    const ac=document.createElement('div'); ac.className='tcell';
+    ac.style.cssText='display:flex;align-items:center;gap:5px;flex-wrap:wrap;';
+    // Total badge
+    const atot=document.createElement('span');
+    atot.style.cssText='font-weight:700;color:#6B4C9A;font-size:12px;';
+    atot.textContent=fmtMoney(antTotal);
+    ac.appendChild(atot);
+    if(saldo>0){
+      const sal=document.createElement('span');
+      sal.style.cssText='font-size:9px;color:var(--muted);';
+      sal.textContent='(falta '+fmtMoney(saldo)+')';
+      ac.appendChild(sal);
+    } else if(antTotal>0){
+      const sal=document.createElement('span');
+      sal.style.cssText='font-size:9px;color:#4CAF50;font-weight:600;';
+      sal.textContent='✓ Cubierto';
+      ac.appendChild(sal);
+    }
+    // Add anticipo button
+    const addBtn=document.createElement('button');
+    addBtn.className='btn-add'; addBtn.textContent='+'; addBtn.title='Agregar anticipo';
+    addBtn.style.cssText='font-size:16px;margin-left:2px;';
+    addBtn.onclick=()=>openAnticipoModal(g);
+    ac.appendChild(addBtn);
+    // Show detail button if has anticipos
+    if(g.anticipos.length>0){
+      const detBtn=document.createElement('button');
+      detBtn.style.cssText='background:none;border:none;cursor:pointer;font-size:10px;color:var(--wine);text-decoration:underline;padding:0;';
+      detBtn.textContent='ver '+g.anticipos.length;
+      detBtn.onclick=()=>toggleAntDetail(g.id);
+      ac.appendChild(detBtn);
+    }
+    row.appendChild(ac);
+
+    // Estado
+    const sc=document.createElement('div'); sc.className='tcell'; sc.style.cssText='display:flex;align-items:center;gap:4px;';
+    const [cls,lbl]=PAY_CYCLE.find(x=>x[0]===g.estado)||PAY_CYCLE[0];
+    const sb=document.createElement('span'); sb.className='status '+cls; sb.textContent=lbl;
+    sb.onclick=()=>{const i=PAY_CYCLE.findIndex(x=>x[0]===g.estado);const[nc,nl]=PAY_CYCLE[(i+1)%PAY_CYCLE.length];g.estado=nc;sb.className='status '+nc;sb.textContent=nl;renderFinanzas();};
+    sc.appendChild(sb);
+    const lprov=S.proveedores.find(x=>x.id===g.provId);
+    if(lprov){const lk=document.createElement('span');lk.title='Vinculado: '+lprov.nombre;lk.textContent='📞';lk.style.cssText='font-size:11px;';sc.appendChild(lk);}
+    row.appendChild(sc);
+
+    // Del
+    const dc=document.createElement('div'); dc.className='tcell';
+    const db=document.createElement('button'); db.className='btn-icon'; db.textContent='×';
+    db.onclick=()=>{S.proveedores=S.proveedores.filter(x=>x.id!==g.provId);S.gastos=S.gastos.filter(x=>x.id!==g.id);renderFinanzas();};
+    dc.appendChild(db); row.appendChild(dc);
+    tbl.appendChild(row);
+
+    // ── Anticipos detail rows (collapsible) ───────
+    const detId='ant-detail-'+g.id;
+    const detDiv=document.createElement('div');
+    detDiv.id=detId; detDiv.style.display='none';
+    detDiv.style.cssText='background:#F8F4FF;border-bottom:2px solid #C4A8F2;';
+    if(g.anticipos.length>0){
+      // Header mini
+      const dh=document.createElement('div');
+      dh.style.cssText='display:grid;grid-template-columns:80px 1fr 120px 30px;background:#6B4C9A;';
+      ['Fecha','Nota','Monto',''].forEach(h=>{
+        const c=document.createElement('div');c.style.cssText='padding:6px 10px;color:white;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;';c.textContent=h;dh.appendChild(c);
+      });
+      detDiv.appendChild(dh);
+      g.anticipos.forEach(ant=>{
+        const ar=document.createElement('div');
+        ar.style.cssText='display:grid;grid-template-columns:80px 1fr 120px 30px;border-bottom:1px solid #E8D5F5;align-items:center;';
+        // Fecha editable
+        const fc=document.createElement('div'); fc.style.cssText='padding:7px 10px;';
+        const fi=document.createElement('input'); fi.type='date';
+        // Convert stored date to YYYY-MM-DD for input
+        fi.style.cssText='border:none;outline:none;font-size:11px;background:transparent;width:100%;color:#6B4C9A;font-weight:600;cursor:pointer;';
+        if(ant.fecha && ant.fecha.includes('/')){
+          const p=ant.fecha.split('/');
+          if(p.length===3) fi.value=p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0');
+        } else { fi.value=ant.fecha||''; }
+        fi.onchange=()=>{
+          if(fi.value){const[y,m,d]=fi.value.split('-');ant.fecha=d+'/'+m+'/'+y;}
+          renderFinanzas();
+        };
+        fc.appendChild(fi); ar.appendChild(fc);
+        // Nota editable
+        const nc=document.createElement('div'); nc.style.cssText='padding:7px 10px;';
+        const ni=document.createElement('input'); ni.type='text';
+        ni.style.cssText='border:none;outline:none;font-size:11px;background:transparent;width:100%;';
+        ni.value=ant.nota||''; ni.placeholder='Nota…';
+        ni.oninput=()=>{ant.nota=ni.value;};
+        nc.appendChild(ni); ar.appendChild(nc);
+        // Monto editable
+        const mc2=document.createElement('div'); mc2.style.cssText='padding:7px 10px;';
+        const mi=document.createElement('input'); mi.type='number';
+        mi.style.cssText='border:none;outline:none;font-size:12px;font-weight:700;color:#6B4C9A;background:transparent;width:100%;';
+        mi.value=ant.monto||0;
+        mi.oninput=()=>{ant.monto=parseFloat(mi.value)||0;renderFinanzas();};
+        mc2.appendChild(mi); ar.appendChild(mc2);
+        // Del anticipo
+        const xc=document.createElement('div'); xc.style.cssText='padding:4px;display:flex;align-items:center;justify-content:center;';
+        const xb=document.createElement('button'); xb.className='btn-icon'; xb.textContent='×';
+        xb.onclick=()=>{g.anticipos=g.anticipos.filter(a=>a.id!==ant.id);renderFinanzas();};
+        xc.appendChild(xb); ar.appendChild(xc);
+        detDiv.appendChild(ar);
+      });
+      // Total row
+      const tr2=document.createElement('div');
+      tr2.style.cssText='display:grid;grid-template-columns:80px 1fr 120px 30px;background:#EDE5F5;';
+      const t1=document.createElement('div');t1.style.cssText='padding:7px 10px;font-size:9px;color:#6B4C9A;font-weight:600;grid-column:1/3;';t1.textContent='TOTAL ANTICIPOS';
+      const t2=document.createElement('div');t2.style.cssText='padding:7px 10px;font-size:13px;font-weight:700;color:#6B4C9A;';t2.textContent=fmtMoney(antTotal);
+      tr2.appendChild(t1);tr2.appendChild(t2);
+      detDiv.appendChild(tr2);
+    }
+    tbl.appendChild(detDiv);
+  });
+}
+
+function makeEditableNumber(row,obj,field){
+  const c=document.createElement('div'); c.className='tcell';
+  const e=document.createElement('span'); e.contentEditable=true; e.setAttribute('data-ph','$0');
+  e.textContent=obj[field]||''; e.style.cursor='text';
+  e.oninput=()=>{obj[field]=parseFloat(e.textContent.replace(/[^0-9.]/g,''))||0;};
+  e.onblur=()=>{if(obj[field])e.textContent=obj[field];renderFinanzas();};
+  c.appendChild(e); row.appendChild(c);
+}
+
+// ══ INVITADOS ═══════════════════════════════════════════════════════
+function renderInvitados(){
+  const conf=S.invitados.filter(i=>i.confirmacion==='s-ok').length;
+  const pend=S.invitados.filter(i=>i.confirmacion==='s-init').length;
+  const noa=S.invitados.filter(i=>i.confirmacion==='s-pend').length;
+  const foraneo=S.invitados.filter(i=>i.tipo==='foraneo').length;
+  // Count total people (adultos + acompañantes)
+  const totalPax=S.invitados.reduce((s,i)=>s+(parseInt(i.adultos)||1),0);
+  document.getElementById('invStats').innerHTML=`
+    <div class="inv-stat"><span class="n">${S.invitados.length}</span><span class="l">Invitaciones</span></div>
+    <div class="inv-stat"><span class="n" style="color:#6B4C9A">${totalPax}</span><span class="l">Personas</span></div>
+    <div class="inv-stat"><span class="n" style="color:#4CAF50">${conf}</span><span class="l">Confirmados</span></div>
+    <div class="inv-stat"><span class="n" style="color:var(--gold)">${pend}</span><span class="l">Pendientes</span></div>
+    <div class="inv-stat"><span class="n" style="color:var(--red-ft)">${noa}</span><span class="l">No asisten</span></div>
+    <div class="inv-stat"><span class="n" style="color:var(--wine)">${foraneo}</span><span class="l">Foráneos</span></div>`;
+
+  const tbl=document.getElementById('invTable'); tbl.innerHTML='';
+  const cols='2fr 1.8fr 0.7fr 1fr 1fr 1fr 36px';
+  const hdr=document.createElement('div'); hdr.className='trow hdr'; hdr.style.gridTemplateColumns=cols;
+  ['Nombre','Acompañantes','#','Menú','Confirmación','Tipo',''].forEach(h=>{
+    const c=document.createElement('div');c.className='tcell';c.textContent=h;hdr.appendChild(c);
+  });
+  tbl.appendChild(hdr);
+
+  if(S.invitados.length===0){
+    const empty=document.createElement('div');
+    empty.style.cssText='padding:32px;text-align:center;color:var(--muted);font-size:12px;font-style:italic;';
+    empty.textContent='Sin invitados. Usa + Invitado o importa desde Excel.';
+    tbl.appendChild(empty); return;
+  }
+
+  S.invitados.forEach(inv=>{
+    const row=document.createElement('div'); row.className='trow'; row.style.gridTemplateColumns=cols;
+    // Nombre
+    const nc=document.createElement('div'); nc.className='tcell';
+    const ne=document.createElement('span'); ne.contentEditable=true; ne.setAttribute('data-ph','Nombre…');
+    ne.textContent=inv.nombre; ne.oninput=()=>{inv.nombre=ne.textContent;}; nc.appendChild(ne); row.appendChild(nc);
+    // Acompañantes
+    const apc=document.createElement('div'); apc.className='tcell';
+    const ape=document.createElement('span'); ape.contentEditable=true; ape.setAttribute('data-ph','Ej. Juan, María…');
+    ape.style.cssText='font-size:11px;color:var(--muted);';
+    ape.textContent=inv.acompanantes||''; ape.oninput=()=>{inv.acompanantes=ape.textContent;}; apc.appendChild(ape); row.appendChild(apc);
+    // Adultos (# invitación)
+    const ac=document.createElement('div'); ac.className='tcell';
+    const ae=document.createElement('span'); ae.contentEditable=true; ae.setAttribute('data-ph','1');
+    ae.textContent=inv.adultos||1; ae.oninput=()=>{inv.adultos=ae.textContent;}; ac.appendChild(ae); row.appendChild(ac);
+    // Menú
+    const mnc=document.createElement('div'); mnc.className='tcell';
+    const mne=document.createElement('span'); mne.contentEditable=true; mne.setAttribute('data-ph','Menú…');
+    mne.textContent=inv.menu||''; mne.oninput=()=>{inv.menu=mne.textContent;}; mnc.appendChild(mne); row.appendChild(mnc);
+    // Confirmación
+    const cc=document.createElement('div'); cc.className='tcell';
+    const [ccls,clbl]=CONF_CYCLE.find(x=>x[0]===inv.confirmacion)||CONF_CYCLE[0];
+    const cb=document.createElement('span'); cb.className='status '+ccls; cb.textContent=clbl;
+    cb.onclick=()=>{const i=CONF_CYCLE.findIndex(x=>x[0]===inv.confirmacion);const[nc2,nl]=CONF_CYCLE[(i+1)%CONF_CYCLE.length];inv.confirmacion=nc2;cb.className='status '+nc2;cb.textContent=nl;renderInvitados();};
+    cc.appendChild(cb); row.appendChild(cc);
+    // Tipo
+    const tc=document.createElement('div'); tc.className='tcell';
+    const tipos=[['foraneo','✈ Foráneo','#F2C4CE','#7B2D42'],['local','📍 Local','#F5E6C0','#7A5C10']];
+    const [,tlbl,tbg,tfg]=tipos.find(t=>t[0]===inv.tipo)||tipos[1];
+    const tb=document.createElement('span'); tb.className='status'; tb.style.background=tbg; tb.style.color=tfg; tb.textContent=tlbl;
+    tb.onclick=()=>{inv.tipo=inv.tipo==='foraneo'?'local':'foraneo';renderInvitados();};
+    tc.appendChild(tb); row.appendChild(tc);
+    // Del
+    const dc=document.createElement('div'); dc.className='tcell';
+    const db=document.createElement('button'); db.className='btn-icon'; db.textContent='×';
+    db.onclick=()=>{S.invitados=S.invitados.filter(x=>x.id!==inv.id);renderInvitados();};
+    dc.appendChild(db); row.appendChild(dc);
+    tbl.appendChild(row);
+  });
+}
+
+// ══ INVITADOS EXCEL EXPORT / IMPORT ═════════════════════════════════
+function exportInvitadosXLSX(){
+  if(typeof XLSX==='undefined'){showImportHelp();return;}
+  const novia=S.expediente.novios.find(x=>x.key==='Nombre Novia')?.val||'Novia';
+  const novio=S.expediente.novios.find(x=>x.key==='Nombre Novio')?.val||'Novio';
+  const confMap={'s-ok':'Confirmado','s-init':'Pendiente','s-pend':'No asiste','s-nd':'Por definir'};
+  const headers=['Nombre','Acompanantes','Mesa','Personas','Menu especial','Confirmacion','Tipo'];
+  const rows=S.invitados.length>0
+    ?S.invitados.map(i=>[i.nombre||'',i.acompanantes||'',i.mesa||'',Number(i.adultos)||1,i.menu||'',confMap[i.confirmacion]||'Pendiente',i.tipo||'local'])
+    :[];
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet([headers,...rows]);
+  ws['!cols']=[{wch:28},{wch:30},{wch:10},{wch:10},{wch:18},{wch:16},{wch:10}];
+  XLSX.utils.book_append_sheet(wb,ws,'Invitados');
+  const fname=S.invitados.length>0
+    ?'Invitados_'+novia.replace(/\s/g,'_')+'_'+novio.replace(/\s/g,'_')+'.xlsx'
+    :'DEMIR_Plantilla_Invitados.xlsx';
+  XLSX.writeFile(wb,fname);
+}
+
+function showImportHelp(){
+  const existing=document.getElementById('importHelpModal');
+  if(existing){existing.style.display='flex';return;}
+  const m=document.createElement('div');
+  m.id='importHelpModal';
+  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;';
+  m.innerHTML=`<div style="background:#fff;border-radius:16px;padding:0;width:100%;max-width:520px;overflow:hidden;font-family:system-ui;">
+    <div style="background:#7B2D42;padding:18px 20px;">
+      <div style="color:#F2C4CE;font-size:11px;letter-spacing:1px;">DEMIR · INVITADOS</div>
+      <div style="color:#fff;font-size:18px;font-weight:700;margin-top:4px;">¿Cómo importar la lista?</div>
+    </div>
+    <div style="padding:20px;display:flex;flex-direction:column;gap:14px;">
+      <div style="background:#FBF0F3;border-radius:10px;padding:14px;">
+        <div style="font-weight:700;color:#7B2D42;font-size:13px;margin-bottom:8px;">✅ Opción recomendada: Google Sheets</div>
+        <div style="font-size:12px;color:#444;line-height:1.7;">
+          1. Descarga la plantilla con el botón <b>📥 Excel</b><br>
+          2. Abre <b>Google Sheets</b> en tu tablet<br>
+          3. Importa el archivo descargado<br>
+          4. Llena los datos y guarda<br>
+          5. Comparte → Descargar → <b>Excel (.xlsx)</b><br>
+          6. Regresa aquí e importa con <b>📤 Importar</b>
+        </div>
+      </div>
+      <div style="background:#F5F5F5;border-radius:10px;padding:14px;">
+        <div style="font-weight:700;color:#555;font-size:13px;margin-bottom:8px;">⚠️ WPS / otras apps</div>
+        <div style="font-size:12px;color:#666;line-height:1.7;">
+          Si usas WPS, al guardar ve a:<br>
+          <b>Guardar como → Formato: xlsx</b><br>
+          (no el formato .wps ni .et)
+        </div>
+      </div>
+      <button onclick="document.getElementById('importHelpModal').style.display='none';" 
+        style="background:#7B2D42;color:#fff;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;width:100%;">
+        Entendido
+      </button>
+    </div>
+  </div>`;
+  document.body.appendChild(m);
+}
+
+function importInvitadosXLSX(input){
+  if(!input||!input.files||!input.files[0]) return;
+  if(typeof XLSX==='undefined'){showImportHelp();return;}
+  const file=input.files[0];
+  const confMap={'confirmado':'s-ok','pendiente':'s-init','no asiste':'s-pend','por definir':'s-nd'};
+  const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+
+  function processRows(rows){
+    let dataStart=0;
+    for(let i=0;i<Math.min(rows.length,5);i++){
+      if(norm(rows[i][0]).startsWith('nombre')){dataStart=i+1;break;}
+    }
+    const imported=[];
+    for(let i=dataStart;i<rows.length;i++){
+      const row=rows[i];
+      const nombre=String(row[0]||'').trim();
+      if(!nombre) continue;
+      imported.push({id:uid(),nombre,
+        acompanantes:String(row[1]||'').trim(),
+        mesa:String(row[2]||'').trim(),
+        adultos:parseInt(row[3])||1,
+        menu:String(row[4]||'').trim(),
+        confirmacion:confMap[norm(row[5])]||'s-init',
+        tipo:norm(row[6]).includes('foraneo')?'foraneo':'local'
+      });
+    }
+    if(!imported.length){alert('No se encontraron invitados.\nVerifica que los nombres estén en la columna A desde la fila 2.');return;}
+    const replace=S.invitados.length>0?confirm('Ya tienes '+S.invitados.length+' invitados.\n¿Reemplazar con los '+imported.length+' nuevos?\n\nCancela para agregar al final.'):true;
+    if(replace) S.invitados=imported; else S.invitados=[...S.invitados,...imported];
+    renderInvitados();
+    alert('✅ '+imported.length+' invitados importados.');
+  }
+
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+      const sName=wb.SheetNames.find(n=>/invitad/i.test(n))||wb.SheetNames[0];
+      const raw=XLSX.utils.sheet_to_json(wb.Sheets[sName],{header:1,defval:''});
+      processRows(raw);
+    }catch(err){
+      showImportHelp();
+    }
+  };
+  reader.onerror=function(){showImportHelp();};
+  reader.readAsArrayBuffer(file);
+  input.value='';
+}
+
+// ══ PROVEEDORES ═════════════════════════════════════════════════════
+function renderProveedores(){
+  const tbl=document.getElementById('provTable'); tbl.innerHTML='';
+  const cols='1.2fr 1.5fr 1.5fr 1.2fr 1.5fr 1fr 36px';
+  const hdr=document.createElement('div'); hdr.className='trow hdr'; hdr.style.gridTemplateColumns=cols;
+  ['Rubro','Nombre / Empresa','Contacto','Teléfono','Horario','Estado',''].forEach(h=>{
+    const c=document.createElement('div');c.className='tcell';c.textContent=h;hdr.appendChild(c);
+  });
+  tbl.appendChild(hdr);
+
+  S.proveedores.forEach(prov=>{
+    const row=document.createElement('div'); row.className='trow'; row.style.gridTemplateColumns=cols;
+    // Campos editables
+    ['rubro','nombre','contacto','tel','horario'].forEach(field=>{
+      const c=document.createElement('div'); c.className='tcell';
+      const e=document.createElement('span'); e.contentEditable=true; e.setAttribute('data-ph',field+'…');
+      e.textContent=prov[field];
+        e.oninput=()=>{
+          prov[field]=e.textContent;
+          // Sync rubro/nombre to linked gasto
+          const g=S.gastos.find(x=>x.provId===prov.id);
+          if(g){
+            if(field==='rubro') g.rubro=e.textContent;
+            if(field==='nombre') g.proveedor=e.textContent;
+          }
+        };
+      c.appendChild(e); row.appendChild(c);
+    });
+    // Estado + link badge
+    const sc=document.createElement('div'); sc.className='tcell'; sc.style.display='flex'; sc.style.alignItems='center'; sc.style.gap='5px';
+    const [scls,slbl]=STATUS_CYCLE.find(x=>x[0]===prov.estado)||STATUS_CYCLE[0];
+    const sb=document.createElement('span'); sb.className='status '+scls; sb.textContent=slbl;
+    sb.onclick=()=>{const i=STATUS_CYCLE.findIndex(x=>x[0]===prov.estado);const[nc,nl]=STATUS_CYCLE[(i+1)%STATUS_CYCLE.length];prov.estado=nc;sb.className='status '+nc;sb.textContent=nl;};
+    sc.appendChild(sb);
+    // Show link icon if linked to finanzas
+    const linked=S.gastos.find(x=>x.provId===prov.id);
+    if(linked){const lk=document.createElement('span');lk.title='Vinculado a Finanzas';lk.textContent='💰';lk.style.cssText='font-size:11px;cursor:default;';sc.appendChild(lk);}
+    row.appendChild(sc);
+    // Del
+    const dc=document.createElement('div'); dc.className='tcell del-row';
+    const db=document.createElement('button'); db.className='btn-icon'; db.textContent='×';
+    db.onclick=()=>{
+      // Also remove linked gasto
+      S.gastos=S.gastos.filter(x=>x.provId!==prov.id);
+      S.proveedores=S.proveedores.filter(x=>x.id!==prov.id);
+      renderProveedores();
+    };
+    dc.appendChild(db); row.appendChild(dc);
+    tbl.appendChild(row);
+  });
+}
+
+// ══ EXPEDIENTE ══════════════════════════════════════════════════════
+function renderExpediente(){
+  const wrap=document.getElementById('expContent'); wrap.innerHTML='';
+  const sections=[
+    {title:'👰🤵 Novios',color:'#7B2D42',fields:S.expediente.novios},
+    {title:'📅 Datos Generales',color:'#C9A84C',fields:S.expediente.generales},
+    {title:'👨‍👩‍👧 Familia',color:'#F4A7B3',fields:S.expediente.familia},
+    {title:'⛪ Ceremonia',color:'#9ECFE0',fields:S.expediente.ceremonia},
+    {title:'📜 Boda Civil',color:'#6B4C9A',fields:S.expediente.civil},
+    {title:'💐 Cortejo',color:'#B5D9A0',fields:S.expediente.cortejo},
+    {title:'🕊️ Padrinos',color:'#F9C5A1',fields:S.expediente.padrinos},
+  ];
+  sections.forEach(sec=>{
+    const div=document.createElement('div'); div.className='exp-section';
+    const lbl=document.createElement('div'); lbl.className='exp-sect-title';
+    lbl.style.color=sec.color; lbl.style.borderBottomColor=sec.color;
+    lbl.textContent=sec.title; div.appendChild(lbl);
+    const card=document.createElement('div'); card.className='card'; div.appendChild(card);
+    sec.fields.forEach((f,i)=>{
+      const row=document.createElement('div'); row.className='exp-row';
+      row.style.background=i%2?'var(--gray)':'white';
+      const key=document.createElement('div'); key.className='exp-key'; key.textContent=f.key;
+      // Use regular INPUT — most reliable across all browsers/mobile
+      const val=document.createElement('input');
+      val.className='exp-val';
+      val.type='text';
+      val.placeholder='Escribe aquí…';
+      val.value=f.val||'';
+      val.autocomplete='off';
+      val.spellcheck=false;
+      // These are critical for Android Chrome
+      val.style.cssText='padding:10px 12px;font-size:16px;flex:1;border:none;outline:none;font-family:system-ui,Arial,sans-serif;color:#3D2B1F;background:white;-webkit--webkit-user-select:text;user-select:text;-webkit-user-select:text;user-select:text;cursor:text;width:100%;min-width:0;-webkit-appearance:none;appearance:none;border-radius:0;';
+      val.addEventListener('input',function(){
+        f.val=this.value;
+        if(f.key==='Nombre Novia'||f.key==='Nombre Novio'||f.key==='Fecha de la boda') updateSidebar();
+      });
+      val.addEventListener('focus',function(){ this.style.background='#FBF0F3'; });
+      val.addEventListener('blur',function(){ this.style.background=''; });
+      row.appendChild(key); row.appendChild(val); card.appendChild(row);
+    });
+    wrap.appendChild(div);
+  });
+}
+
+// ══ MINUTO A MINUTO ═════════════════════════════════════════════════
+function renderMAM(){
+  const wrap=document.getElementById('mamWrap'); wrap.innerHTML='';
+  S.mam.forEach(sec=>{
+    const div=document.createElement('div'); div.style.marginBottom='28px';
+    const hdr=document.createElement('div');
+    hdr.style.cssText='display:flex;align-items:center;gap:10px;margin-bottom:12px;';
+    hdr.innerHTML=`<div style="width:14px;height:14px;border-radius:50%;background:${sec.color};flex-shrink:0;"></div>
+      <span style="font-family:Georgia,'Times New Roman',serif;font-size:18px;color:var(--wine);font-style:italic;">${sec.titulo}</span>
+      <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="addMAMItem(${sec.id})">+ Fila</button>
+      <button class="btn-icon" onclick="deleteMAMSection(${sec.id})" title="Eliminar sección">🗑</button>`;
+    div.appendChild(hdr);
+    const card=document.createElement('div'); card.className='card'; card.style.overflow='hidden';
+    // header row
+    const cols='100px 1fr 1fr 1.5fr 36px';
+    const headerRow=document.createElement('div'); headerRow.className='trow hdr'; headerRow.style.gridTemplateColumns=cols;
+    ['Horario','Actividad','Proveedor','Observaciones / Canción',''].forEach(h=>{
+      const c=document.createElement('div');c.className='tcell';c.textContent=h;headerRow.appendChild(c);
+    });
+    card.appendChild(headerRow);
+    sec.items.forEach((item,idx)=>{
+      const row=document.createElement('div'); row.className='trow'; row.style.gridTemplateColumns=cols;
+      row.style.background=idx%2?'var(--blush-lt)':'white';
+      ['hora','actividad','proveedor','notas'].forEach(field=>{
+        const c=document.createElement('div'); c.className='tcell';
+        const e=document.createElement('span'); e.contentEditable=true; e.setAttribute('data-ph',field+'…');
+        e.textContent=item[field]; e.oninput=()=>{item[field]=e.textContent;};
+        if(field==='hora') e.style.cssText='font-weight:600;color:#7B2D42;font-size:11px;';
+        c.appendChild(e); row.appendChild(c);
+      });
+      const dc=document.createElement('div'); dc.className='tcell del-row';
+      const db=document.createElement('button'); db.className='btn-icon'; db.textContent='×';
+      db.onclick=()=>{sec.items=sec.items.filter(x=>x.id!==item.id);renderMAM();};
+      dc.appendChild(db); row.appendChild(dc);
+      card.appendChild(row);
+    });
+    div.appendChild(card); wrap.appendChild(div);
+  });
+}
+
+function addMAMItem(secId){ const sec=S.mam.find(s=>s.id===secId); if(sec)sec.items.push({id:uid(),hora:'',actividad:'',proveedor:'',notas:''}); renderMAM(); }
+function deleteMAMSection(secId){ if(confirm('¿Eliminar sección?')){S.mam=S.mam.filter(s=>s.id!==secId);renderMAM();} }
+
+// ══ MODAL ═══════════════════════════════════════════════════════════
+let _modalType='';
+function openModal(type){
+  _modalType=type;
+  const bg=document.getElementById('modalBg'); bg.classList.add('open');
+  const box=document.getElementById('modalBox'); box.onclick=e=>e.stopPropagation();
+  const bodies={
+    addSection:`
+      <div class="modal-field"><label>Nombre de la sección</label><input id="mf1" placeholder="Ej. 🟢 Post-Boda" value=""></div>
+      <div class="modal-field"><label>Color</label><input id="mf2" type="color" value="#7B2D42"></div>`,
+    addGasto:`
+      <div class="mf"><label>Rubro / Servicio</label><input id="mf1" placeholder="Ej. Fotografía"></div>
+      <div class="mf"><label>Proveedor / Empresa</label><input id="mf2" placeholder="Nombre del proveedor"></div>
+      <div class="mf"><label>Costo total estimado ($)</label><input id="mf3" type="number" placeholder="0"></div>
+      <div class="mf"><label>Anticipo ($)</label><input id="mf4" type="number" placeholder="0"></div>
+      <div style="background:#FBF0F3;border-radius:10px;padding:12px;margin-top:4px;">
+        <div style="font-size:9px;letter-spacing:1.5px;color:#9E8C84;text-transform:uppercase;margin-bottom:10px;font-weight:600;">📞 Vincular a Proveedores</div>
+        <div class="mf"><label>Teléfono (opcional)</label><input id="mf5" placeholder=""></div>
+        <div class="mf"><label>Horario de servicio (opcional)</label><input id="mf6" placeholder="Ej. Full day"></div>
+      </div>`,
+    addInvitado:`
+      <div class="mf"><label>Nombre completo</label><input id="mf1" placeholder="Nombre Apellido"></div>
+      <div class="mf"><label>Acompañantes (separados por coma)</label><input id="mf2" placeholder="Ej. María López, Juan Pérez"></div>
+      <div class="mf"><label>Mesa #</label><input id="mf3" placeholder="1"></div>
+      <div class="mf"><label>Menú especial</label><input id="mf4" placeholder="Vegetariano, Sin gluten…"></div>
+      <div class="mf"><label>Tipo</label>
+        <select id="mf5" style="width:100%;padding:10px;border:1px solid var(--sand);border-radius:10px;font-size:14px;background:white;">
+          <option value="local">📍 Local</option>
+          <option value="foraneo">✈ Foráneo</option>
+        </select>
+      </div>`,
+    addProveedor:`
+      <div class="mf"><label>Rubro / Servicio</label><input id="mf1" placeholder="Ej. DJ, Florería…"></div>
+      <div class="mf"><label>Nombre / Empresa</label><input id="mf2" placeholder=""></div>
+      <div class="mf"><label>Contacto</label><input id="mf3" placeholder="Nombre del contacto"></div>
+      <div class="mf"><label>Teléfono</label><input id="mf4" placeholder=""></div>
+      <div class="mf"><label>Horario</label><input id="mf5" placeholder="Ej. Full day, 8 hrs"></div>
+      <div style="background:#FBF0F3;border-radius:10px;padding:12px;margin-top:4px;">
+        <div style="font-size:9px;letter-spacing:1.5px;color:#9E8C84;text-transform:uppercase;margin-bottom:10px;font-weight:600;">💰 Vincular a Finanzas</div>
+        <div class="mf"><label>Costo total estimado ($)</label><input id="mf6" type="number" placeholder="0"></div>
+        <div class="mf"><label>Anticipo ($)</label><input id="mf7" type="number" placeholder="0"></div>
+      </div>`,
+    addMAMSection:`
+      <div class="modal-field"><label>Título de la sección</label><input id="mf1" placeholder="Ej. 🌅 Pre-ceremonia"></div>
+      <div class="modal-field"><label>Color</label><input id="mf2" type="color" value="#F4A7B3"></div>`,
+  };
+  const titles={addSection:'Nueva sección de checklist',addGasto:'Nuevo gasto',addInvitado:'Nuevo invitado',addProveedor:'Nuevo proveedor',addMAMSection:'Nueva sección'};
+  document.getElementById('modalTitle').textContent=titles[type]||'Agregar';
+  document.getElementById('modalBody').innerHTML=bodies[type]||'';
+  setTimeout(()=>{const f=document.getElementById('mf1');if(f)f.focus();},100);
+}
+
+function closeModal(e){
+  if(e&&e.target!==document.getElementById('modalBg')) return;
+  document.getElementById('modalBg').classList.remove('open');
+}
+
+function saveModal(){
+  const v=(id)=>{const el=document.getElementById(id);return el?el.value.trim():'';};
+  if(_modalType==='addSection'){
+    const fase=v('mf1'); const color=v('mf2');
+    if(fase) S.checklist.push({id:uid(),fase,color,items:[]});
+    renderChecklist();
+  } else if(_modalType==='addGasto'){
+    const gastoId=uid();
+    const rubro=v('mf1'); const nombreProv=v('mf2');
+    const montoAnticipo=parseFloat(v('mf4'))||0;
+    const today=new Date().toLocaleDateString('es-MX');
+    const initAnt=montoAnticipo>0?[{id:uid(),monto:montoAnticipo,fecha:today,nota:'Anticipo inicial'}]:[];
+    S.gastos.push({id:gastoId,rubro,proveedor:nombreProv,costo:parseFloat(v('mf3'))||0,anticipos:initAnt,estado:'s-pend'});
+    // Auto-create linked proveedor if name given
+    if(nombreProv){
+      const provId=uid();
+      S.proveedores.push({id:provId,gastoId:gastoId,rubro,nombre:nombreProv,contacto:'',tel:v('mf5'),horario:v('mf6'),estado:'s-init'});
+    }
+    renderFinanzas();
+    if(document.getElementById('view-proveedores').classList.contains('active')) renderProveedores();
+  } else if(_modalType==='addInvitado'){
+    const sel5=document.getElementById('mf5');
+    S.invitados.push({id:uid(),nombre:v('mf1'),acompanantes:v('mf2'),mesa:v('mf3'),adultos:1,menu:v('mf4'),confirmacion:'s-init',tipo:sel5?sel5.value:'local'});
+    renderInvitados();
+  } else if(_modalType==='addProveedor'){
+    const provId=uid();
+    S.proveedores.push({id:provId,rubro:v('mf1'),nombre:v('mf2'),contacto:v('mf3'),tel:v('mf4'),horario:v('mf5'),estado:'s-init'});
+    // Auto-create linked gasto
+    const costo=parseFloat(v('mf6'))||0;
+    const anticipo=parseFloat(v('mf7'))||0;
+    const initAntProv=anticipo>0?[{id:uid(),monto:anticipo,fecha:new Date().toLocaleDateString('es-MX'),nota:'Anticipo inicial'}]:[];
+    S.gastos.push({id:uid(),provId:provId,rubro:v('mf1'),proveedor:v('mf2'),costo,anticipos:initAntProv,estado:'s-pend'});
+    renderProveedores();
+    if(document.getElementById('view-finanzas').classList.contains('active')) renderFinanzas();
+  } else if(_modalType==='addMAMSection'){
+    const titulo=v('mf1'); const color=v('mf2');
+    if(titulo) S.mam.push({id:uid(),titulo,color,items:[]});
+    renderMAM();
+  } else if(_modalType==='addAnticipo'&&_anticipo_gasto){
+    const monto=parseFloat(document.getElementById('mf1')?.value)||0;
+    const fechaInput=document.getElementById('mf2')?.value||'';
+    let fechaFmt='';
+    if(fechaInput){const[y,m,d]=fechaInput.split('-');fechaFmt=d+'/'+m+'/'+y;}
+    const nota=document.getElementById('mf3')?.value||'Anticipo';
+    if(monto>0){
+      if(!_anticipo_gasto.anticipos) _anticipo_gasto.anticipos=[];
+      _anticipo_gasto.anticipos.push({id:uid(),monto,fecha:fechaFmt,nota});
+      renderFinanzas();
+      // Auto-expand detail
+      setTimeout(()=>{const el=document.getElementById('ant-detail-'+_anticipo_gasto.id);if(el)el.style.display='block';},50);
+    }
+    _anticipo_gasto=null;
+  }
+  document.getElementById('modalBg').classList.remove('open');
+}
+
+document.getElementById('modalBg').addEventListener('click',function(e){ if(e.target===this) closeModal(e); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(e); if(e.key==='Enter'&&document.getElementById('modalBg').classList.contains('open')){e.preventDefault();saveModal();} });
+
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') closeModal(e);
+  if(e.key==='Enter'&&document.getElementById('modalBg').classList.contains('open')){e.preventDefault();saveModal();}
+});
+
+
+// ══ ANTICIPOS ═══════════════════════════════════════════════════════
+function toggleAntDetail(gastoId){
+  const el=document.getElementById('ant-detail-'+gastoId);
+  if(el) el.style.display=el.style.display==='none'?'block':'none';
+}
+
+function openAnticipoModal(g){
+  _modalType='addAnticipo';
+  _anticipo_gasto=g;
+  document.getElementById('modalTitle').textContent='Agregar Anticipo · '+g.rubro;
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('modalBody').innerHTML=`
+    <div style="background:#F8F4FF;border-radius:12px;padding:14px;margin-bottom:14px;">
+      <div style="font-size:11px;color:#6B4C9A;margin-bottom:10px;">
+        <strong>Proveedor:</strong> ${g.proveedor||'—'}<br>
+        <strong>Costo total:</strong> ${fmtMoney(g.costo)}<br>
+        <strong>Total anticipos entregados:</strong> ${fmtMoney(totalAnt(g))}<br>
+        <strong style="color:${(Number(g.costo)-totalAnt(g))>0?'#C9A84C':'#4CAF50'}">Saldo restante: ${fmtMoney(Math.max(0,Number(g.costo)-totalAnt(g)))}</strong>
+      </div>
+    </div>
+    <div class="mf"><label>Monto del anticipo ($)</label><input id="mf1" type="number" placeholder="0" autofocus></div>
+    <div class="mf"><label>Fecha de pago</label><input id="mf2" type="date" value="${today}"></div>
+    <div class="mf"><label>Nota (opcional)</label><input id="mf3" placeholder="Ej. Transferencia, efectivo…"></div>`;
+  document.getElementById('modalBg').classList.add('open');
+  setTimeout(()=>{const f=document.getElementById('mf1');if(f)f.focus();},150);
+}
+let _anticipo_gasto=null;
+
+// ══ PRINT MAM ═══════════════════════════════════════════════════════
+function printMAM(){
+  // Build a clean print window with only MAM content
+  const mamDiv = document.getElementById('mamWrap');
+  if(!mamDiv || mamDiv.innerHTML.trim()===''){
+    renderMAM();
+  }
+  
+  // Get couple info
+  const novia = S.expediente.novios.find(x=>x.key==='Nombre Novia')?.val||'Novia';
+  const novio = S.expediente.novios.find(x=>x.key==='Nombre Novio')?.val||'Novio';
+  const fecha = S.expediente.generales.find(x=>x.key==='Fecha de la boda')?.val||'';
+  const venue = S.expediente.generales.find(x=>x.key==='Venue / Salón')?.val||'';
+
+  // Build clean HTML table from MAM data
+  let rows = '';
+  S.mam.forEach(sec => {
+    rows += `<tr style="background:#7B2D42;"><td colspan="4" style="padding:10px 14px;color:white;font-size:13px;font-weight:700;letter-spacing:1px;">${sec.titulo}</td></tr>`;
+    sec.items.forEach((item,i) => {
+      const bg = i%2===0 ? '#ffffff' : '#FBF0F3';
+      rows += `<tr style="background:${bg};">
+        <td style="padding:8px 12px;font-weight:700;color:#7B2D42;font-size:12px;white-space:nowrap;border-bottom:1px solid #EDE5D8;min-width:80px;">${item.hora||'—'}</td>
+        <td style="padding:8px 12px;font-size:12px;border-bottom:1px solid #EDE5D8;">${item.actividad||''}</td>
+        <td style="padding:8px 12px;font-size:11px;color:#9E8C84;border-bottom:1px solid #EDE5D8;">${item.proveedor||''}</td>
+        <td style="padding:8px 12px;font-size:11px;color:#9E8C84;border-bottom:1px solid #EDE5D8;">${item.notas||''}</td>
+      </tr>`;
+    });
+  });
+
+  const html = `<!DOCTYPE html><html lang="es"><head>
+  <meta charset="UTF-8">
+  <title>Minuto a Minuto · ${novia} & ${novio}</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:Arial,sans-serif;background:white;color:#3D2B1F;padding:20px;}
+    @page{size:A4;margin:15mm 18mm;}
+    .header{text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:3px solid #7B2D42;}
+    .logo{font-size:10px;letter-spacing:5px;text-transform:uppercase;color:#9E8C84;margin-bottom:4px;}
+    .couple{font-size:26px;color:#7B2D42;font-style:italic;margin-bottom:6px;}
+    .meta{font-size:11px;color:#9E8C84;display:flex;justify-content:center;gap:24px;flex-wrap:wrap;}
+    .meta span{display:flex;align-items:center;gap:4px;}
+    table{width:100%;border-collapse:collapse;font-size:12px;}
+    th{background:#7B2D42;color:white;padding:9px 12px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;text-align:left;}
+    .footer{margin-top:20px;text-align:center;font-size:9px;color:#9E8C84;border-top:1px solid #EDE5D8;padding-top:10px;}
+    @media print{body{padding:0;}}
+  </style>
+  </head><body>
+  <div class="header">
+    <div class="logo">DEMIR · Wedding Planner</div>
+    <div class="couple">${novia} & ${novio}</div>
+    <div class="meta">
+      ${fecha?`<span>📅 ${fecha}</span>`:''}
+      ${venue?`<span>📍 ${venue}</span>`:''}
+    </div>
+  </div>
+  <table>
+    <thead><tr>
+      <th style="min-width:80px;">Horario</th>
+      <th>Actividad</th>
+      <th style="min-width:120px;">Proveedor</th>
+      <th>Observaciones</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="footer">Generado por DEMIR Wedding Planner · Confidencial</div>
+  </body></html>`;
+
+  const win = window.open('','_blank','width=800,height=900');
+  if(win){
+    win.document.write(html);
+    win.document.close();
+    setTimeout(()=>{ win.focus(); win.print(); }, 500);
+  } else {
+    // Fallback: if popup blocked, use data URI
+    const blob = new Blob([html], {type:'text/html'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href=url; a.download=`MinutoAMinuto_${novia}_${novio}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+}
+
+// ══ DESKTOP SIDEBAR (injected if wide screen) ════════════════════
+function buildDesktopSidebar(){
+  if(window.innerWidth<=900) return;
+  const app=document.getElementById('app');
+  const sidebar=document.createElement('aside');
+  sidebar.className='desktop-sidebar';
+  sidebar.innerHTML=`
+    <div style="padding:22px 18px 16px;border-bottom:1px solid var(--sand);text-align:center;">
+      <span style="font-family:Georgia,'Times New Roman',serif;font-size:20px;color:var(--wine);letter-spacing:3px;display:block;">DEMIR</span>
+      <span style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;">Wedding Planner</span>
+    </div>
+    <div style="margin:12px 10px 4px;background:var(--wine);border-radius:12px;padding:11px 13px;color:white;">
+      <div style="font-size:8px;opacity:.6;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;">NOMBRE NOVIA</div>
+      <input id="sideNovia" type="text" placeholder="Nombre novia…" 
+        style="width:100%;background:rgba(255,255,255,.15);border:none;border-radius:6px;padding:5px 8px;color:white;font-family:Georgia,serif;font-size:13px;font-style:italic;outline:none;margin-bottom:5px;-webkit-user-select:text;user-select:text;"
+        oninput="syncExpField('Nombre Novia',this.value)">
+      <div style="font-size:8px;opacity:.6;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;">NOMBRE NOVIO</div>
+      <input id="sideNovio" type="text" placeholder="Nombre novio…"
+        style="width:100%;background:rgba(255,255,255,.15);border:none;border-radius:6px;padding:5px 8px;color:white;font-family:Georgia,serif;font-size:13px;font-style:italic;outline:none;margin-bottom:5px;-webkit-user-select:text;user-select:text;"
+        oninput="syncExpField('Nombre Novio',this.value)">
+      <div style="font-size:8px;opacity:.6;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;">FECHA (DD/MM/AAAA)</div>
+      <input id="sideFecha" type="text" placeholder="Ej. 20/12/2025"
+        style="width:100%;background:rgba(255,255,255,.15);border:none;border-radius:6px;padding:5px 8px;color:white;font-size:11px;outline:none;margin-bottom:8px;-webkit-user-select:text;user-select:text;"
+        oninput="syncExpField('Fecha de la boda',this.value)">
+      <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:5px 8px;font-size:10px;text-align:center;">
+        <span style="font-size:20px;font-weight:700;display:block;line-height:1.1;" id="daysLeft">—</span>días para la boda
+      </div>
+    </div>
+    <nav style="flex:1;padding:8px 0;overflow-y:auto;">
+      <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:10px 16px 4px;">Principal</div>
+      <div class="nav-item active" onclick="go('contenido')"><span class="ic">🗂</span><span>Contenido</span></div>
+      <div class="nav-item" onclick="go('calendario')"><span class="ic">📅</span><span>Calendario</span></div>
+      <div class="nav-item" onclick="go('diario')"><span class="ic">✏️</span><span>Planner Diario</span></div>
+      <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:10px 16px 4px;">Gestión</div>
+      <div class="nav-item" onclick="go('checklist')"><span class="ic">✅</span><span>Checklist</span></div>
+      <div class="nav-item" onclick="go('finanzas')"><span class="ic">💰</span><span>Finanzas</span></div>
+      <div class="nav-item" onclick="go('invitados')"><span class="ic">👥</span><span>Invitados</span></div>
+      <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:10px 16px 4px;">Boda</div>
+      <div class="nav-item" onclick="go('proveedores')"><span class="ic">📞</span><span>Proveedores</span></div>
+      <div class="nav-item" onclick="go('expediente')"><span class="ic">💍</span><span>Expediente</span></div>
+      <div class="nav-item" onclick="go('minutominuto')"><span class="ic">⏱</span><span>Minuto a Minuto</span></div>
+      <div style="padding:12px 10px 8px;">
+        <button onclick="window.print()" style="width:100%;background:var(--gold);color:white;border:none;border-radius:10px;padding:10px;font-size:11px;font-weight:600;cursor:pointer;font-family:system-ui,Arial,sans-serif;">📄 Exportar / Imprimir</button>
+      </div>
+    </nav>`;
+  // Insert before main
+  const main=document.getElementById('mainArea');
+  app.insertBefore(sidebar, main);
+  // Month tabs
+  const tabs=document.createElement('div');
+  tabs.className='month-tabs-desktop';
+  MONTHS_S.forEach((m,i)=>{
+    const b=document.createElement('button');
+    b.className='mtab'+(i===new Date().getMonth()?' active':'');
+    b.textContent=m; b.style.background=TAB_C[i];
+    b.onclick=()=>{ S.curM=i;S.curY=2025; document.querySelectorAll('.mtab').forEach((t,j)=>t.classList.toggle('active',j===i)); go('calendario'); };
+    tabs.appendChild(b);
+  });
+  document.body.appendChild(tabs);
+}
+
+function buildMonthChips(){
+  const c=document.getElementById('monthChips');
+  MONTHS.forEach((m,i)=>{
+    const ch=document.createElement('div');
+    ch.className='mchip'; ch.textContent=m; ch.style.background=TAB_C[i];
+    ch.onclick=()=>{S.curM=i;S.curY=2025;go('calendario');};
+    c.appendChild(ch);
+  });
+}
+
+// Link existing gastos ↔ proveedores by matching rubro
+(function linkDefaults(){
+  S.gastos.forEach(g=>{
+    if(!g.provId){
+      const match=S.proveedores.find(p=>!p.id_linked&&p.rubro.toLowerCase()===g.rubro.toLowerCase());
+      if(match){ g.provId=match.id; match.gastoId=g.id; match.id_linked=true;
+        if(!g.proveedor&&match.nombre) g.proveedor=match.nombre;
+        if(!match.nombre&&g.proveedor) match.nombre=g.proveedor;
+      }
+    }
+  });
+})();
+
+buildDesktopSidebar();
+buildMonthChips();
+renderCal();
+renderDaily();
+updateSidebar();
+
+
+</script>
+</body>
+</html>
