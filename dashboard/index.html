@@ -401,6 +401,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
           <div class="add-grp"><label>Contraseña de su agenda</label><input type="text" id="new-pwd" placeholder="Ej: denmario2026"></div>
           <div class="add-grp"><label>URL de su agenda</label><input type="text" id="new-url" placeholder="Ej: mi-agenda/den-mario/"></div>
           <div class="add-grp"><label>Database URL de Firebase</label><input type="text" id="new-fburl" placeholder="https://nombre-default-rtdb.firebaseio.com"></div>
+          <div class="add-grp"><label>API Key de Firebase</label><input type="text" id="new-apikey" placeholder="AIzaSy..."></div>
           <div class="add-grp"><label>ID de la pareja en Firebase</label><input type="text" id="new-parejaid" placeholder="Ej: nat-luis  (carpeta en agendas/)"></div>
           <button class="add-btn" onclick="addCouple()">+ Agregar pareja</button>
           <div id="couples-list" style="margin-top:16px;"></div>
@@ -532,7 +533,10 @@ async function loadAllFirebaseTasks(){
     if(!c.fburl) return;
     try {
       const appName = `couple-${i}-${Date.now()}-${Math.random()}`;
-      const app = initializeApp({ databaseURL: c.fburl }, appName);
+      const app = initializeApp({ 
+        apiKey: c.apikey || 'AIzaSyplaceholder',
+        databaseURL: c.fburl 
+      }, appName);
       apps.push(app);
       const db = getDatabase(app);
       const parejaId = c.parejaid || c.fburl.replace('https://','').split('-default-rtdb')[0].split('.firebaseio')[0];
@@ -853,10 +857,11 @@ window.addCouple = () => {
     pwd:document.getElementById('new-pwd').value.trim(),
     url:document.getElementById('new-url').value.trim(),
     fburl:document.getElementById('new-fburl').value.trim(),
+    apikey:document.getElementById('new-apikey').value.trim(),
     parejaid:document.getElementById('new-parejaid').value.trim()
   });
   saveCouples();
-  ['new-names','new-date','new-pwd','new-url','new-fburl','new-parejaid'].forEach(id=>document.getElementById(id).value='');
+  ['new-names','new-date','new-pwd','new-url','new-fburl','new-apikey','new-parejaid'].forEach(id=>document.getElementById(id).value='');
   loadAllFirebaseTasks();
 };
 
