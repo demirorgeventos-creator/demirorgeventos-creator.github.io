@@ -65,7 +65,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
 .dtab.active{color:var(--wine);border-bottom-color:var(--wine);}
 
 /* Contenido scrollable */
-.dash-main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:20px;}
+.dash-main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px;}
 
 /* Month chips (tabs laterales del mes) */
 .month-tabs{position:fixed;right:0;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:2px;z-index:200;}
@@ -315,8 +315,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
     </div>
 
     <!-- ── PLANNER DIARIO ──────────────────────────────── -->
-    <div class="view" id="view-planner">
-      <div style="padding-right:36px;">
+    <div class="view" id="view-planner" style="padding-right:36px;">
         <div class="daily-hero" style="margin-top:16px;">
           <div class="day-num" id="dayNum"></div>
           <div class="day-info">
@@ -365,7 +364,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
         </div>
         <div id="pend-parejas-hoy"></div>
 
-      </div>
     </div>
 
     <!-- ── PENDIENTES ──────────────────────────────────── -->
@@ -596,7 +594,7 @@ function renderBodas(){
       <div class="boda-dias-lbl">${diasLbl}</div>
       <div class="boda-nombres">${c.names}</div>
       <div class="boda-fecha">${fmtDate(c.date)}</div>
-      ${c.url?`<a href="https://demirorgeventos-creator.github.io/${c.url}" target="_blank" style="display:inline-block;margin-top:10px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--wine);border-bottom:1px solid rgba(123,45,66,.3);">Ver agenda →</a>`:''}
+      ${c.url?`<a href="${cleanUrl(c.url)}" target="_blank" style="display:inline-block;margin-top:10px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--wine);border-bottom:1px solid rgba(123,45,66,.3);">Ver agenda →</a>`:''}
     </div>`;
   }).join('');
 }
@@ -869,7 +867,7 @@ function renderCouplesList(){
         <div class="cr-date">${c.date?fmtDate(c.date):'Sin fecha'} · Pwd: ${c.pwd||'—'}</div>
       </div>
       <div class="cr-dias">${diasTxt}</div>
-      ${c.url?`<a href="https://demirorgeventos-creator.github.io/${c.url}" target="_blank" class="cr-link">Ver agenda</a>`:'<span></span>'}
+      ${c.url?`<a href="${cleanUrl(c.url)}" target="_blank" class="cr-link">Ver agenda</a>`:'<span></span>'}
       <button class="cr-del" onclick="deleteCouple(${i})">✕</button>
     </div>`;
   }).join('');
@@ -877,6 +875,15 @@ function renderCouplesList(){
 
 function saveCouples(){ localStorage.setItem('demir_couples',JSON.stringify(couples)); }
 function fmtDate(str){ if(!str)return''; const d=new Date(str+'T12:00:00'); return`${d.getDate()} ${MONTHS[d.getMonth()].slice(0,3)} ${d.getFullYear()}`; }
+
+// Limpia URLs — maneja paths relativos y URLs completas sin duplicar dominio
+function cleanUrl(url){
+  if(!url) return '#';
+  // Ya es URL completa — úsala directo
+  if(url.startsWith('http://') || url.startsWith('https://')) return url;
+  // Path relativo — agrega demir.com.mx
+  return `https://demir.com.mx/${url.replace(/^\//,'')}`;
+}
 </script>
 </body>
-</html> 
+</html>
