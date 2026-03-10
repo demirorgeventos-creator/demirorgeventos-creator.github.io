@@ -416,7 +416,7 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getDatabase, ref, get } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
 // ══ CONFIG ═══════════════════════════════════════════════
-const MASTER_PASSWORD = 'demir.admin2024';
+const MASTER_PASSWORD = 'demir12';
 
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const MONTHS_S = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
@@ -760,14 +760,18 @@ function savePlanner(){ localStorage.setItem('demir_planner', JSON.stringify(pla
 function renderPendParejasHoy(){
   const container=document.getElementById('pend-parejas-hoy');
   const dateStr=`${dailyDate.getFullYear()}-${dailyDate.getMonth()}-${dailyDate.getDate()}`;
-  const dateIso=dailyDate.toISOString().split('T')[0];
 
   if(!couples.length){ container.innerHTML='<div class="pend-card"><div class="pend-empty">Agrega parejas para ver sus tareas aquí</div></div>'; return; }
 
   container.innerHTML = couples.map((c,i)=>{
     const fb=firebaseTasks[i];
     let tasks=[];
-    if(fb&&fb[dateStr]) tasks=fb[dateStr].filter(t=>!t.done);
+    if(fb && fb[dateStr]){
+      // Firebase puede devolver array real o objeto {0:{}, 1:{}, ...}
+      const raw = fb[dateStr];
+      tasks = Array.isArray(raw) ? raw : Object.values(raw);
+      tasks = tasks.filter(t => t && !t.done && t.text && t.text.trim());
+    }
     const fbBadge=fb?'<span style="font-size:9px;background:#C6EFCE;color:#006100;padding:2px 7px;border-radius:10px;margin-left:6px;">🔥</span>':'';
     return `<div class="pend-card">
       <div class="pend-card-title" style="color:${CHIP_COLORS[i%CHIP_COLORS.length]}">${c.names}${fbBadge}</div>
@@ -825,7 +829,11 @@ function renderPendientes(){
   grid.innerHTML=couples.map((c,i)=>{
     const fb=firebaseTasks[i];
     let tasks=[];
-    if(fb&&fb[todayKey]) tasks=fb[todayKey].filter(t=>!t.done);
+    if(fb && fb[todayKey]){
+      const raw=fb[todayKey];
+      tasks = Array.isArray(raw) ? raw : Object.values(raw);
+      tasks = tasks.filter(t => t && !t.done && t.text && t.text.trim());
+    }
     const fbBadge=fb?'<span style="font-size:9px;background:#C6EFCE;color:#006100;padding:2px 7px;border-radius:10px;margin-left:6px;">🔥</span>':'<span style="font-size:9px;background:#FFEB9C;color:#9C6500;padding:2px 7px;border-radius:10px;margin-left:6px;">Sin Firebase</span>';
     return `<div class="pend-card">
       <div class="pend-card-title" style="color:${CHIP_COLORS[i%CHIP_COLORS.length]}">${c.names}${fbBadge}</div>
