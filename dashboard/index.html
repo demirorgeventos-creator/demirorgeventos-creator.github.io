@@ -401,6 +401,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
           <div class="add-grp"><label>Contraseña de su agenda</label><input type="text" id="new-pwd" placeholder="Ej: denmario2026"></div>
           <div class="add-grp"><label>URL de su agenda</label><input type="text" id="new-url" placeholder="Ej: mi-agenda/den-mario/"></div>
           <div class="add-grp"><label>Database URL de Firebase</label><input type="text" id="new-fburl" placeholder="https://nombre-default-rtdb.firebaseio.com"></div>
+          <div class="add-grp"><label>ID de la pareja en Firebase</label><input type="text" id="new-parejaid" placeholder="Ej: nat-luis  (carpeta en agendas/)"></div>
           <button class="add-btn" onclick="addCouple()">+ Agregar pareja</button>
           <div id="couples-list" style="margin-top:16px;"></div>
         </div>
@@ -415,7 +416,7 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getDatabase, ref, get } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
 // ══ CONFIG ═══════════════════════════════════════════════
-const MASTER_PASSWORD = 'demir12';
+const MASTER_PASSWORD = 'demir.admin2024';
 
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const MONTHS_S = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
@@ -534,7 +535,7 @@ async function loadAllFirebaseTasks(){
       const app = initializeApp({ databaseURL: c.fburl }, appName);
       apps.push(app);
       const db = getDatabase(app);
-      const parejaId = c.fburl.replace('https://','').replace('-default-rtdb.firebaseio.com','').replace('.firebaseio.com','');
+      const parejaId = c.parejaid || c.fburl.replace('https://','').split('-default-rtdb')[0].split('.firebaseio')[0];
       const snap = await get(ref(db, `agendas/${parejaId}/tasks`));
       if(snap.exists()) firebaseTasks[i] = snap.val() || {};
     } catch(e){ console.warn(`Firebase error ${c.names}:`, e.message); }
@@ -841,10 +842,11 @@ window.addCouple = () => {
     names, date:document.getElementById('new-date').value,
     pwd:document.getElementById('new-pwd').value.trim(),
     url:document.getElementById('new-url').value.trim(),
-    fburl:document.getElementById('new-fburl').value.trim()
+    fburl:document.getElementById('new-fburl').value.trim(),
+    parejaid:document.getElementById('new-parejaid').value.trim()
   });
   saveCouples();
-  ['new-names','new-date','new-pwd','new-url','new-fburl'].forEach(id=>document.getElementById(id).value='');
+  ['new-names','new-date','new-pwd','new-url','new-fburl','new-parejaid'].forEach(id=>document.getElementById(id).value='');
   loadAllFirebaseTasks();
 };
 
