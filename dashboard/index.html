@@ -766,15 +766,17 @@ function renderPendParejasHoy(){
   container.innerHTML = couples.map((c,i)=>{
     const fb=firebaseTasks[i];
     let tasks=[];
+    const fbKeys = fb ? Object.keys(fb).filter(k=>!k.startsWith('imp_')&&!k.startsWith('not_')&&!k.startsWith('obj_')).join(', ') : 'sin conexión';
     if(fb && fb[dateStr]){
-      // Firebase puede devolver array real o objeto {0:{}, 1:{}, ...}
       const raw = fb[dateStr];
       tasks = Array.isArray(raw) ? raw : Object.values(raw);
       tasks = tasks.filter(t => t && !t.done && t.text && t.text.trim());
     }
     const fbBadge=fb?'<span style="font-size:9px;background:#C6EFCE;color:#006100;padding:2px 7px;border-radius:10px;margin-left:6px;">🔥</span>':'';
+    const debugInfo=`<div style="font-size:9px;color:#999;margin-top:4px;">Buscando: <b>${dateStr}</b> | Claves: ${fbKeys}</div>`;
     return `<div class="pend-card">
       <div class="pend-card-title" style="color:${CHIP_COLORS[i%CHIP_COLORS.length]}">${c.names}${fbBadge}</div>
+      ${debugInfo}
       ${tasks.length?tasks.map(t=>`<div class="pend-item"><div class="pend-dot" style="background:${CHIP_COLORS[i%CHIP_COLORS.length]}"></div><div class="pend-txt">${t.text}</div></div>`).join(''):'<div class="pend-empty">Sin tareas para este día ✓</div>'}
     </div>`;
   }).join('');
