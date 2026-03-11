@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galería · DEMIR Wedding Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@300;400;500&family=Lora:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --wine:#7B2D42;--wine2:#5a1e2e;--gold:#C9A84C;--gold-lt:#F5E6C0;
+  --cream:#FAF6F0;--cream2:#F4EDE4;--sand:#EDE5D8;--text:#3D2B1F;
+  --muted:#9E8C84;--dark:#1a0a0f;--gray:#8a7070;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--cream);color:var(--text);font-family:'Montserrat',sans-serif;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:24px 60px;transition:all .5s;}
+nav.scrolled{background:rgba(250,246,240,.96);backdrop-filter:blur(12px);padding:16px 60px;border-bottom:1px solid rgba(185,148,56,.2);}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:500;letter-spacing:6px;color:var(--wine);text-decoration:none;}
+.nav-logo span{color:var(--gold);}
+.nav-back{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--text);text-decoration:none;transition:color .3s;display:flex;align-items:center;gap:8px;}
+.nav-back:hover{color:var(--wine);}
+@media(max-width:768px){nav{padding:20px 24px;}nav.scrolled{padding:14px 24px;}}
+
+/* ── HERO ── */
+.gal-hero{padding:140px 60px 60px;text-align:center;background:linear-gradient(180deg,var(--dark) 0%,var(--wine2) 60%,var(--wine) 100%);position:relative;overflow:hidden;}
+.gal-hero::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(255,255,255,.02) 40px,rgba(255,255,255,.02) 80px);}
+.gal-hero-eyebrow{font-size:9px;letter-spacing:5px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;position:relative;}
+.gal-hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(42px,7vw,80px);color:white;font-weight:300;font-style:italic;line-height:1.1;position:relative;margin-bottom:16px;}
+.gal-hero-sub{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.45);position:relative;}
+
+/* ── FILTROS ── */
+.filters{display:flex;justify-content:center;gap:8px;padding:48px 60px 0;flex-wrap:wrap;}
+.filter-btn{font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;padding:10px 24px;border:1px solid var(--sand);background:transparent;color:var(--muted);cursor:pointer;transition:all .3s;}
+.filter-btn.active,.filter-btn:hover{background:var(--wine);color:white;border-color:var(--wine);}
+@media(max-width:600px){.filters{padding:32px 24px 0;gap:6px;}.filter-btn{font-size:8px;padding:8px 16px;}}
+
+/* ── CATEGORÍA LABEL ── */
+.cat-section{padding:48px 60px 0;}
+.cat-label{font-family:'Cormorant Garamond',serif;font-size:11px;letter-spacing:5px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
+.cat-title{font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--wine);font-style:italic;margin-bottom:24px;}
+@media(max-width:768px){.cat-section{padding:36px 24px 0;}}
+
+/* ── MASONRY PINTEREST ── */
+.masonry{
+  columns:3;
+  column-gap:10px;
+}
+.masonry-item{
+  break-inside:avoid;
+  margin-bottom:10px;
+  position:relative;
+  cursor:pointer;
+  overflow:hidden;
+  border-radius:4px;
+}
+.masonry-item img{
+  width:100%;
+  height:auto;
+  display:block;
+  transition:transform .5s ease;
+}
+.masonry-item:hover img{transform:scale(1.03);}
+
+/* Placeholder Pinterest */
+.masonry-ph{
+  width:100%;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;
+  border-radius:4px;
+}
+.masonry-ph-icon{font-size:20px;opacity:.35;}
+.masonry-ph-label{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.4);}
+
+/* Alturas variadas para placeholders */
+.ph-sm{height:180px;}
+.ph-md{height:260px;}
+.ph-lg{height:340px;}
+.ph-xl{height:420px;}
+
+/* Overlay hover */
+.masonry-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top, rgba(26,10,15,.5) 0%, transparent 50%);
+  opacity:0;transition:opacity .3s;
+  display:flex;align-items:flex-end;padding:16px;
+}
+.masonry-item:hover .masonry-overlay{opacity:1;}
+.masonry-lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:white;}
+
+/* Colores placeholder */
+.c1{background:linear-gradient(135deg,#5a1e2e,#7B2D42);}
+.c2{background:linear-gradient(135deg,#3d2830,#6b3a45);}
+.c3{background:linear-gradient(135deg,#2d1f24,#4a2535);}
+.c4{background:linear-gradient(135deg,#7B2D42,#a04560);}
+.c5{background:linear-gradient(135deg,#1a0a0f,#3d1e28);}
+.c6{background:linear-gradient(135deg,#4a2535,#7B2D42);}
+.c7{background:linear-gradient(135deg,#3d2830,#5a1e2e);}
+.c8{background:linear-gradient(135deg,#C9A84C,#a08030);}
+.c9{background:linear-gradient(135deg,#2d1f24,#7B2D42);}
+.c10{background:linear-gradient(135deg,#5a1e2e,#C9A84C);}
+
+@media(max-width:900px){.masonry{columns:2;}}
+@media(max-width:500px){.masonry{columns:2;column-gap:6px;}.masonry-item{margin-bottom:6px;}}
+
+/* ── SEPARADOR ── */
+.cat-divider{margin:60px 60px 0;border:none;border-top:1px solid var(--sand);}
+@media(max-width:768px){.cat-divider{margin:40px 24px 0;}}
+
+/* ── LIGHTBOX ── */
+.lightbox{display:none;position:fixed;inset:0;z-index:1000;background:rgba(26,10,15,.95);align-items:center;justify-content:center;}
+.lightbox.open{display:flex;}
+#lb-img{max-width:90vw;max-height:88vh;object-fit:contain;border-radius:4px;}
+.lb-x{position:absolute;top:24px;right:32px;font-size:36px;color:var(--cream);background:none;border:none;cursor:pointer;opacity:.6;line-height:1;transition:opacity .2s;}
+.lb-x:hover{opacity:1;}
+.lb-arr{position:absolute;top:50%;transform:translateY(-50%);font-size:52px;color:var(--cream);background:none;border:none;cursor:pointer;opacity:.35;padding:12px;transition:opacity .2s;}
+.lb-arr:hover{opacity:1;}
+.lb-prev{left:8px;}
+.lb-next{right:8px;}
+.lb-cat{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.4);}
+
+/* ── CTA ── */
+.gal-cta{text-align:center;padding:80px 60px;}
+.gal-cta p{font-family:'Lora',serif;font-style:italic;font-size:18px;color:var(--muted);margin-bottom:28px;}
+.gal-cta a{display:inline-block;font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--cream);background:var(--wine);padding:18px 48px;text-decoration:none;transition:background .3s;}
+.gal-cta a:hover{background:var(--wine2);}
+
+/* ── FOOTER ── */
+footer{background:var(--dark);padding:48px 60px;text-align:center;}
+.ft-logo{font-family:'Cormorant Garamond',serif;font-size:32px;letter-spacing:8px;color:var(--cream);margin-bottom:8px;}
+.ft-logo span{color:var(--gold);}
+.ft-tag{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:24px;opacity:.7;}
+.ft-copy{font-size:10px;color:var(--gray);letter-spacing:1px;}
+@media(max-width:768px){footer{padding:40px 24px;}.gal-cta{padding:60px 24px;}}
+
+/* ── REVEAL ── */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.visible{opacity:1;transform:none;}
+
+/* ── WHATSAPP FLOTANTE ── */
+.wa-float{position:fixed;bottom:32px;right:32px;z-index:9999;display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
+.wa-bubble{background:white;border:1px solid rgba(185,148,56,.25);box-shadow:0 8px 32px rgba(123,45,66,.15);padding:14px 20px;font-family:'Lora',serif;font-style:italic;font-size:13px;color:var(--wine);opacity:0;transform:translateY(8px) scale(.97);transition:all .3s ease;pointer-events:none;white-space:nowrap;position:relative;}
+.wa-bubble::after{content:'';position:absolute;bottom:-8px;right:22px;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:8px solid white;}
+.wa-float:hover .wa-bubble,.wa-float.open .wa-bubble{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
+.wa-btn{width:60px;height:60px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.4);cursor:pointer;text-decoration:none;transition:transform .3s,box-shadow .3s;animation:wa-pulse 2.5s infinite;border:3px solid white;}
+.wa-btn:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(37,211,102,.5);animation:none;}
+@keyframes wa-pulse{0%,100%{box-shadow:0 4px 20px rgba(37,211,102,.4);}50%{box-shadow:0 4px 30px rgba(37,211,102,.7),0 0 0 10px rgba(37,211,102,.08);}}
+@media(max-width:600px){.wa-float{bottom:20px;right:20px;}.wa-btn{width:54px;height:54px;}}
+</style>
+</head>
+<body>
+
+<nav id="navbar">
+  <a href="/" class="nav-logo">D<span>·</span>EMIR</a>
+  <a href="/#galeria" class="nav-back">← Volver al inicio</a>
+</nav>
+
+<!-- HERO -->
+<div class="gal-hero">
+  <div class="gal-hero-eyebrow">Momentos que perduran</div>
+  <h1 class="gal-hero-title">Nuestra Galería</h1>
+  <div class="gal-hero-sub">Cada boda, una historia única</div>
+</div>
+
+<!-- ══ CATEGORÍA 1: CEREMONIA ══════════════════════════════════════ -->
+<div class="cat-section">
+  <div class="cat-label reveal">01</div>
+  <div class="cat-title reveal">Ceremonia</div>
+  <div class="masonry reveal">
+    <div class="masonry-item" onclick="openLb(0)">
+      <div class="masonry-ph ph-xl c1"><span class="masonry-ph-icon">📷</span><span class="masonry-ph-label">Tu foto aquí</span></div>
+      <div class="masonry-overlay"><span class="masonry-lbl">El altar</span></div>
+    </div>
+    <div class="masonry-item" onclick="openLb(1)">
+      <div class="masonry-ph ph-md c2"><span class="masonry-ph-icon">📷</span><span class="masonry-ph-label">Tu foto aquí</span></div>
+      <div class="masonry-overlay"><span class="masonry-lbl">Los votos</span></div>
+    </div>
+    <div class="masonry-item" onclick="openLb(2)">
+      <div class="masonry-ph ph-lg c3"><span class="masonry-ph-icon">📷</span><span class="masonry-ph-label">Tu foto aquí</span></div>
+      <div class="masonry-overlay"><span class="masonry-lbl">El beso</span></div>
+    </div>
+    <div class="masonry-item" onclick="openLb(3)">
+      <div class="masonry-ph ph-sm c4"><span class="masonry-ph-icon">📷</span><span class="masonry-ph-label">Tu foto aquí</span></div>
+      <div class="masonry-overlay"><span class="masonry-lbl">La salida</span></div>
+    </div>
+    <div class="masonry-item" onclick="openLb(4)">
+      <div class="masonry-ph ph-md c5"><span class="masonry-ph-icon">📷</span><span class="masonry-ph-label">Tu foto aquí</span></div>
+      <div class="masonry-overlay"><span class="masonry-lbl">Decoración</span></div>
+    </div>
+  </div>
+</div>
+
+<hr class="cat-divider">
+
+<!-- ══ CATEGORÍA 2: RECEPCIÓN ══════════════════════════════════════ -->
+<div class="cat-section">
+  <div class="cat-label reveal">02</div>
+  <div class="cat-title reveal">Recepción</div>
+  <div class="masonry reveal">
+    <div class="masonry-item" onclick="openLb(5)">
+      <div class="masonry-ph ph-lg c6"><span class="masonry-ph-icon">📷</span><span class="masonry-ph-label">Tu foto aquí</span></div>
+      <div class="masonry-overlay"><span class="masonry-lbl">El salón</span></div>
+    </div>
+    <div class="masonry-item" onclick="openLb(6)">
+      <div class="masonry-ph ph-xl c7"><span class="masonry-ph-icon">📷</span><span class="masonry-ph-label">Tu foto aquí</span></div>
+      <div class="masonry-overlay"><span class="masonry-lbl">Primer vals</span></div>
+    </div>
+    <div class="masonry-item" onclick="openLb(7)">
+      <div class="masonry-ph ph-sm c8"><span class="masonry-ph-icon">📷</span><span class="masonry-ph-label">Tu foto aquí</span></div>
+      <div class="masonry-overlay"><span class="masonry-lbl">El brindis</span></div>
+    </div>
+    <div class="masonry-item" onclick="openLb(8)">
+      <div class="masonry-ph ph-md c9"><span class="masonry-ph-icon">📷</span><span class="masonry-ph-label">Tu foto aquí</span></div>
+      <div class="masonry-overlay"><span class="masonry-lbl">La mesa</span></div>
+    </div>
+    <div class="masonry-item" onclick="openLb(9)">
+      <div class="masonry-ph ph-lg c10"><span class="masonry-ph-icon">📷</span><span class="masonry-ph-label">Tu foto aquí</span></div>
+      <div class="masonry-overlay"><span class="masonry-lbl">El pastel</span></div>
+    </div>
+  </div>
+</div>
+
+<hr class="cat-divider">
+
+<!-- ══ CATEGORÍA 3: GETTING READY ══════════════════════════════════ -->
+<div class="cat-section">
+  <div class="cat-label reveal">03</div>
+  <div class="cat-title reveal">Getting Ready</div>
+  <div class="masonry reveal">
+    <div class="masonry-item" onclick="openLb(10)">
+      <img src="getting-ready-1.jpg" alt="Getting Ready · El vestido">
+      <div class="masonry-overlay"><span class="masonry-lbl">El vestido</span></div>
+    </div>
+    <div class="masonry-item" onclick="openLb(11)">
+      <img src="getting-ready-2.jpg" alt="Getting Ready · Maquillaje">
+      <div class="masonry-overlay"><span class="masonry-lbl">Maquillaje</span></div>
+    </div>
+    <div class="masonry-item" onclick="openLb(12)">
+      <div class="masonry-ph ph-lg c5"><span class="masonry-ph-icon">📷</span><span class="masonry-ph-label">Tu foto aquí</span></div>
+      <div class="masonry-overlay"><span class="masonry-lbl">Peinado</span></div>
+    </div>
+    <div class="masonry-item" onclick="openLb(13)">
+      <div class="masonry-ph ph-md c3"><span class="masonry-ph-icon">📷</span><span class="masonry-ph-label">Tu foto aquí</span></div>
+      <div class="masonry-overlay"><span class="masonry-lbl">Los accesorios</span></div>
+    </div>
+    <div class="masonry-item" onclick="openLb(14)">
+      <div class="masonry-ph ph-xl c7"><span class="masonry-ph-icon">📷</span><span class="masonry-ph-label">Tu foto aquí</span></div>
+      <div class="masonry-overlay"><span class="masonry-lbl">Las damas</span></div>
+    </div>
+  </div>
+</div>
+
+<hr class="cat-divider">
+
+<!-- ══ CATEGORÍA 4: DETALLES ══════════════════════════════════════ -->
+<div class="cat-section">
+  <div class="cat-label reveal">04</div>
+  <div class="cat-title reveal">Detalles</div>
+  <div class="masonry reveal">
+    <div class="masonry-item" onclick="openLb(15)">
+      <div class="masonry-ph ph-md c8"><span class="masonry-ph-icon">📷</span><span class="masonry-ph-label">Tu foto aquí</span></div>
+      <div class="masonry-overlay"><span class="masonry-lbl">El ramo</span></div>
+    </div>
+    <div class="masonry-item" onclick="openLb(16)">
+      <div class="masonry-ph ph-xl c1"><span class="masonry-ph-icon">📷</span><span class="masonry-ph-label">Tu foto aquí</span></div>
+      <div class="masonry-overlay"><span class="masonry-lbl">Centros de mesa</span></div>
+    </div>
+    <div class="masonry-item" onclick="openLb(17)">
+      <div class="masonry-ph ph-lg c6"><span class="masonry-ph-icon">📷</span><span class="masonry-ph-label">Tu foto aquí</span></div>
+      <div class="masonry-overlay"><span class="masonry-lbl">Decoración floral</span></div>
+    </div>
+    <div class="masonry-item" onclick="openLb(18)">
+      <div class="masonry-ph ph-sm c9"><span class="masonry-ph-icon">📷</span><span class="masonry-ph-label">Tu foto aquí</span></div>
+      <div class="masonry-overlay"><span class="masonry-lbl">Los anillos</span></div>
+    </div>
+    <div class="masonry-item" onclick="openLb(19)">
+      <div class="masonry-ph ph-md c10"><span class="masonry-ph-icon">📷</span><span class="masonry-ph-label">Tu foto aquí</span></div>
+      <div class="masonry-overlay"><span class="masonry-lbl">Papelería</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="gal-cta">
+  <p>¿Lista para crear tu historia?</p>
+  <a href="/#contacto">Agenda tu consulta gratuita</a>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lb-x" onclick="closeLb()">×</button>
+  <button class="lb-arr lb-prev" onclick="navLb(-1)">‹</button>
+  <img id="lb-img" src="" alt="">
+  <button class="lb-arr lb-next" onclick="navLb(1)">›</button>
+  <div class="lb-cat" id="lb-cat"></div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-logo">D<span>·</span>EMIR</div>
+  <div class="ft-tag">Wedding &amp; Event Planner</div>
+  <p class="ft-copy">© 2025 DEMIR Wedding &amp; Event Planner · Todos los derechos reservados</p>
+</footer>
+
+<!-- BOTÓN FLOTANTE WHATSAPP -->
+<div class="wa-float" id="waFloat">
+  <div class="wa-bubble">¿Hablamos de tu boda? 💍</div>
+  <a class="wa-btn"
+     href="https://wa.me/522214306593?text=Hola%20DEMIR%2C%20me%20gustar%C3%ADa%20platicar%20sobre%20mi%20boda%20%F0%9F%92%8D"
+     target="_blank"
+     aria-label="Contactar por WhatsApp">
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="white">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+    </svg>
+  </a>
+</div>
+
+<script>
+// Nav scroll
+const nav = document.getElementById('navbar');
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 60));
+
+// Reveal on scroll
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, {threshold:0.08});
+reveals.forEach(el => observer.observe(el));
+
+// Fotos reales — agrega aquí cada foto cuando la subas a GitHub
+const fotos = {
+  10: 'getting-ready-1.jpg',
+  11: 'getting-ready-2.jpg'
+  // Cuando subas más fotos, agrega así:
+  // 0: 'ceremonia-1.jpg',
+  // 1: 'ceremonia-2.jpg',
+  // etc.
+};
+
+const labels = [
+  'Ceremonia · El altar','Ceremonia · Los votos','Ceremonia · El beso','Ceremonia · La salida','Ceremonia · Decoración',
+  'Recepción · El salón','Recepción · Primer vals','Recepción · El brindis','Recepción · La mesa','Recepción · El pastel',
+  'Getting Ready · El vestido','Getting Ready · Maquillaje','Getting Ready · Peinado','Getting Ready · Accesorios','Getting Ready · Las damas',
+  'Detalles · El ramo','Detalles · Centros de mesa','Detalles · Decoración floral','Detalles · Los anillos','Detalles · Papelería'
+];
+let cur = 0;
+const total = 20;
+
+function openLb(i) {
+  if(!fotos[i]) return; // Solo abre lightbox si hay foto real
+  cur = i;
+  const lb = document.getElementById('lightbox');
+  const img = document.getElementById('lb-img');
+  const cat = document.getElementById('lb-cat');
+  img.src = fotos[i];
+  cat.textContent = labels[i] || '';
+  lb.classList.add('open');
+}
+function closeLb() { document.getElementById('lightbox').classList.remove('open'); }
+function navLb(dir) {
+  let next = (cur + dir + total) % total;
+  // Busca la siguiente foto real
+  for(let i=0;i<total;i++){
+    if(fotos[next]) { openLb(next); return; }
+    next = (next + dir + total) % total;
+  }
+}
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') closeLb();
+  if(e.key === 'ArrowLeft') navLb(-1);
+  if(e.key === 'ArrowRight') navLb(1);
+});
+
+// Mostrar burbuja WhatsApp después de 3 segundos
+setTimeout(() => {
+  document.getElementById('waFloat').classList.add('open');
+  setTimeout(() => document.getElementById('waFloat').classList.remove('open'), 4000);
+}, 3000);
+</script>
+</body>
+</html>
