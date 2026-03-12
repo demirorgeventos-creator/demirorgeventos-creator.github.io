@@ -904,12 +904,21 @@ function renderCouplesList(){
 function saveCouples(){ localStorage.setItem('demir_couples',JSON.stringify(couples)); }
 
 function exportCouples(){
+  if(!couples.length){ alert('No hay parejas configuradas'); return; }
   const code = btoa(unescape(encodeURIComponent(JSON.stringify(couples))));
   const box = document.getElementById('import-box');
   box.value = code;
-  box.select();
-  try { document.execCommand('copy'); alert('✅ Código copiado. Pégalo en el otro dispositivo.'); }
-  catch(e) { alert('Selecciona el texto del cuadro y cópialo manualmente.'); }
+  // Intentar copiar al portapapeles
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(code)
+      .then(() => alert('✅ Código copiado al portapapeles.\nTambién aparece en el cuadro de texto por si acaso.'))
+      .catch(() => alert('El código aparece en el cuadro de texto.\nSelecciónalo todo y cópialo manualmente.'));
+  } else {
+    try { box.select(); document.execCommand('copy'); alert('✅ Código copiado.\nTambién aparece en el cuadro de texto.'); }
+    catch(e) { alert('El código aparece en el cuadro de texto.\nMantenlo presionado para copiar todo.'); }
+  }
+  // Scroll hasta el cuadro para que lo vea
+  box.scrollIntoView({behavior:'smooth', block:'center'});
 }
 
 function importCouples(){
@@ -939,4 +948,3 @@ function cleanUrl(url){
 </script>
 </body>
 </html>
-
