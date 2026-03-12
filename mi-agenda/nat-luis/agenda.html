@@ -1403,9 +1403,9 @@ function renderInvitados(){
     <div class="inv-stat"><span class="n" style="color:var(--wine)">${foraneo}</span><span class="l">Foráneos</span></div>`;
 
   const tbl=document.getElementById('invTable'); tbl.innerHTML='';
-  const cols='2fr 1.8fr 0.7fr 1fr 1fr 1fr 36px';
+  const cols='2fr 1.8fr 0.7fr 1fr 1.2fr 1fr 1fr 36px';
   const hdr=document.createElement('div'); hdr.className='trow hdr'; hdr.style.gridTemplateColumns=cols;
-  ['Nombre','Acompañantes','#','Menú','Confirmación','Tipo',''].forEach(h=>{
+  ['Nombre','Acompañantes','#','Menú','Teléfono','Confirmación','Tipo',''].forEach(h=>{
     const c=document.createElement('div');c.className='tcell';c.textContent=h;hdr.appendChild(c);
   });
   tbl.appendChild(hdr);
@@ -1436,6 +1436,11 @@ function renderInvitados(){
     const mnc=document.createElement('div'); mnc.className='tcell';
     const mne=document.createElement('span'); mne.contentEditable=true; mne.setAttribute('data-ph','Menú…');
     mne.textContent=inv.menu||''; mne.oninput=()=>{inv.menu=mne.textContent;}; mnc.appendChild(mne); row.appendChild(mnc);
+    // Teléfono
+    const telc=document.createElement('div'); telc.className='tcell';
+    const tele=document.createElement('span'); tele.contentEditable=true; tele.setAttribute('data-ph','Tel…');
+    tele.style.cssText='font-size:11px;color:var(--muted);';
+    tele.textContent=inv.tel||''; tele.oninput=()=>{inv.tel=tele.textContent;}; telc.appendChild(tele); row.appendChild(telc);
     // Confirmación
     const cc=document.createElement('div'); cc.className='tcell';
     const [ccls,clbl]=CONF_CYCLE.find(x=>x[0]===inv.confirmacion)||CONF_CYCLE[0];
@@ -1464,13 +1469,67 @@ function exportInvitadosXLSX(){
   const novia=S.expediente.novios.find(x=>x.key==='Nombre Novia')?.val||'Novia';
   const novio=S.expediente.novios.find(x=>x.key==='Nombre Novio')?.val||'Novio';
   const confMap={'s-ok':'Confirmado','s-init':'Pendiente','s-pend':'No asiste','s-nd':'Por definir'};
-  const headers=['Nombre','Acompanantes','Mesa','Personas','Menu especial','Confirmacion','Tipo'];
+  const headers=['Nombre','Acompanantes','Mesa','Personas','Menu especial','Telefono','Confirmacion','Tipo'];
   const rows=S.invitados.length>0
-    ?S.invitados.map(i=>[i.nombre||'',i.acompanantes||'',i.mesa||'',Number(i.adultos)||1,i.menu||'',confMap[i.confirmacion]||'Pendiente',i.tipo||'local'])
+    ?S.invitados.map(i=>[i.nombre||'',i.acompanantes||'',i.mesa||'',Number(i.adultos)||1,i.menu||'',i.tel||'',confMap[i.confirmacion]||'Pendiente',i.tipo||'local'])
     :[];
   const wb=XLSX.utils.book_new();
-  const ws=XLSX.utils.aoa_to_sheet([headers,...rows]);
-  ws['!cols']=[{wch:28},{wch:30},{wch:10},{wch:10},{wch:18},{wch:16},{wch:10}];
+
+  // ── Estilos DEMIR ──
+  const WINE='7B2D42', GOLD='B99438', GOLD_L='D4B96A', CREAM='FAF6F0', CREAM2='F2EBE0', WHITE='FFFFFF', DARK='3A2028', GRAY='8A7070';
+  function mkFill(hex){return{patternType:'solid',fgColor:{rgb:hex}}}
+  function mkFont(hex,bold,sz){return{color:{rgb:hex},bold:!!bold,sz:sz||10,name:'Arial'}}
+  function mkBorder(hex){const s={style:'thin',color:{rgb:hex}};return{top:s,bottom:s,left:s,right:s}}
+  function mkAlign(h,v){return{horizontal:h||'left',vertical:v||'center',wrapText:true}}
+
+  const ws=XLSX.utils.aoa_to_sheet([]);
+
+  // Fila 1 — Título DEMIR
+  XLSX.utils.sheet_add_aoa(ws,[['D · E M I R   —   LISTA DE INVITADOS','','','','','','','']], {origin:'A1'});
+  if(!ws['!merges']) ws['!merges']=[];
+  ws['!merges'].push({s:{r:0,c:0},e:{r:0,c:7}});
+  ws['A1'].s={fill:mkFill(WINE),font:mkFont(WHITE,true,16),alignment:mkAlign('center','center')};
+
+  // Fila 2 — Subtítulo
+  XLSX.utils.sheet_add_aoa(ws,[['Wedding & Event Planner  ·  '+novia+' & '+novio,'','','','','','','']], {origin:'A2'});
+  ws['!merges'].push({s:{r:1,c:0},e:{r:1,c:7}});
+  ws['A2'].s={fill:mkFill(WINE),font:{color:{rgb:GOLD_L},sz:10,italic:true,name:'Arial'},alignment:mkAlign('center','center')};
+
+  // Fila 3 — vacía
+  XLSX.utils.sheet_add_aoa(ws,[['','','','','','','','']], {origin:'A3'});
+  const fila3=['A3','B3','C3','D3','E3','F3','G3','H3'];
+  fila3.forEach(ref=>{if(!ws[ref])ws[ref]={t:'s',v:''};ws[ref].s={fill:mkFill('F5F0EA')}});
+
+  // Fila 4 — Headers de tabla
+  const hRow=headers;
+  XLSX.utils.sheet_add_aoa(ws,[hRow], {origin:'A4'});
+  ['A4','B4','C4','D4','E4','F4','G4','H4'].forEach((ref,i)=>{
+    if(!ws[ref])ws[ref]={t:'s',v:hRow[i]||''};
+    ws[ref].s={fill:mkFill(WINE),font:mkFont(WHITE,true,10),alignment:mkAlign('center','center'),border:mkBorder(GOLD_L)};
+  });
+
+  // Filas de datos
+  rows.forEach((row,ri)=>{
+    const exRow=ri+4; // 0-indexed: fila 5 en Excel
+    XLSX.utils.sheet_add_aoa(ws,[row],{origin:{r:exRow,c:0}});
+    const bg=ri%2===0?CREAM:CREAM2;
+    const confColors={'Confirmado':{bg:'D4EDDA',fg:'1A5E2A'},'Pendiente':{bg:'FFF3CD',fg:'856404'},'No asiste':{bg:'F8D7DA',fg:'721C24'},'Por definir':{bg:CREAM2,fg:GRAY}};
+    row.forEach((val,ci)=>{
+      const ref=XLSX.utils.encode_cell({r:exRow,c:ci});
+      if(!ws[ref])ws[ref]={t:'s',v:String(val)};
+      const isConf=ci===6;
+      const cc=isConf&&confColors[val]?confColors[val]:null;
+      ws[ref].s={
+        fill:mkFill(cc?cc.bg:bg),
+        font:mkFont(cc?cc.fg:DARK,cc,9),
+        alignment:mkAlign(ci>1?'center':'left','center'),
+        border:mkBorder(GOLD_L)
+      };
+    });
+  });
+
+  ws['!cols']=[{wch:28},{wch:28},{wch:8},{wch:10},{wch:18},{wch:14},{wch:14},{wch:10}];
+  ws['!rows']=[{hpt:36},{hpt:20},{hpt:8},{hpt:28}];
   XLSX.utils.book_append_sheet(wb,ws,'Invitados');
   const fname=S.invitados.length>0
     ?'Invitados_'+novia.replace(/\s/g,'_')+'_'+novio.replace(/\s/g,'_')+'.xlsx'
@@ -1527,21 +1586,28 @@ function importInvitadosXLSX(input){
 
   function processRows(rows){
     let dataStart=0;
+    let headers=[];
     for(let i=0;i<Math.min(rows.length,5);i++){
-      if(norm(rows[i][0]).startsWith('nombre')){dataStart=i+1;break;}
+      if(norm(rows[i][0]).startsWith('nombre')){dataStart=i+1;headers=rows[i];break;}
     }
     const imported=[];
     for(let i=dataStart;i<rows.length;i++){
       const row=rows[i];
       const nombre=String(row[0]||'').trim();
       if(!nombre) continue;
+      // Detectar si hay columna Teléfono (col 5) o no (formato anterior sin tel)
+      const hasTel=headers.length>=7||String(headers[5]||'').toLowerCase().includes('tel')||String(headers[5]||'').toLowerCase().includes('fono');
+      const telIdx=hasTel?5:-1;
+      const confIdx=hasTel?6:5;
+      const tipoIdx=hasTel?7:6;
       imported.push({id:uid(),nombre,
         acompanantes:String(row[1]||'').trim(),
         mesa:String(row[2]||'').trim(),
         adultos:parseInt(row[3])||1,
         menu:String(row[4]||'').trim(),
-        confirmacion:confMap[norm(row[5])]||'s-init',
-        tipo:norm(row[6]).includes('foraneo')?'foraneo':'local'
+        tel:telIdx>=0?String(row[telIdx]||'').trim():'',
+        confirmacion:confMap[norm(row[confIdx])]||'s-init',
+        tipo:norm(row[tipoIdx]||'').includes('foraneo')?'foraneo':'local'
       });
     }
     if(!imported.length){alert('No se encontraron invitados.\nVerifica que los nombres estén en la columna A desde la fila 2.');return;}
@@ -1734,6 +1800,7 @@ function openModal(type){
       <div class="mf"><label>Acompañantes (separados por coma)</label><input id="mf2" placeholder="Ej. María López, Juan Pérez"></div>
       <div class="mf"><label>Mesa #</label><input id="mf3" placeholder="1"></div>
       <div class="mf"><label>Menú especial</label><input id="mf4" placeholder="Vegetariano, Sin gluten…"></div>
+      <div class="mf"><label>Teléfono</label><input id="mf6" placeholder="222 123 4567" type="tel"></div>
       <div class="mf"><label>Tipo</label>
         <select id="mf5" style="width:100%;padding:10px;border:1px solid var(--sand);border-radius:10px;font-size:14px;background:white;">
           <option value="local">📍 Local</option>
@@ -1788,7 +1855,7 @@ function saveModal(){
     if(document.getElementById('view-proveedores').classList.contains('active')) renderProveedores();
   } else if(_modalType==='addInvitado'){
     const sel5=document.getElementById('mf5');
-    S.invitados.push({id:uid(),nombre:v('mf1'),acompanantes:v('mf2'),mesa:v('mf3'),adultos:1,menu:v('mf4'),confirmacion:'s-init',tipo:sel5?sel5.value:'local'});
+    S.invitados.push({id:uid(),nombre:v('mf1'),acompanantes:v('mf2'),mesa:v('mf3'),adultos:1,menu:v('mf4'),tel:v('mf6'),confirmacion:'s-init',tipo:sel5?sel5.value:'local'});
     renderInvitados();
   } else if(_modalType==='addProveedor'){
     const provId=uid();
