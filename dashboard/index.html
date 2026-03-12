@@ -684,12 +684,27 @@ function getCalEvents(){
       }
     }
   });
-  // Own tasks
+  // Own tasks (con fecha asignada)
   ownTasks.forEach(t=>{
     if(t.date){
       const td=new Date(t.date+'T12:00:00'), key=td.toDateString();
       if(!evs[key]) evs[key]=[];
       evs[key].push({type:'own',name:t.text,couple:'DEMIR',color:CHIP_COLORS[1],done:t.done});
+    }
+  });
+  // Tareas del Planner Diario del dashboard (plannerData)
+  // keys formato: "año-mes(0-idx)-día"  ej: "2026-2-11"
+  Object.entries(plannerData).forEach(([k, val])=>{
+    if(k.startsWith('obj-')) return; // saltar objetivos del mes
+    const parts = k.split('-');
+    if(parts.length === 3 && val && val.tasks){
+      const pending = val.tasks.filter(t => t && !t.done && t.text && t.text.trim());
+      if(pending.length > 0){
+        const td = new Date(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]));
+        const key = td.toDateString();
+        if(!evs[key]) evs[key]=[];
+        evs[key].push({type:'task', name:pending[0].text, couple:'DEMIR', color:CHIP_COLORS[1], done:false});
+      }
     }
   });
   return evs;
@@ -824,7 +839,7 @@ window.addTask = () => {
   savePlanner(); renderTasks();
 };
 
-function savePlanner(){ localStorage.setItem('demir_planner', JSON.stringify(plannerData)); }
+function savePlanner(){ localStorage.setItem('demir_planner', JSON.stringify(plannerData)); if(currentTab==='calendario') renderCal(); }
 
 // Pendientes de parejas para el día seleccionado en el planner
 function renderPendParejasHoy(){
@@ -1033,4 +1048,3 @@ function cleanUrl(url){
 </script>
 </body>
 </html>
-
