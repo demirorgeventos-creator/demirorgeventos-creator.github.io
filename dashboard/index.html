@@ -127,6 +127,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
 .cal-day.other{color:#ccc;}
 .cal-day.has-boda{background:var(--gold-lt);color:var(--wine);font-weight:700;}
 .cal-day.has-event::after{content:'';position:absolute;bottom:2px;width:4px;height:4px;background:var(--gold);border-radius:50%;}
+.cal-day.has-task::after{content:'';position:absolute;bottom:3px;right:calc(50% + 2px);width:5px;height:5px;background:var(--gold);border-radius:50%;}
+.cal-day.has-deadline::before{content:'';position:absolute;bottom:3px;left:calc(50% + 2px);width:5px;height:5px;background:#7B2D42;border-radius:50%;}
+.cal-day.has-task.has-deadline::after{right:calc(50% + 3px);}
+.cal-day.has-task.has-deadline::before{left:calc(50% + 3px);}
+.cal-legend{display:flex;gap:16px;justify-content:center;margin-top:10px;flex-wrap:wrap;}
+.cal-legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);letter-spacing:1px;}
+.cal-legend-dot{width:7px;height:7px;border-radius:50%;}
 .cal-legend{display:flex;gap:14px;font-size:9px;color:var(--muted);padding:0 2px;flex-wrap:wrap;}
 .cal-legend span{display:flex;align-items:center;gap:4px;}
 .cal-legend i{display:inline-block;width:7px;height:7px;border-radius:50%;}
@@ -631,19 +638,39 @@ function getCalEvents(){
       if(!evs[key]) evs[key]=[];
       evs[key].push({type:'boda',name:c.names,color:CHIP_COLORS[ci%CHIP_COLORS.length]});
     }
-    // Firebase tasks
+    // Firebase tasks del planner diario
     const fb = firebaseTasks[ci];
     if(fb){
-      Object.values(fb).forEach(dayArr=>{
-        if(!Array.isArray(dayArr)) return;
-        dayArr.forEach(t=>{
-          if(t.date){
-            const td=new Date(t.date+'T12:00:00'), key=td.toDateString();
-            if(!evs[key]) evs[key]=[];
-            evs[key].push({type:'task',name:t.text,couple:c.names,color:CHIP_COLORS[ci%CHIP_COLORS.length],done:t.done});
+      // Tareas del planner (keys tipo "2026-3-15")
+      Object.entries(fb).forEach(([k, val])=>{
+        if(Array.isArray(val)){
+          // Planner diario — punto dorado
+          const parts=k.split('-');
+          if(parts.length===3){
+            const pending = val.filter(t=>!t.done);
+            if(pending.length>0){
+              const td=new Date(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2]));
+              const key=td.toDateString();
+              if(!evs[key]) evs[key]=[];
+              evs[key].push({type:'task',name:pending[0].text,couple:c.names,color:CHIP_COLORS[ci%CHIP_COLORS.length],done:false});
+            }
           }
-        });
+        }
       });
+      // Checklist deadlines — punto vino
+      if(fb.checklist){
+        Object.values(fb.checklist).forEach(section=>{
+          if(!section || !section.items) return;
+          Object.values(section.items).forEach(item=>{
+            if(item && item.deadline && !item.done){
+              const td=new Date(item.deadline+'T12:00:00');
+              const key=td.toDateString();
+              if(!evs[key]) evs[key]=[];
+              evs[key].push({type:'deadline',name:item.text,couple:c.names,color:'#7B2D42'});
+            }
+          });
+        });
+      }
     }
   });
   // Own tasks
@@ -679,11 +706,14 @@ function renderCal(){
   for(let day=1;day<=dim;day++){
     const dt=new Date(y,m,day), key=dt.toDateString();
     const ev=calEvents[key]||[];
-    const hasBoda=ev.some(e=>e.type==='boda'), hasEv=ev.length>0;
+    const hasBoda=ev.some(e=>e.type==='boda');
+    const hasTask=ev.some(e=>e.type==='task'||e.type==='own');
+    const hasDeadline=ev.some(e=>e.type==='deadline');
     const d=document.createElement('div'); d.className='cal-day'; d.textContent=day;
     if(dt.getTime()===today.getTime()) d.classList.add('today');
     else if(hasBoda) d.classList.add('has-boda');
-    else if(hasEv) d.classList.add('has-event');
+    if(hasTask) d.classList.add('has-task');
+    if(hasDeadline) d.classList.add('has-deadline');
     // Al tocar un día → ir al planner con esa fecha
     d.onclick=()=>{
       dailyDate=new Date(y,m,day);
@@ -693,6 +723,20 @@ function renderCal(){
   }
   const tot=first+dim, rem=tot%7===0?0:7-(tot%7);
   for(let i=1;i<=rem;i++){const d=document.createElement('div');d.className='cal-day other';d.textContent=i;grid.appendChild(d);}
+
+  // Leyenda
+  let leg = document.getElementById('calLegend');
+  if(!leg){
+    leg = document.createElement('div');
+    leg.id = 'calLegend';
+    leg.className = 'cal-legend';
+    leg.innerHTML = `
+      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--gold)"></div>Tareas pendientes</div>
+      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#7B2D42"></div>Fecha límite</div>
+      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--gold-lt);border:1px solid var(--gold);"></div>Boda</div>
+    `;
+    grid.parentElement.appendChild(leg);
+  }
 }
 
 // ══ PLANNER DIARIO ════════════════════════════════════════
@@ -977,3 +1021,4 @@ function cleanUrl(url){
 </script>
 </body>
 </html>
+
