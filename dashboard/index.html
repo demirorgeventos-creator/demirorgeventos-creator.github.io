@@ -423,60 +423,69 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
       <div style="margin-top:16px;">
 
         <!-- Tarjetas resumen -->
-        <div class="stats-row" id="ing-stats-row">
+        <div class="stats-row">
           <div class="stat-box"><div class="n" id="ing-total" style="color:var(--gold);">$0</div><div class="l">Total cobrado</div></div>
           <div class="stat-box"><div class="n" id="ing-pendiente" style="color:var(--wine);">$0</div><div class="l">Por cobrar</div></div>
-          <div class="stat-box"><div class="n" id="ing-comisiones" style="color:#6B8F71;">$0</div><div class="l">Comisiones</div></div>
-          <div class="stat-box"><div class="n" id="ing-otros" style="color:#7B68EE;">$0</div><div class="l">Otros</div></div>
         </div>
 
-        <!-- Agregar ingreso -->
-        <div class="add-section" style="margin-top:16px;">
-          <span class="add-eye">Registrar movimiento</span>
-          <div class="add-title-lbl">Nuevo <em>ingreso</em></div>
+        <!-- Tabla de conceptos — estilo Finanzas -->
+        <div class="sec-hdr" style="margin-top:16px;">
+          <span class="sec-eye-lbl">Mis servicios y comisiones</span>
+          <div class="sec-title">Ingresos <em>DEMIR</em></div>
+        </div>
+
+        <!-- Cabecera tabla -->
+        <div style="background:var(--wine);border-radius:12px 12px 0 0;padding:10px 14px;display:grid;grid-template-columns:2fr 1.2fr 1fr 1fr 1.2fr 36px;gap:8px;align-items:center;">
+          <span style="color:white;font-size:10px;letter-spacing:1.5px;font-weight:700;">CONCEPTO / PAREJA</span>
+          <span style="color:white;font-size:10px;letter-spacing:1.5px;font-weight:700;">SERVICIO</span>
+          <span style="color:white;font-size:10px;letter-spacing:1.5px;font-weight:700;text-align:right;">TOTAL</span>
+          <span style="color:white;font-size:10px;letter-spacing:1.5px;font-weight:700;text-align:right;">COBRADO</span>
+          <span style="color:white;font-size:10px;letter-spacing:1.5px;font-weight:700;text-align:center;">ESTADO</span>
+          <span></span>
+        </div>
+        <div id="ing-tabla" style="border:1px solid var(--sand);border-top:none;border-radius:0 0 12px 12px;overflow:hidden;margin-bottom:16px;"></div>
+
+        <!-- Agregar nuevo ingreso -->
+        <div class="add-section">
+          <span class="add-eye">Nuevo registro</span>
+          <div class="add-title-lbl">Agregar <em>ingreso</em></div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-            <div class="add-grp"><label>Pareja / Concepto</label><input type="text" id="ing-concepto" placeholder="Ej: Nat & Luis · Anticipo"></div>
-            <div class="add-grp"><label>Tipo</label>
-              <select id="ing-tipo" style="width:100%;padding:10px 12px;border:1px solid var(--sand);border-radius:10px;font-size:13px;background:white;color:var(--dark);">
-                <option value="anticipo">💍 Anticipo de pareja</option>
-                <option value="liquidacion">✅ Liquidación de pareja</option>
-                <option value="comision">🤝 Comisión proveedor</option>
-                <option value="otro">✨ Otro ingreso</option>
+            <div class="add-grp"><label>Pareja o fuente</label>
+              <input type="text" id="ing-pareja" placeholder="Ej: Nat &amp; Luis, Florería García…">
+            </div>
+            <div class="add-grp"><label>Servicio / Concepto</label>
+              <select id="ing-servicio" style="width:100%;padding:10px 12px;border:1px solid var(--sand);border-radius:10px;font-size:13px;background:white;color:var(--dark);">
+                <option value="Wedding Planner">💍 Wedding Planner</option>
+                <option value="Wedding Day">🌸 Wedding Day</option>
+                <option value="Coordinación">📋 Coordinación del día</option>
+                <option value="Asesoría">✨ Asesoría</option>
+                <option value="Comisión">🤝 Comisión proveedor</option>
+                <option value="Propina">🎁 Propina / Extra</option>
+                <option value="Otro">💫 Otro</option>
               </select>
             </div>
-            <div class="add-grp"><label>Monto ($)</label><input type="number" id="ing-monto" placeholder="0.00" min="0"></div>
-            <div class="add-grp"><label>Fecha</label><input type="date" id="ing-fecha"></div>
-            <div class="add-grp" style="grid-column:1/-1;"><label>Notas</label><input type="text" id="ing-notas" placeholder="Detalles opcionales…"></div>
-            <div class="add-grp" style="grid-column:1/-1;">
-              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                <input type="checkbox" id="ing-cobrado" checked style="width:16px;height:16px;accent-color:var(--wine);">
-                <span style="font-size:13px;">Ya lo cobré (desmarcar si está pendiente)</span>
-              </label>
+            <div class="add-grp"><label>Costo total del servicio ($)</label>
+              <input type="number" id="ing-total-srv" placeholder="0" min="0">
+            </div>
+            <div class="add-grp"><label>Anticipo recibido ($)</label>
+              <input type="number" id="ing-anticipo" placeholder="0" min="0">
+            </div>
+            <div class="add-grp"><label>Fecha</label>
+              <input type="date" id="ing-fecha">
+            </div>
+            <div class="add-grp"><label>Notas</label>
+              <input type="text" id="ing-notas" placeholder="Detalles opcionales…">
             </div>
           </div>
-          <button class="add-btn" onclick="addIngreso()">+ Registrar ingreso</button>
+          <button class="add-btn" onclick="addIngreso()">+ Agregar ingreso</button>
         </div>
 
-        <!-- Lista por pareja -->
-        <div class="sec-hdr" style="margin-top:20px;">
-          <span class="sec-eye-lbl">Desglose</span>
-          <div class="sec-title">Por <em>pareja</em></div>
-        </div>
-        <div id="ing-por-pareja"></div>
-
-        <!-- Lista por tipo -->
+        <!-- Resumen por servicio -->
         <div class="sec-hdr" style="margin-top:16px;">
           <span class="sec-eye-lbl">Desglose</span>
-          <div class="sec-title">Por <em>tipo</em></div>
+          <div class="sec-title">Por tipo de <em>servicio</em></div>
         </div>
-        <div id="ing-por-tipo"></div>
-
-        <!-- Todos los movimientos -->
-        <div class="sec-hdr" style="margin-top:16px;">
-          <span class="sec-eye-lbl">Historial completo</span>
-          <div class="sec-title">Todos los <em>ingresos</em></div>
-        </div>
-        <div class="pend-card" id="ing-lista"></div>
+        <div id="ing-por-servicio"></div>
 
       </div>
     </div>
@@ -1116,24 +1125,40 @@ function saveIngresos(){ localStorage.setItem('demir_ingresos', JSON.stringify(i
 
 function initIngFecha(){
   const f = document.getElementById('ing-fecha');
-  if(f && !f.value){ const t=new Date(); f.value=t.toISOString().split('T')[0]; }
+  if(f && !f.value){ f.value = new Date().toISOString().split('T')[0]; }
 }
 
+function fmtMXN(n){ return '$'+Number(n||0).toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+function fmtFechaIng(s){ if(!s) return ''; const [y,m,d]=s.split('-'); const ms=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']; return `${parseInt(d)} ${ms[parseInt(m)-1]} ${y}`; }
+
+const ING_SERVICIOS = {
+  'Wedding Planner': {emoji:'💍', color:'#F2C4CE', fg:'#7B2D42'},
+  'Wedding Day':     {emoji:'🌸', color:'#F9E4EE', fg:'#9C2752'},
+  'Coordinación':    {emoji:'📋', color:'#FFF3CD', fg:'#856404'},
+  'Asesoría':        {emoji:'✨', color:'#EDE7F6', fg:'#4527A0'},
+  'Comisión':        {emoji:'🤝', color:'#D4EDFC', fg:'#1A4A6E'},
+  'Propina':         {emoji:'🎁', color:'#D4EDDA', fg:'#1A5E2A'},
+  'Otro':            {emoji:'💫', color:'#F5F5F5', fg:'#555'},
+};
+
 function addIngreso(){
-  const concepto = document.getElementById('ing-concepto').value.trim();
-  const monto    = parseFloat(document.getElementById('ing-monto').value)||0;
-  const tipo     = document.getElementById('ing-tipo').value;
-  const fecha    = document.getElementById('ing-fecha').value;
-  const notas    = document.getElementById('ing-notas').value.trim();
-  const cobrado  = document.getElementById('ing-cobrado').checked;
-  if(!concepto){ document.getElementById('ing-concepto').focus(); return; }
-  if(!monto){ document.getElementById('ing-monto').focus(); return; }
-  ingresos.unshift({id:Date.now().toString(36)+Math.random().toString(36).substr(2,5), concepto, tipo, monto, fecha, notas, cobrado});
+  const pareja  = document.getElementById('ing-pareja').value.trim();
+  const servicio= document.getElementById('ing-servicio').value;
+  const total   = parseFloat(document.getElementById('ing-total-srv').value)||0;
+  const anticipo= parseFloat(document.getElementById('ing-anticipo').value)||0;
+  const fecha   = document.getElementById('ing-fecha').value;
+  const notas   = document.getElementById('ing-notas').value.trim();
+  if(!pareja){ document.getElementById('ing-pareja').focus(); return; }
+  if(!total){ document.getElementById('ing-total-srv').focus(); return; }
+  ingresos.unshift({
+    id: Date.now().toString(36)+Math.random().toString(36).substr(2,5),
+    pareja, servicio, total, cobrado: anticipo, fecha, notas
+  });
   saveIngresos();
-  document.getElementById('ing-concepto').value='';
-  document.getElementById('ing-monto').value='';
+  document.getElementById('ing-pareja').value='';
+  document.getElementById('ing-total-srv').value='';
+  document.getElementById('ing-anticipo').value='';
   document.getElementById('ing-notas').value='';
-  document.getElementById('ing-cobrado').checked=true;
   renderIngresos();
 }
 
@@ -1143,102 +1168,92 @@ function deleteIngreso(id){
   saveIngresos(); renderIngresos();
 }
 
-function toggleCobrado(id){
+function addPago(id){
+  const monto = parseFloat(prompt('¿Cuánto pagaron? ($)'));
+  if(!monto || isNaN(monto) || monto<=0) return;
   const ing = ingresos.find(i=>i.id===id);
-  if(ing){ ing.cobrado=!ing.cobrado; saveIngresos(); renderIngresos(); }
+  if(!ing) return;
+  ing.cobrado = Math.min(Number(ing.cobrado||0)+monto, Number(ing.total));
+  saveIngresos(); renderIngresos();
 }
 
-const ING_TIPOS = {
-  anticipo:    {lbl:'💍 Anticipo',    color:'#F2C4CE', fg:'#7B2D42'},
-  liquidacion: {lbl:'✅ Liquidación', color:'#D4EDDA', fg:'#1A5E2A'},
-  comision:    {lbl:'🤝 Comisión',    color:'#D4EDFC', fg:'#1A4A6E'},
-  otro:        {lbl:'✨ Otro',        color:'#EDE7F6', fg:'#4527A0'},
-};
-
-function fmtMXN(n){ return '$'+Number(n).toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0}); }
-function fmtFechaIng(s){ if(!s) return ''; const [y,m,d]=s.split('-'); const meses=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']; return `${parseInt(d)} ${meses[parseInt(m)-1]} ${y}`; }
-
 function renderIngresos(){
-  const cobrados   = ingresos.filter(i=>i.cobrado);
-  const pendientes = ingresos.filter(i=>!i.cobrado);
-  const comisiones = cobrados.filter(i=>i.tipo==='comision');
-  const otros      = cobrados.filter(i=>i.tipo==='otro');
-  const sum = arr => arr.reduce((s,i)=>s+Number(i.monto),0);
+  // ── Stats globales ──
+  const totalSrv  = ingresos.reduce((s,i)=>s+Number(i.total||0),0);
+  const totalCob  = ingresos.reduce((s,i)=>s+Number(i.cobrado||0),0);
+  const totalPend = totalSrv - totalCob;
+  document.getElementById('ing-total').textContent    = fmtMXN(totalCob);
+  document.getElementById('ing-pendiente').textContent= fmtMXN(totalPend);
 
-  document.getElementById('ing-total').textContent      = fmtMXN(sum(cobrados));
-  document.getElementById('ing-pendiente').textContent  = fmtMXN(sum(pendientes));
-  document.getElementById('ing-comisiones').textContent = fmtMXN(sum(comisiones));
-  document.getElementById('ing-otros').textContent      = fmtMXN(sum(otros));
-
-  // ── Por pareja ──
-  const porPareja = {};
-  ingresos.forEach(i=>{
-    const k = i.concepto.split('·')[0].trim() || i.concepto;
-    if(!porPareja[k]) porPareja[k]={cobrado:0,pendiente:0};
-    if(i.cobrado) porPareja[k].cobrado+=Number(i.monto);
-    else          porPareja[k].pendiente+=Number(i.monto);
-  });
-  const ppEl = document.getElementById('ing-por-pareja');
-  ppEl.innerHTML='';
-  if(Object.keys(porPareja).length===0){
-    ppEl.innerHTML='<div style="padding:16px;color:var(--muted);font-size:12px;font-style:italic;text-align:center;">Sin ingresos registrados aún</div>';
+  // ── Tabla principal ──
+  const tabla = document.getElementById('ing-tabla');
+  tabla.innerHTML='';
+  if(ingresos.length===0){
+    tabla.innerHTML='<div style="padding:24px;text-align:center;color:var(--muted);font-size:12px;font-style:italic;">Sin ingresos registrados aún ✨</div>';
   } else {
-    Object.entries(porPareja).forEach(([nombre,data])=>{
-      const card=document.createElement('div');
-      card.className='pend-card'; card.style.marginBottom='10px';
-      card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-        <div style="font-size:13px;font-weight:700;color:var(--wine);">👥 ${nombre}</div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <span style="font-size:12px;background:#D4EDDA;color:#1A5E2A;padding:3px 10px;border-radius:20px;font-weight:600;">✅ ${fmtMXN(data.cobrado)}</span>
-          ${data.pendiente>0?`<span style="font-size:12px;background:#F2C4CE;color:#7B2D42;padding:3px 10px;border-radius:20px;font-weight:600;">⏳ ${fmtMXN(data.pendiente)} por cobrar</span>`:''}
+    ingresos.forEach((ing,idx)=>{
+      const meta = ING_SERVICIOS[ing.servicio]||ING_SERVICIOS['Otro'];
+      const pend = Number(ing.total||0)-Number(ing.cobrado||0);
+      const pct  = ing.total>0?Math.round((ing.cobrado/ing.total)*100):0;
+      const liquidado = pend<=0;
+      const bg = idx%2===0?'#FAFAFA':'white';
+      const row = document.createElement('div');
+      row.style.cssText=`display:grid;grid-template-columns:2fr 1.2fr 1fr 1fr 1.2fr 36px;gap:8px;align-items:center;padding:11px 14px;background:${bg};border-bottom:1px solid var(--sand);`;
+      row.innerHTML=`
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--dark);">${ing.pareja}</div>
+          ${ing.notas?`<div style="font-size:10px;color:var(--muted);">${ing.notas}</div>`:''}
+          <div style="font-size:10px;color:var(--muted);margin-top:1px;">${fmtFechaIng(ing.fecha)}</div>
         </div>
-      </div>`;
-      ppEl.appendChild(card);
+        <div>
+          <span style="background:${meta.color};color:${meta.fg};font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;">${meta.emoji} ${ing.servicio}</span>
+        </div>
+        <div style="text-align:right;font-size:13px;font-weight:700;color:var(--dark);">${fmtMXN(ing.total)}</div>
+        <div style="text-align:right;">
+          <div style="font-size:13px;font-weight:700;color:#1A5E2A;">${fmtMXN(ing.cobrado)}</div>
+          ${pend>0?`<div style="font-size:10px;color:var(--wine);font-weight:600;">-${fmtMXN(pend)}</div>`:''}
+        </div>
+        <div style="text-align:center;">
+          ${liquidado
+            ? `<span style="background:#D4EDDA;color:#1A5E2A;font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;">✅ Liquidado</span>`
+            : `<button onclick="addPago('${ing.id}')" style="background:#F2C4CE;color:#7B2D42;border:none;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;">+ Cobro (${pct}%)</button>`
+          }
+        </div>
+        <div style="text-align:center;">
+          <button onclick="deleteIngreso('${ing.id}')" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;">×</button>
+        </div>`;
+      tabla.appendChild(row);
     });
   }
 
-  // ── Por tipo ──
-  const ptEl = document.getElementById('ing-por-tipo');
-  ptEl.innerHTML='';
-  const tipoGrid=document.createElement('div');
-  tipoGrid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px;';
-  Object.entries(ING_TIPOS).forEach(([key,meta])=>{
-    const cobT=ingresos.filter(i=>i.tipo===key&&i.cobrado).reduce((s,i)=>s+Number(i.monto),0);
-    const pendT=ingresos.filter(i=>i.tipo===key&&!i.cobrado).reduce((s,i)=>s+Number(i.monto),0);
-    const box=document.createElement('div');
-    box.style.cssText=`background:${meta.color};border-radius:12px;padding:14px;`;
-    box.innerHTML=`<div style="font-size:11px;font-weight:700;color:${meta.fg};margin-bottom:4px;">${meta.lbl}</div>
-      <div style="font-size:16px;font-weight:800;color:${meta.fg};">${fmtMXN(cobT)}</div>
-      ${pendT>0?`<div style="font-size:10px;color:${meta.fg};opacity:.75;margin-top:2px;">⏳ ${fmtMXN(pendT)} pendiente</div>`:''}`;
-    tipoGrid.appendChild(box);
+  // ── Por tipo de servicio ──
+  const porSrv = {};
+  ingresos.forEach(i=>{
+    if(!porSrv[i.servicio]) porSrv[i.servicio]={total:0,cobrado:0,count:0};
+    porSrv[i.servicio].total  +=Number(i.total||0);
+    porSrv[i.servicio].cobrado+=Number(i.cobrado||0);
+    porSrv[i.servicio].count++;
   });
-  ptEl.appendChild(tipoGrid);
-
-  // ── Lista completa ──
-  const listEl=document.getElementById('ing-lista');
-  listEl.innerHTML='';
-  if(ingresos.length===0){
-    listEl.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px;font-style:italic;">¡Registra tu primer cobro! 💰</div>';
+  const psel = document.getElementById('ing-por-servicio');
+  psel.innerHTML='';
+  if(Object.keys(porSrv).length===0){
+    psel.innerHTML='<div style="padding:16px;color:var(--muted);font-size:12px;font-style:italic;text-align:center;">Aquí verás el desglose por servicio</div>';
     return;
   }
-  ingresos.forEach(ing=>{
-    const meta=ING_TIPOS[ing.tipo]||ING_TIPOS.otro;
-    const row=document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--sand);flex-wrap:wrap;';
-    row.innerHTML=`
-      <span style="background:${meta.color};color:${meta.fg};font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;">${meta.lbl}</span>
-      <div style="flex:1;min-width:120px;">
-        <div style="font-size:13px;font-weight:600;color:var(--dark);">${ing.concepto}</div>
-        ${ing.notas?`<div style="font-size:11px;color:var(--muted);">${ing.notas}</div>`:''}
-        <div style="font-size:10px;color:var(--muted);margin-top:2px;">${fmtFechaIng(ing.fecha)}</div>
-      </div>
-      <div style="font-size:15px;font-weight:800;color:${ing.cobrado?'#1A5E2A':'var(--wine)'};">${fmtMXN(ing.monto)}</div>
-      <button onclick="toggleCobrado('${ing.id}')" style="background:${ing.cobrado?'#D4EDDA':'#F2C4CE'};color:${ing.cobrado?'#1A5E2A':'#7B2D42'};border:none;padding:4px 10px;border-radius:20px;font-size:11px;cursor:pointer;font-weight:600;">${ing.cobrado?'✅ Cobrado':'⏳ Pendiente'}</button>
-      <button onclick="deleteIngreso('${ing.id}')" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;padding:0 4px;">×</button>`;
-    listEl.appendChild(row);
+  const grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:10px;';
+  Object.entries(porSrv).forEach(([srv,d])=>{
+    const meta=ING_SERVICIOS[srv]||ING_SERVICIOS['Otro'];
+    const pend=d.total-d.cobrado;
+    const box=document.createElement('div');
+    box.style.cssText=`background:${meta.color};border-radius:12px;padding:14px;`;
+    box.innerHTML=`
+      <div style="font-size:11px;font-weight:700;color:${meta.fg};margin-bottom:6px;">${meta.emoji} ${srv} <span style="opacity:.6;font-weight:400;">(${d.count})</span></div>
+      <div style="font-size:15px;font-weight:800;color:${meta.fg};">${fmtMXN(d.cobrado)}</div>
+      <div style="font-size:10px;color:${meta.fg};opacity:.7;margin-top:2px;">de ${fmtMXN(d.total)}</div>
+      ${pend>0?`<div style="font-size:10px;color:${meta.fg};font-weight:600;margin-top:3px;">⏳ ${fmtMXN(pend)} por cobrar</div>`:'<div style="font-size:10px;color:'+meta.fg+';margin-top:3px;">✅ Al corriente</div>'}`;
+    grid.appendChild(box);
   });
+  psel.appendChild(grid);
 }
 </script>
-</body>
-</html>
-
