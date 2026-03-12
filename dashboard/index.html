@@ -404,6 +404,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
           <div class="add-grp"><label>API Key de Firebase</label><input type="text" id="new-apikey" placeholder="AIzaSy..."></div>
           <div class="add-grp"><label>ID de la pareja en Firebase</label><input type="text" id="new-parejaid" placeholder="Ej: nat-luis  (carpeta en agendas/)"></div>
           <button class="add-btn" onclick="addCouple()">+ Agregar pareja</button>
+
+          <!-- Exportar / Importar -->
+          <div style="margin-top:24px;border-top:1px solid var(--sand);padding-top:20px;">
+            <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Sincronizar entre dispositivos</div>
+            <button class="add-btn" style="background:var(--gold);margin-bottom:10px;" onclick="exportCouples()">📋 Copiar código de parejas</button>
+            <textarea id="import-box" placeholder="Pega aquí el código copiado desde otro dispositivo..." style="width:100%;height:80px;border:1px solid var(--sand);border-radius:8px;padding:10px;font-size:12px;font-family:inherit;resize:none;margin-bottom:8px;"></textarea>
+            <button class="add-btn" style="background:#4a7c59;" onclick="importCouples()">📥 Importar parejas</button>
+          </div>
+
           <div id="couples-list" style="margin-top:16px;"></div>
         </div>
       </div>
@@ -417,7 +426,7 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getDatabase, ref, get } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
 // ══ CONFIG ═══════════════════════════════════════════════
-const MASTER_PASSWORD = 'demir12';
+const MASTER_PASSWORD = 'demir.admin2024';
 
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const MONTHS_S = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
@@ -491,7 +500,8 @@ function buildMonthChipsAndTabs(){
     chip.className = 'mchip' + (i === curM ? ' active' : '');
     chip.style.background = color;
     chip.textContent = MONTHS_S[i];
-    chip.onclick = () => goToMonth(i);
+    chip.addEventListener('click', () => goToMonth(i));
+    chip.addEventListener('touchend', (e) => { e.preventDefault(); goToMonth(i); });
     chips.appendChild(chip);
 
     // Tab lateral
@@ -499,7 +509,8 @@ function buildMonthChipsAndTabs(){
     tab.className = 'mtab' + (i === curM ? ' active' : '');
     tab.style.background = color;
     tab.textContent = MONTHS_S[i];
-    tab.onclick = () => goToMonth(i);
+    tab.addEventListener('click', () => goToMonth(i));
+    tab.addEventListener('touchend', (e) => { e.preventDefault(); goToMonth(i); });
     tabs.appendChild(tab);
   });
 }
@@ -891,6 +902,30 @@ function renderCouplesList(){
 }
 
 function saveCouples(){ localStorage.setItem('demir_couples',JSON.stringify(couples)); }
+
+function exportCouples(){
+  const code = btoa(unescape(encodeURIComponent(JSON.stringify(couples))));
+  const box = document.getElementById('import-box');
+  box.value = code;
+  box.select();
+  try { document.execCommand('copy'); alert('✅ Código copiado. Pégalo en el otro dispositivo.'); }
+  catch(e) { alert('Selecciona el texto del cuadro y cópialo manualmente.'); }
+}
+
+function importCouples(){
+  const raw = document.getElementById('import-box').value.trim();
+  if(!raw){ alert('Pega primero el código'); return; }
+  try {
+    const data = JSON.parse(decodeURIComponent(escape(atob(raw))));
+    if(!Array.isArray(data)) throw new Error();
+    if(!confirm('¿Importar ' + data.length + ' parejas? Esto reemplazará las actuales.')) return;
+    couples = data;
+    saveCouples();
+    loadAllFirebaseTasks();
+    alert('✅ Parejas importadas correctamente');
+    document.getElementById('import-box').value = '';
+  } catch(e) { alert('Código inválido. Asegúrate de copiar el código completo.'); }
+}
 function fmtDate(str){ if(!str)return''; const d=new Date(str+'T12:00:00'); return`${d.getDate()} ${MONTHS[d.getMonth()].slice(0,3)} ${d.getFullYear()}`; }
 
 // Limpia URLs — maneja paths relativos y URLs completas sin duplicar dominio
