@@ -649,14 +649,16 @@ function getCalEvents(){
     const fb = firebaseTasks[ci];
     if(fb){
       // Tareas del planner diario — punto dorado
+      // taskKey() en la agenda usa: año-mes(0-indexado)-día  ej: "2026-2-11" = 11 marzo 2026
       if(fb.tasks){
         Object.entries(fb.tasks).forEach(([k, val])=>{
-          if(Array.isArray(val)){
+          if(Array.isArray(val) && !k.startsWith('imp_') && !k.startsWith('not_') && !k.startsWith('obj_')){
             const parts=k.split('-');
             if(parts.length===3){
               const pending = val.filter(t=>!t.done);
               if(pending.length>0){
-                const td=new Date(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2]));
+                // mes ya es 0-indexado, pasarlo directo a new Date
+                const td=new Date(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]));
                 const key=td.toDateString();
                 if(!evs[key]) evs[key]=[];
                 evs[key].push({type:'task',name:pending[0].text,couple:c.names,color:CHIP_COLORS[ci%CHIP_COLORS.length],done:false});
