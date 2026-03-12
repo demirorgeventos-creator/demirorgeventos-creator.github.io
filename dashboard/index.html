@@ -558,8 +558,14 @@ async function loadAllFirebaseTasks(){
       apps.push(app);
       const db = getDatabase(app);
       const parejaId = c.parejaid || c.fburl.replace('https://','').split('-default-rtdb')[0].split('.firebaseio')[0];
-      const snap = await get(ref(db, `agendas/${parejaId}/tasks`));
-      if(snap.exists()) firebaseTasks[i] = snap.val() || {};
+      // Cargar tasks del planner Y checklist
+      const [snapTasks, snapChecklist] = await Promise.all([
+        get(ref(db, `agendas/${parejaId}/tasks`)),
+        get(ref(db, `agendas/${parejaId}/checklist`))
+      ]);
+      firebaseTasks[i] = {};
+      if(snapTasks.exists()) firebaseTasks[i].tasks = snapTasks.val() || {};
+      if(snapChecklist.exists()) firebaseTasks[i].checklist = snapChecklist.val() || [];
     } catch(e){ console.warn(`Firebase error ${c.names}:`, e.message); }
   });
   await Promise.all(promises);
@@ -586,7 +592,8 @@ function renderStats(){
 
   let pend = ownTasks.filter(t=>!t.done && t.date===todayStr).length;
   couples.forEach((c,i)=>{
-    const tasks = firebaseTasks[i];
+    const fb = firebaseTasks[i];
+    const tasks = fb && fb.tasks ? fb.tasks : {};
     if(tasks) Object.values(tasks).forEach(dayTasks => {
       if(Array.isArray(dayTasks)) pend += dayTasks.filter(t=>!t.done && t.date===todayStr).length;
     });
@@ -638,30 +645,32 @@ function getCalEvents(){
       if(!evs[key]) evs[key]=[];
       evs[key].push({type:'boda',name:c.names,color:CHIP_COLORS[ci%CHIP_COLORS.length]});
     }
-    // Firebase tasks del planner diario
+    // Firebase tasks del planner diario y checklist
     const fb = firebaseTasks[ci];
     if(fb){
-      // Tareas del planner (keys tipo "2026-3-15")
-      Object.entries(fb).forEach(([k, val])=>{
-        if(Array.isArray(val)){
-          // Planner diario — punto dorado
-          const parts=k.split('-');
-          if(parts.length===3){
-            const pending = val.filter(t=>!t.done);
-            if(pending.length>0){
-              const td=new Date(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2]));
-              const key=td.toDateString();
-              if(!evs[key]) evs[key]=[];
-              evs[key].push({type:'task',name:pending[0].text,couple:c.names,color:CHIP_COLORS[ci%CHIP_COLORS.length],done:false});
+      // Tareas del planner diario — punto dorado
+      if(fb.tasks){
+        Object.entries(fb.tasks).forEach(([k, val])=>{
+          if(Array.isArray(val)){
+            const parts=k.split('-');
+            if(parts.length===3){
+              const pending = val.filter(t=>!t.done);
+              if(pending.length>0){
+                const td=new Date(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2]));
+                const key=td.toDateString();
+                if(!evs[key]) evs[key]=[];
+                evs[key].push({type:'task',name:pending[0].text,couple:c.names,color:CHIP_COLORS[ci%CHIP_COLORS.length],done:false});
+              }
             }
           }
-        }
-      });
+        });
+      }
       // Checklist deadlines — punto vino
-      if(fb.checklist){
-        Object.values(fb.checklist).forEach(section=>{
-          if(!section || !section.items) return;
-          Object.values(section.items).forEach(item=>{
+      // S.checklist es un array de secciones: [{id, fase, items:[{id,text,done,deadline,...}]}]
+      if(fb.checklist && Array.isArray(fb.checklist)){
+        fb.checklist.forEach(section=>{
+          if(!section || !section.items || !Array.isArray(section.items)) return;
+          section.items.forEach(item=>{
             if(item && item.deadline && !item.done){
               const td=new Date(item.deadline+'T12:00:00');
               const key=td.toDateString();
@@ -824,15 +833,15 @@ function renderPendParejasHoy(){
 
   container.innerHTML = couples.map((c,i)=>{
     const fb=firebaseTasks[i];
+    const fbTasks = fb && fb.tasks ? fb.tasks : null;
     let tasks=[];
-    const fbKeys = fb ? Object.keys(fb).filter(k=>!k.startsWith('imp_')&&!k.startsWith('not_')&&!k.startsWith('obj_')).join(', ') : 'sin conexión';
-    if(fb && fb[dateStr]){
-      const raw = fb[dateStr];
+    if(fbTasks && fbTasks[dateStr]){
+      const raw = fbTasks[dateStr];
       tasks = Array.isArray(raw) ? raw : Object.values(raw);
       tasks = tasks.filter(t => t && !t.done && t.text && t.text.trim());
     }
     const fbBadge=fb?'<span style="font-size:9px;background:#C6EFCE;color:#006100;padding:2px 7px;border-radius:10px;margin-left:6px;">🔥</span>':'';
-    const debugInfo=`<div style="font-size:9px;color:#999;margin-top:4px;">Buscando: <b>${dateStr}</b> | Claves: ${fbKeys}</div>`;
+    const debugInfo='';
     return `<div class="pend-card">
       <div class="pend-card-title" style="color:${CHIP_COLORS[i%CHIP_COLORS.length]}">${c.names}${fbBadge}</div>
       ${debugInfo}
@@ -889,9 +898,10 @@ function renderPendientes(){
   if(!couples.length){ grid.innerHTML='<div class="pend-card"><div class="pend-empty">Agrega parejas en "Parejas" para ver sus pendientes</div></div>'; return; }
   grid.innerHTML=couples.map((c,i)=>{
     const fb=firebaseTasks[i];
+    const fbTasks2 = fb && fb.tasks ? fb.tasks : null;
     let tasks=[];
-    if(fb && fb[todayKey]){
-      const raw=fb[todayKey];
+    if(fbTasks2 && fbTasks2[todayKey]){
+      const raw=fbTasks2[todayKey];
       tasks = Array.isArray(raw) ? raw : Object.values(raw);
       tasks = tasks.filter(t => t && !t.done && t.text && t.text.trim());
     }
@@ -932,7 +942,7 @@ function renderCouplesList(){
     const d=c.date?new Date(c.date+'T12:00:00'):null;
     const diff=d?Math.ceil((d-today)/864e5):null;
     const diasTxt=diff===null?'Sin fecha':diff<0?`Hace ${Math.abs(diff)}d`:diff===0?'¡Hoy!':diff+'d';
-    const fb=firebaseTasks[i]?'🔥':'⚠️';
+    const fb=firebaseTasks[i] && (firebaseTasks[i].tasks||firebaseTasks[i].checklist)?'🔥':'⚠️';
     return `<div class="couple-row">
       <div class="cr-info">
         <div class="cr-name">${c.names} <span style="font-size:12px;">${fb}</span></div>
