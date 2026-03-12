@@ -12,8 +12,8 @@
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   html{scroll-behavior:smooth;}
-  html{overflow-x:hidden;}
-  body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden;}
+  html{overflow-x:hidden;max-width:100%;}
+  body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden;max-width:100%;}
   ::-webkit-scrollbar{width:4px;}
   ::-webkit-scrollbar-track{background:var(--cream2);}
   ::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px;}
@@ -59,7 +59,7 @@
   .scroll-hint::after{content:'';width:1px;height:40px;background:linear-gradient(to bottom,var(--gold),transparent);}
 
   /* SECTIONS */
-  section{padding:100px 60px;}
+  section{padding:100px 60px;overflow:hidden;}
   .section-eyebrow{font-size:10px;letter-spacing:5px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;display:block;}
   .section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,5vw,58px);font-weight:300;color:var(--wine);line-height:1.15;margin-bottom:20px;}
   .section-title em{font-style:italic;color:var(--gold);}
@@ -231,6 +231,10 @@
     .gal-item.wide{grid-column:span 1;}
     .testi-grid{grid-template-columns:1fr;}
     #contacto{grid-template-columns:1fr;gap:40px;}
+    .about-deco{display:none;}
+    .about-img-wrap{overflow:visible;}
+    .c-form{padding:32px 20px;}
+    .pkg-card{padding:36px 24px;}
   }
   @media(max-width:600px){
     .services-grid{grid-template-columns:1fr;}
