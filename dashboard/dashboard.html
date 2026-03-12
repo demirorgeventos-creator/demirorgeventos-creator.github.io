@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>DEMIR · Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --wine:#7B2D42; --wine2:#5a1e2e; --gold:#B99438; --gold-lt:rgba(185,148,56,.12);
+  --cream:#FAF6F0; --cream2:#F2EBE0; --dark:#1a0a0f;
+  --text:#3a2028; --muted:#8a7070; --sand:#EDE5D8; --blush:#F4A7B3; --blush-lt:#FDF0F3;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:var(--cream);color:var(--text);overflow:hidden;height:100vh;}
+
+/* ══ LOGIN ══════════════════════════════════════════════ */
+#login-screen{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:var(--cream);position:fixed;inset:0;z-index:9999;
+}
+#login-screen::before{
+  content:'';position:absolute;inset:0;
+  background-image:linear-gradient(rgba(185,148,56,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(185,148,56,.07) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 80%);
+}
+.login-box{
+  background:white;padding:52px 44px;max-width:400px;width:90%;
+  position:relative;z-index:1;border:1px solid rgba(185,148,56,.2);
+  box-shadow:0 20px 60px rgba(123,45,66,.08);
+}
+.l-logo{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:300;letter-spacing:10px;color:var(--wine);text-align:center;margin-bottom:6px;}
+.l-logo span{color:var(--gold);}
+.l-tag{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:8px;}
+.l-sub{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);text-align:center;margin-bottom:36px;border:1px solid rgba(185,148,56,.3);padding:6px;background:rgba(185,148,56,.05);}
+.l-label{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:10px;}
+.l-input{width:100%;border:none;border-bottom:1px solid var(--cream2);padding:12px 0;font-size:15px;color:var(--text);background:transparent;outline:none;transition:border-color .3s;letter-spacing:4px;text-align:center;}
+.l-input:focus{border-color:var(--gold);}
+.l-btn{width:100%;margin-top:28px;padding:16px;background:var(--wine);color:var(--cream);border:none;font-size:11px;letter-spacing:4px;text-transform:uppercase;cursor:pointer;transition:background .3s;}
+.l-btn:hover{background:var(--wine2);}
+.l-error{margin-top:14px;text-align:center;font-size:12px;color:#c0392b;opacity:0;transition:opacity .3s;font-style:italic;}
+.l-error.show{opacity:1;}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+
+/* ══ LAYOUT PRINCIPAL ═══════════════════════════════════ */
+#dashboard{display:none;height:100vh;overflow:hidden;}
+#dashboard.show{display:flex;flex-direction:column;}
+
+/* Header */
+.dash-header{
+  background:var(--dark);padding:14px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;z-index:50;
+}
+.dash-logo{font-family:'Cormorant Garamond',serif;font-size:20px;letter-spacing:8px;color:var(--cream);}
+.dash-logo span{color:var(--gold);}
+.dash-subtitle{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-top:2px;}
+.dash-logout{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:white;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:6px 14px;cursor:pointer;border-radius:4px;}
+
+/* Tabs de navegación */
+.dash-tabs{display:flex;background:white;border-bottom:1px solid var(--sand);flex-shrink:0;overflow-x:auto;}
+.dash-tabs::-webkit-scrollbar{display:none;}
+.dtab{padding:12px 20px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;}
+.dtab.active{color:var(--wine);border-bottom-color:var(--wine);}
+
+/* Contenido scrollable */
+.dash-main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px;}
+
+/* Month chips (tabs laterales del mes) */
+.month-tabs{position:fixed;right:0;top:50%;transform:translateY(-50%);display:none;flex-direction:column;gap:2px;z-index:200;}
+.mtab{
+  writing-mode:vertical-rl;transform:rotate(180deg);
+  width:26px;padding:10px 4px;font-size:8px;font-weight:700;letter-spacing:1.5px;
+  border:none;cursor:pointer;color:white;opacity:.7;transition:opacity .15s,width .15s;
+  border-radius:6px 0 0 6px;font-family:inherit;
+}
+.mtab:hover{opacity:1;width:30px;}
+.mtab.active{opacity:1;width:32px;box-shadow:-2px 0 8px rgba(0,0,0,.2);}
+
+/* Chips de meses (scroll horizontal) */
+.chips-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:10px 16px;background:white;border-bottom:1px solid var(--sand);flex-shrink:0;}
+.chips-wrap::-webkit-scrollbar{display:none;}
+.chips-inner{display:flex;gap:8px;width:max-content;}
+.mchip{padding:7px 16px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;color:white;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.12);opacity:.65;transition:opacity .2s,transform .1s;}
+.mchip.active{opacity:1;}
+.mchip:active{transform:scale(.95);}
+
+/* ══ VISTAS ═════════════════════════════════════════════ */
+.view{display:none;padding:16px 16px 0;}
+.view.active{display:block;}
+
+/* ══ STATS ══════════════════════════════════════════════ */
+.stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px;}
+.stat-box{background:white;border:1px solid var(--sand);border-radius:12px;padding:16px;text-align:center;}
+.stat-box .n{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:300;color:var(--wine);line-height:1;}
+.stat-box .l{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+
+/* ══ PRÓXIMAS BODAS ═════════════════════════════════════ */
+.bodas-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px;}
+.boda-card{background:white;border:1px solid var(--sand);border-radius:12px;padding:16px;position:relative;border-top:3px solid var(--wine);}
+.boda-card.urgente{border-top-color:#c0392b;}
+.boda-card.pronto{border-top-color:var(--gold);}
+.boda-dias{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300;color:var(--wine);line-height:1;font-style:italic;}
+.boda-dias-lbl{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.boda-nombres{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;color:var(--text);margin:10px 0 4px;}
+.boda-fecha{font-size:10px;color:var(--muted);}
+.boda-badge{position:absolute;top:12px;right:12px;font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:20px;}
+.badge-urgente{background:#ffc7ce;color:#9c0006;}
+.badge-pronto{background:#ffeb9c;color:#9c6500;}
+.badge-ok{background:#c6efce;color:#006100;}
+.boda-empty{grid-column:1/-1;text-align:center;padding:32px;color:var(--muted);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;background:white;border-radius:12px;border:1px solid var(--sand);}
+
+/* ══ CALENDARIO ═════════════════════════════════════════ */
+.cal-top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px;gap:10px;}
+.cal-month-name{font-family:'Cormorant Garamond',serif;font-size:40px;color:var(--wine);font-style:italic;line-height:1;}
+.cal-year-lbl{font-size:10px;color:var(--muted);letter-spacing:2px;margin-top:2px;}
+.cal-nav{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.cal-nav-btn{background:white;border:1px solid var(--sand);border-radius:8px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--wine);cursor:pointer;}
+.cal-nav-lbl{font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--text);font-style:italic;}
+.cal-grid-wrap{background:white;border-radius:14px;padding:14px;border:1px solid var(--sand);margin-bottom:10px;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.cal-dow{text-align:center;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:3px 0 8px;font-weight:500;}
+.cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;border-radius:7px;cursor:pointer;transition:background .1s;position:relative;}
+.cal-day:active{background:var(--blush-lt);}
+.cal-day.today{background:var(--wine);color:white;font-weight:700;}
+.cal-day.other{color:#ccc;}
+.cal-day.has-boda{background:var(--gold-lt);color:var(--wine);font-weight:700;}
+.cal-day.has-event::after{content:'';position:absolute;bottom:2px;width:4px;height:4px;background:var(--gold);border-radius:50%;}
+.cal-day.has-task::after{content:'';position:absolute;bottom:3px;right:calc(50% + 2px);width:5px;height:5px;background:var(--gold);border-radius:50%;}
+.cal-day.has-deadline::before{content:'';position:absolute;bottom:3px;left:calc(50% + 2px);width:5px;height:5px;background:#7B2D42;border-radius:50%;}
+.cal-day.has-task.has-deadline::after{right:calc(50% + 3px);}
+.cal-day.has-task.has-deadline::before{left:calc(50% + 3px);}
+.cal-legend{display:flex;gap:16px;justify-content:center;margin-top:10px;flex-wrap:wrap;}
+.cal-legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);letter-spacing:1px;}
+.cal-legend-dot{width:7px;height:7px;border-radius:50%;}
+.cal-legend{display:flex;gap:14px;font-size:9px;color:var(--muted);padding:0 2px;flex-wrap:wrap;}
+.cal-legend span{display:flex;align-items:center;gap:4px;}
+.cal-legend i{display:inline-block;width:7px;height:7px;border-radius:50%;}
+
+.cal-obj-box{background:white;border:1px solid var(--sand);border-radius:12px;padding:10px 12px;flex:1;min-width:0;}
+.cal-obj-box label{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;}
+.cal-obj-box input{width:100%;border:none;outline:none;font-size:12px;color:var(--text);background:transparent;}
+
+/* Evento del día — ya no se muestra en calendario */
+.day-events{margin-top:14px;display:flex;flex-direction:column;gap:6px;}
+.dev-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:white;border-radius:10px;border:1px solid var(--sand);}
+.dev-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.dev-title{font-size:12px;color:var(--text);font-weight:500;}
+.dev-meta{font-size:10px;color:var(--muted);margin-top:1px;}
+.dev-empty{text-align:center;padding:16px;color:var(--muted);font-style:italic;font-size:12px;background:white;border-radius:10px;border:1px solid var(--sand);}
+
+/* ══ PLANNER DIARIO ═════════════════════════════════════ */
+.daily-hero{display:flex;align-items:baseline;gap:10px;margin-bottom:14px;}
+.day-num{font-family:'Cormorant Garamond',serif;font-size:64px;color:var(--wine);line-height:1;font-style:italic;}
+.day-info .dow{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);display:block;}
+.day-info .mon{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--wine);font-style:italic;display:block;}
+
+.mini-cal-wrap{background:white;border:1px solid var(--sand);border-radius:12px;padding:12px;margin-bottom:12px;}
+.mini-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.mini-lbl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.mini-nav{display:flex;gap:4px;}
+.mini-nav button{background:white;border:1px solid var(--sand);border-radius:6px;width:24px;height:24px;font-size:11px;color:var(--wine);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.mc-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;}
+.mc-dow{text-align:center;font-size:7px;color:var(--muted);text-transform:uppercase;padding-bottom:3px;}
+.mc-day{text-align:center;font-size:10px;padding:4px 0;border-radius:4px;cursor:pointer;}
+.mc-day.mc-active{background:var(--wine);color:white;font-weight:700;}
+.mc-day.mc-other{color:#ddd;}
+.mc-day.mc-has-boda{background:var(--gold-lt);color:var(--wine);font-weight:700;}
+
+.card{background:white;border:1px solid var(--sand);border-radius:12px;margin-bottom:12px;overflow:hidden;}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--blush-lt);}
+.card-hdr h3{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:600;}
+.btn-add{background:var(--wine);color:white;border:none;border-radius:6px;width:24px;height:24px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
+
+.task-item{display:flex;align-items:center;gap:9px;padding:9px 14px;border-bottom:1px solid var(--blush-lt);}
+.task-item:last-child{border-bottom:none;}
+.task-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;cursor:pointer;border:2px solid;transition:all .2s;}
+.task-dot.done-dot{background:currentColor;}
+.task-inp{flex:1;border:none;outline:none;font-size:13px;color:var(--text);background:transparent;}
+.task-inp.done-txt{text-decoration:line-through;color:var(--muted);}
+.task-del{background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;line-height:1;}
+
+.notas-lines{background:#FEFCF8;background-image:repeating-linear-gradient(transparent,transparent 23px,#EDE8E0 23px,#EDE8E0 24px);}
+.notas-lines textarea{width:100%;border:none;outline:none;font-family:'Cormorant Garamond',serif;font-size:15px;background:transparent;resize:none;line-height:24px;color:var(--text);padding:12px 16px;min-height:96px;}
+
+/* ══ PENDIENTES ═════════════════════════════════════════ */
+.pend-card{background:white;border:1px solid var(--sand);border-radius:12px;padding:16px;margin-bottom:10px;}
+.pend-card-title{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;color:var(--wine);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.pend-card-title::after{content:'';flex:1;height:1px;background:var(--sand);}
+.pend-item{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--blush-lt);}
+.pend-item:last-child{border-bottom:none;}
+.pend-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.pend-txt{font-size:12px;color:var(--text);line-height:1.5;}
+.pend-who{font-size:10px;color:var(--muted);margin-top:1px;}
+.pend-empty{font-size:12px;color:var(--muted);font-style:italic;padding:6px 0;}
+
+/* Input de pendiente propio */
+.own-task-row{display:flex;gap:8px;margin-bottom:14px;align-items:flex-end;flex-wrap:wrap;}
+.own-task-row input[type=text]{flex:1;min-width:140px;border:none;border-bottom:1px solid var(--sand);padding:8px 0;font-size:13px;color:var(--text);outline:none;background:transparent;}
+.own-task-row input[type=date]{border:none;border-bottom:1px solid var(--sand);padding:8px 0;font-size:12px;color:var(--text);outline:none;background:transparent;}
+.btn-wine-sm{padding:8px 16px;background:var(--wine);color:white;border:none;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:6px;}
+
+/* ══ GESTIÓN PAREJAS ════════════════════════════════════ */
+.add-section{background:var(--dark);border-radius:12px;padding:20px;margin-bottom:16px;}
+.add-eye{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;display:block;}
+.add-title-lbl{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:300;color:var(--cream);margin-bottom:16px;}
+.add-title-lbl em{color:var(--gold);font-style:italic;}
+.add-grp{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+.add-grp label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(250,246,240,.5);}
+.add-grp input{border:none;border-bottom:1px solid rgba(185,148,56,.3);padding:9px 0;font-size:13px;color:var(--cream);background:transparent;outline:none;}
+.add-grp input:focus{border-color:var(--gold);}
+.add-btn{width:100%;padding:12px;background:var(--gold);color:var(--dark);border:none;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;border-radius:6px;margin-top:4px;}
+
+.couple-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(185,148,56,.15);}
+.couple-row:last-child{border-bottom:none;}
+.cr-info{flex:1;min-width:0;}
+.cr-name{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;color:var(--cream);}
+.cr-date{font-size:10px;color:rgba(250,246,240,.5);margin-top:2px;}
+.cr-dias{font-size:10px;color:var(--gold);white-space:nowrap;}
+.cr-link{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);text-decoration:none;border:1px solid rgba(185,148,56,.3);padding:4px 10px;border-radius:4px;white-space:nowrap;}
+.cr-del{background:none;border:none;color:rgba(250,246,240,.3);cursor:pointer;font-size:18px;padding:0 2px;line-height:1;}
+
+/* Sec headers */
+.sec-hdr{margin-bottom:12px;}
+.sec-eye-lbl{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:3px;}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;color:var(--wine);}
+.sec-title em{font-style:italic;}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="l-logo">D<span>·</span>EMIR</div>
+    <div class="l-tag">Wedding &amp; Event Planner</div>
+    <div class="l-sub">✦ Panel de Control ✦</div>
+    <label class="l-label">Contraseña maestra</label>
+    <input class="l-input" type="password" id="pwd-input" placeholder="••••••••" autocomplete="off">
+    <button class="l-btn" onclick="checkPwd()">Acceder al dashboard</button>
+    <div class="l-error" id="l-error">Contraseña incorrecta.</div>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ═════════════════════════════════════════ -->
+<div id="dashboard">
+
+  <!-- Header -->
+  <div class="dash-header">
+    <div>
+      <div class="dash-logo">D<span>·</span>EMIR</div>
+      <div class="dash-subtitle">Panel de Control</div>
+    </div>
+    <button class="dash-logout" onclick="doLogout()">Salir</button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="dash-tabs">
+    <button class="dtab active" onclick="switchTab('resumen')" id="tab-resumen">Resumen</button>
+    <button class="dtab" onclick="switchTab('calendario')" id="tab-calendario">Calendario</button>
+    <button class="dtab" onclick="switchTab('planner')" id="tab-planner">Planner diario</button>
+    <button class="dtab" onclick="switchTab('pendientes')" id="tab-pendientes">Pendientes</button>
+    <button class="dtab" onclick="switchTab('parejas')" id="tab-parejas">Parejas</button>
+    <button class="dtab" onclick="switchTab('ingresos')" id="tab-ingresos">💰 Ingresos</button>
+  </div>
+
+  <!-- Chips de meses — siempre visibles en calendario y planner -->
+  <div class="chips-wrap" id="chips-wrap" style="display:none;">
+    <div class="chips-inner" id="monthChips"></div>
+  </div>
+
+  <!-- Month tabs laterales -->
+  <div class="month-tabs" id="monthTabs"></div>
+
+  <!-- Contenido -->
+  <div class="dash-main" id="dash-main">
+
+    <!-- ── RESUMEN ────────────────────────────────────── -->
+    <div class="view active" id="view-resumen">
+      <div class="stats-row" style="margin-top:16px;">
+        <div class="stat-box"><div class="n" id="stat-total">0</div><div class="l">Parejas activas</div></div>
+        <div class="stat-box"><div class="n" id="stat-proximas">0</div><div class="l">Bodas este mes</div></div>
+        <div class="stat-box"><div class="n" id="stat-pendientes">0</div><div class="l">Pendientes hoy</div></div>
+        <div class="stat-box"><div class="n" id="stat-dias">—</div><div class="l">Días a próxima boda</div></div>
+      </div>
+
+      <div class="sec-hdr">
+        <span class="sec-eye-lbl">Agenda general</span>
+        <div class="sec-title">Próximas <em>bodas</em></div>
+      </div>
+      <div class="bodas-grid" id="bodas-grid">
+        <div class="boda-empty">Agrega parejas en "Parejas" para verlas aquí</div>
+      </div>
+    </div>
+
+    <!-- ── CALENDARIO ─────────────────────────────────── -->
+    <div class="view" id="view-calendario">
+      <div class="cal-nav" style="margin-top:16px;">
+        <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+        <span class="cal-nav-lbl" id="calNavLbl"></span>
+        <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="cal-top">
+        <div>
+          <div class="cal-month-name" id="calMonthName"></div>
+          <div class="cal-year-lbl" id="calYear"></div>
+        </div>
+        <div class="cal-obj-box">
+          <label>OBJETIVO DEL MES</label>
+          <input id="calObj" placeholder="Escribe el objetivo…">
+        </div>
+      </div>
+      <div class="cal-grid-wrap">
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+      <div class="cal-legend">
+        <span><i style="background:var(--wine);border-radius:50%;"></i>Hoy</span>
+        <span><i style="background:var(--gold-lt);border:1px solid var(--gold);"></i>💍 Boda</span>
+        <span><i style="background:var(--gold);"></i>Con evento</span>
+      </div>
+      <p style="font-size:10px;color:var(--muted);font-style:italic;text-align:center;margin-top:16px;padding-bottom:16px;">Toca un día para abrir el planner</p>
+    </div>
+
+    <!-- ── PLANNER DIARIO ──────────────────────────────── -->
+    <div class="view" id="view-planner" style="padding-right:36px;">
+        <div class="daily-hero" style="margin-top:16px;">
+          <div class="day-num" id="dayNum"></div>
+          <div class="day-info">
+            <span class="dow" id="dayDow"></span>
+            <span class="mon" id="dayMonth"></span>
+          </div>
+        </div>
+
+        <div class="mini-cal-wrap">
+          <div class="mini-hdr">
+            <span class="mini-lbl" id="miniCalLbl"></span>
+            <div class="mini-nav">
+              <button onclick="chDailyM(-1)">‹</button>
+              <button onclick="chDailyM(1)">›</button>
+            </div>
+          </div>
+          <div class="mc-grid" id="miniCal"></div>
+        </div>
+
+        <!-- Tareas del día -->
+        <div class="card">
+          <div class="card-hdr"><h3>Tareas del día</h3><button class="btn-add" onclick="addTask()">+</button></div>
+          <div id="taskList"></div>
+        </div>
+
+        <!-- Notas importatnes -->
+        <div class="card">
+          <div class="card-hdr">
+            <div style="display:flex;align-items:center;gap:7px;"><div style="width:3px;height:13px;border-radius:2px;background:var(--gold);"></div><h3>Importante</h3></div>
+          </div>
+          <div style="padding:12px 14px;">
+            <textarea id="importanteTA" style="width:100%;border:none;outline:none;font-size:13px;background:transparent;resize:none;min-height:60px;line-height:1.7;" placeholder="Algo urgente para hoy…"></textarea>
+          </div>
+        </div>
+
+        <!-- Notas libres -->
+        <div class="card">
+          <div class="card-hdr"><div style="display:flex;align-items:center;gap:7px;"><div style="width:3px;height:13px;border-radius:2px;background:var(--wine);"></div><h3>Notas</h3></div></div>
+          <div class="notas-lines"><textarea id="notasTA" rows="5" placeholder="Notas libres…"></textarea></div>
+        </div>
+
+        <!-- Pendientes de parejas HOY -->
+        <div class="sec-hdr" style="margin-top:4px;">
+          <span class="sec-eye-lbl">Hoy de tus parejas</span>
+          <div class="sec-title">Tareas <em>de la pareja</em></div>
+        </div>
+        <div id="pend-parejas-hoy"></div>
+
+    </div>
+
+    <!-- ── PENDIENTES ──────────────────────────────────── -->
+    <div class="view" id="view-pendientes">
+      <div style="margin-top:16px;">
+        <div class="sec-hdr">
+          <span class="sec-eye-lbl">Solo para ti</span>
+          <div class="sec-title">Mis <em>pendientes</em></div>
+        </div>
+        <div class="pend-card">
+          <div class="own-task-row">
+            <input type="text" id="own-txt" placeholder="Nuevo pendiente…" onkeydown="if(event.key==='Enter')addOwnTask()">
+            <input type="date" id="own-date">
+            <button class="btn-wine-sm" onclick="addOwnTask()">+ Agregar</button>
+          </div>
+          <div id="own-tasks-list"></div>
+        </div>
+
+        <div class="sec-hdr" style="margin-top:8px;">
+          <span class="sec-eye-lbl">Tareas de hoy</span>
+          <div class="sec-title">Pendientes <em>de parejas</em></div>
+        </div>
+        <div id="pend-grid"></div>
+      </div>
+    </div>
+
+    <!-- ── PAREJAS ─────────────────────────────────────── -->
+    <div class="view" id="view-parejas">
+      <div style="margin-top:16px;">
+        <div class="add-section">
+          <span class="add-eye">Gestión de parejas</span>
+          <div class="add-title-lbl">Agregar <em>nueva pareja</em></div>
+          <div class="add-grp"><label>Nombre de la pareja</label><input type="text" id="new-names" placeholder="Ej: Den &amp; Mario"></div>
+          <div class="add-grp"><label>Fecha de la boda</label><input type="date" id="new-date"></div>
+          <div class="add-grp"><label>Contraseña de su agenda</label><input type="text" id="new-pwd" placeholder="Ej: denmario2026"></div>
+          <div class="add-grp"><label>URL de su agenda</label><input type="text" id="new-url" placeholder="Ej: mi-agenda/den-mario/"></div>
+          <div class="add-grp"><label>Database URL de Firebase</label><input type="text" id="new-fburl" placeholder="https://nombre-default-rtdb.firebaseio.com"></div>
+          <div class="add-grp"><label>API Key de Firebase</label><input type="text" id="new-apikey" placeholder="AIzaSy..."></div>
+          <div class="add-grp"><label>ID de la pareja en Firebase</label><input type="text" id="new-parejaid" placeholder="Ej: nat-luis  (carpeta en agendas/)"></div>
+          <button class="add-btn" onclick="addCouple()">+ Agregar pareja</button>
+
+          <div id="couples-list" style="margin-top:16px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── INGRESOS DEMIR ──────────────────────────── -->
+    <div class="view" id="view-ingresos">
+      <div style="margin-top:16px;padding-bottom:120px;">
+
+        <!-- Tarjetas resumen -->
+        <div class="stats-row">
+          <div class="stat-box"><div class="n" id="ing-gran-total" style="color:var(--dark);">$0</div><div class="l">Total ingresos</div></div>
+          <div class="stat-box"><div class="n" id="ing-total" style="color:var(--gold);">$0</div><div class="l">Total cobrado</div></div>
+          <div class="stat-box"><div class="n" id="ing-pendiente" style="color:var(--wine);">$0</div><div class="l">Por cobrar</div></div>
+        </div>
+
+        <!-- Tabla de conceptos — estilo Finanzas -->
+        <div class="sec-hdr" style="margin-top:16px;">
+          <span class="sec-eye-lbl">Mis servicios y comisiones</span>
+          <div class="sec-title">Ingresos <em>DEMIR</em></div>
+        </div>
+
+        <!-- Cabecera tabla -->
+        <div style="background:var(--wine);border-radius:12px 12px 0 0;padding:10px 14px;display:grid;grid-template-columns:2fr 1.2fr 1fr 1fr 1.2fr 36px;gap:8px;align-items:center;">
+          <span style="color:white;font-size:10px;letter-spacing:1.5px;font-weight:700;">CONCEPTO / PAREJA</span>
+          <span style="color:white;font-size:10px;letter-spacing:1.5px;font-weight:700;">SERVICIO</span>
+          <span style="color:white;font-size:10px;letter-spacing:1.5px;font-weight:700;text-align:right;">TOTAL</span>
+          <span style="color:white;font-size:10px;letter-spacing:1.5px;font-weight:700;text-align:right;">COBRADO</span>
+          <span style="color:white;font-size:10px;letter-spacing:1.5px;font-weight:700;text-align:center;">ESTADO</span>
+          <span></span>
+        </div>
+        <div id="ing-tabla" style="border:1px solid var(--sand);border-top:none;border-radius:0 0 12px 12px;overflow:hidden;margin-bottom:16px;"></div>
+
+        <!-- Agregar nuevo ingreso -->
+        <div class="add-section">
+          <span class="add-eye">Nuevo registro</span>
+          <div class="add-title-lbl">Agregar <em>ingreso</em></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="add-grp"><label>Pareja o fuente</label>
+              <input type="text" id="ing-pareja" placeholder="Ej: Nat &amp; Luis, Florería García…">
+            </div>
+            <div class="add-grp"><label>Servicio / Concepto</label>
+              <select id="ing-servicio" style="width:100%;padding:10px 12px;border:1px solid var(--sand);border-radius:10px;font-size:13px;background:white;color:var(--dark);">
+                <option value="Wedding Planner">💍 Wedding Planner</option>
+                <option value="Wedding Day">🌸 Wedding Day</option>
+                <option value="Coordinación">📋 Coordinación del día</option>
+                <option value="Asesoría">✨ Asesoría</option>
+                <option value="Comisión">🤝 Comisión proveedor</option>
+                <option value="Propina">🎁 Propina / Extra</option>
+                <option value="Otro">💫 Otro</option>
+              </select>
+            </div>
+            <div class="add-grp"><label>Costo total del servicio ($)</label>
+              <input type="number" id="ing-total-srv" placeholder="0" min="0">
+            </div>
+            <div class="add-grp"><label>Anticipo recibido ($)</label>
+              <input type="number" id="ing-anticipo" placeholder="0" min="0">
+            </div>
+            <div class="add-grp"><label>Fecha</label>
+              <input type="date" id="ing-fecha">
+            </div>
+            <div class="add-grp"><label>Notas</label>
+              <input type="text" id="ing-notas" placeholder="Detalles opcionales…">
+            </div>
+          </div>
+          <button class="add-btn" onclick="addIngreso()">+ Agregar ingreso</button>
+        </div>
+
+        <!-- Resumen por servicio -->
+        <div class="sec-hdr" style="margin-top:16px;">
+          <span class="sec-eye-lbl">Desglose</span>
+          <div class="sec-title">Por tipo de <em>servicio</em></div>
+        </div>
+        <div id="ing-por-servicio"></div>
+
+      </div>
+    </div>
+
+  </div><!-- /dash-main -->
+</div><!-- /dashboard -->
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getDatabase, ref, get, set, onValue } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+
+// ══ CONFIG ═══════════════════════════════════════════════
+const MASTER_PASSWORD = 'demir12';
+
+const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const MONTHS_S = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const DAYS_S = ['D','L','M','M','J','V','S'];
+const DAYS_L = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const CHIP_COLORS = ['#7B2D42','#B99438','#5a1e2e','#c4607a','#d4ac4a','#3a2028','#8a7070','#c0392b','#6B4C9A','#2D5986','#5D8A5E','#7a6040'];
+
+// ══ FIREBASE DASHBOARD CONFIG ════════════════════════════
+const DASH_FB_CONFIG = {
+  apiKey: 'AIzaSyBSUYwd2cagF8GVv2E7IpMXinHNphPjMRM',
+  databaseURL: 'https://nat-luis-bf4d8-default-rtdb.firebaseio.com'
+};
+const dashApp = initializeApp(DASH_FB_CONFIG, 'dashboard');
+const dashDb = getDatabase(dashApp);
+
+let couples = JSON.parse(localStorage.getItem('demir_couples') || '[]');
+let ownTasks = JSON.parse(localStorage.getItem('demir_own_tasks') || '[]');
+let plannerData = JSON.parse(localStorage.getItem('demir_planner') || '{}');
+let ingresos = JSON.parse(localStorage.getItem('demir_ingresos') || '[]');
+let firebaseTasks = {};
+
+// Estado calendario/planner
+let curM = new Date().getMonth(), curY = new Date().getFullYear();
+let dailyDate = new Date(), dM = new Date().getMonth(), dY = new Date().getFullYear();
+let currentTab = 'resumen';
+
+// ══ LOGIN ═════════════════════════════════════════════════
+document.getElementById('pwd-input').addEventListener('keydown', e => { if(e.key==='Enter') checkPwd(); });
+
+window.checkPwd = () => {
+  if(document.getElementById('pwd-input').value === MASTER_PASSWORD){
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').classList.add('show');
+    buildMonthChipsAndTabs();
+    loadCouplesFromFirebase(); // carga parejas desde Firebase y luego llama loadAllFirebaseTasks
+  } else {
+    const err = document.getElementById('l-error'); err.classList.add('show');
+    document.getElementById('pwd-input').value = '';
+    const box = document.querySelector('.login-box');
+    box.style.animation = 'shake .4s ease';
+    setTimeout(()=>box.style.animation='', 400);
+  }
+};
+
+window.doLogout = () => {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('dashboard').classList.remove('show');
+  document.getElementById('pwd-input').value = '';
+};
+
+// ══ TABS ══════════════════════════════════════════════════
+window.switchTab = (tab) => {
+  currentTab = tab;
+  document.querySelectorAll('.dtab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-'+tab).classList.add('active');
+
+  // Chips y tabs laterales solo en calendario y planner
+  const showChips = tab === 'calendario' || tab === 'planner';
+  document.getElementById('chips-wrap').style.display = showChips ? 'block' : 'none';
+  document.getElementById('monthTabs').style.display = showChips ? 'flex' : 'none';
+
+  if(tab === 'calendario') renderCal();
+  if(tab === 'planner') renderDaily();
+  if(tab === 'pendientes'){ renderOwnTasks(); renderPendientes(); }
+  if(tab === 'resumen'){ renderStats(); renderBodas(); }
+  if(tab === 'ingresos'){ renderIngresos(); initIngFecha(); }
+};
+
+// ══ MONTH CHIPS + LATERAL TABS ═══════════════════════════
+function buildMonthChipsAndTabs(){
+  const chips = document.getElementById('monthChips');
+  const tabs = document.getElementById('monthTabs');
+  chips.innerHTML = ''; tabs.innerHTML = '';
+
+  MONTHS.forEach((m, i) => {
+    const color = CHIP_COLORS[i];
+    // Chip horizontal
+    const chip = document.createElement('div');
+    chip.className = 'mchip' + (i === curM ? ' active' : '');
+    chip.style.background = color;
+    chip.textContent = MONTHS_S[i];
+    chip.addEventListener('click', () => goToMonth(i));
+    chip.addEventListener('touchend', (e) => { e.preventDefault(); goToMonth(i); });
+    chips.appendChild(chip);
+
+    // Tab lateral
+    const tab = document.createElement('button');
+    tab.className = 'mtab' + (i === curM ? ' active' : '');
+    tab.style.background = color;
+    tab.textContent = MONTHS_S[i];
+    tab.addEventListener('click', () => goToMonth(i));
+    tab.addEventListener('touchend', (e) => { e.preventDefault(); goToMonth(i); });
+    tabs.appendChild(tab);
+  });
+}
+
+function updateChipsActive(){
+  const m = currentTab === 'planner' ? dM : curM;
+  document.querySelectorAll('.mchip').forEach((c,i) => c.classList.toggle('active', i===m));
+  document.querySelectorAll('.mtab').forEach((t,i) => t.classList.toggle('active', i===m));
+  // Scroll chip activo a la vista
+  const activeChip = document.querySelectorAll('.mchip')[m];
+  if(activeChip) activeChip.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+}
+
+function goToMonth(m){
+  if(currentTab === 'planner'){
+    dM = m; dY = new Date().getFullYear();
+    renderMiniCal();
+    document.getElementById('miniCalLbl').textContent = `${MONTHS[dM]} ${dY}`;
+  } else {
+    curM = m;
+    renderCal();
+  }
+  updateChipsActive();
+}
+
+// ══ FIREBASE ══════════════════════════════════════════════
+async function loadAllFirebaseTasks(){
+  firebaseTasks = {};
+  const apps = [];
+  const promises = couples.map(async (c, i) => {
+    if(!c.fburl) return;
+    try {
+      const appName = `couple-${i}-${Date.now()}-${Math.random()}`;
+      const app = initializeApp({ 
+        apiKey: c.apikey || 'AIzaSyplaceholder',
+        databaseURL: c.fburl 
+      }, appName);
+      apps.push(app);
+      const db = getDatabase(app);
+      const parejaId = c.parejaid || c.fburl.replace('https://','').split('-default-rtdb')[0].split('.firebaseio')[0];
+      // Cargar tasks del planner Y checklist
+      const [snapTasks, snapChecklist] = await Promise.all([
+        get(ref(db, `agendas/${parejaId}/tasks`)),
+        get(ref(db, `agendas/${parejaId}/checklist`))
+      ]);
+      firebaseTasks[i] = {};
+      if(snapTasks.exists()) firebaseTasks[i].tasks = snapTasks.val() || {};
+      if(snapChecklist.exists()) firebaseTasks[i].checklist = snapChecklist.val() || [];
+    } catch(e){ console.warn(`Firebase error ${c.names}:`, e.message); }
+  });
+  await Promise.all(promises);
+  renderAll();
+}
+
+// ══ RENDER ALL ════════════════════════════════════════════
+function renderAll(){
+  renderStats(); renderBodas(); renderOwnTasks(); renderPendientes();
+  if(currentTab==='calendario') renderCal();
+  if(currentTab==='planner') renderDaily();
+  renderCouplesList();
+}
+
+// ══ STATS ═════════════════════════════════════════════════
+function renderStats(){
+  const today = new Date(), todayStr = today.toISOString().split('T')[0];
+  document.getElementById('stat-total').textContent = couples.length;
+  document.getElementById('stat-proximas').textContent = couples.filter(c=>{
+    if(!c.date) return false;
+    const d = new Date(c.date+'T12:00:00');
+    return d.getMonth()===today.getMonth() && d.getFullYear()===today.getFullYear();
+  }).length;
+
+  let pend = ownTasks.filter(t=>!t.done && t.date===todayStr).length;
+  couples.forEach((c,i)=>{
+    const fb = firebaseTasks[i];
+    const tasks = fb && fb.tasks ? fb.tasks : {};
+    if(tasks) Object.values(tasks).forEach(dayTasks => {
+      if(Array.isArray(dayTasks)) pend += dayTasks.filter(t=>!t.done && t.date===todayStr).length;
+    });
+  });
+  document.getElementById('stat-pendientes').textContent = pend;
+
+  const upcoming = couples.filter(c=>c.date && new Date(c.date+'T12:00:00')>=today).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  document.getElementById('stat-dias').textContent = upcoming.length
+    ? Math.ceil((new Date(upcoming[0].date+'T12:00:00')-today)/(864e5))
+    : '—';
+}
+
+// ══ BODAS ═════════════════════════════════════════════════
+function renderBodas(){
+  const grid = document.getElementById('bodas-grid'), today = new Date();
+  if(!couples.length){ grid.innerHTML='<div class="boda-empty">Agrega parejas en "Parejas" para verlas aquí</div>'; return; }
+  const sorted = [...couples].filter(c=>c.date).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  if(!sorted.length){ grid.innerHTML='<div class="boda-empty">No hay bodas con fecha asignada</div>'; return; }
+  grid.innerHTML = sorted.map(c=>{
+    const d=new Date(c.date+'T12:00:00'), diff=Math.ceil((d-today)/864e5);
+    const past=diff<0, urgent=diff>=0&&diff<=30, soon=diff>30&&diff<=90;
+    const cls = urgent?'urgente':soon?'pronto':'';
+    const badge = past?'':urgent?'<span class="boda-badge badge-urgente">¡Pronto!</span>':soon?'<span class="boda-badge badge-pronto">Este trimestre</span>':'<span class="boda-badge badge-ok">Planificando</span>';
+    const diasTxt = past?`Hace ${Math.abs(diff)}`:diff===0?'¡HOY!':diff;
+    const diasLbl = past?'días':diff===0?'':'días';
+    return `<div class="boda-card ${cls}">${badge}
+      <div class="boda-dias">${diasTxt}</div>
+      <div class="boda-dias-lbl">${diasLbl}</div>
+      <div class="boda-nombres">${c.names}</div>
+      <div class="boda-fecha">${fmtDate(c.date)}</div>
+      ${c.url?`<a href="${cleanUrl(c.url)}" target="_blank" style="display:inline-block;margin-top:10px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--wine);border-bottom:1px solid rgba(123,45,66,.3);">Ver agenda →</a>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ══ CALENDARIO ════════════════════════════════════════════
+window.changeMonth = (dir) => {
+  curM += dir;
+  if(curM>11){curM=0;curY++;} if(curM<0){curM=11;curY--;}
+  renderCal(); updateChipsActive();
+};
+
+function getCalEvents(){
+  const evs = {};
+  couples.forEach((c,ci)=>{
+    if(c.date){
+      const d=new Date(c.date+'T12:00:00');
+      const key=d.toDateString();
+      if(!evs[key]) evs[key]=[];
+      evs[key].push({type:'boda',name:c.names,color:CHIP_COLORS[ci%CHIP_COLORS.length]});
+    }
+    // Firebase tasks del planner diario y checklist
+    const fb = firebaseTasks[ci];
+    if(fb){
+      // Tareas del planner diario — punto dorado
+      // taskKey() en la agenda usa: año-mes(0-indexado)-día  ej: "2026-2-11" = 11 marzo 2026
+      if(fb.tasks){
+        Object.entries(fb.tasks).forEach(([k, val])=>{
+          if(Array.isArray(val) && !k.startsWith('imp_') && !k.startsWith('not_') && !k.startsWith('obj_')){
+            const parts=k.split('-');
+            if(parts.length===3){
+              const pending = val.filter(t=>!t.done);
+              if(pending.length>0){
+                // mes ya es 0-indexado, pasarlo directo a new Date
+                const td=new Date(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]));
+                const key=td.toDateString();
+                if(!evs[key]) evs[key]=[];
+                evs[key].push({type:'task',name:pending[0].text,couple:c.names,color:CHIP_COLORS[ci%CHIP_COLORS.length],done:false});
+              }
+            }
+          }
+        });
+      }
+      // Checklist deadlines — punto vino
+      // S.checklist es un array de secciones: [{id, fase, items:[{id,text,done,deadline,...}]}]
+      if(fb.checklist && Array.isArray(fb.checklist)){
+        fb.checklist.forEach(section=>{
+          if(!section || !section.items || !Array.isArray(section.items)) return;
+          section.items.forEach(item=>{
+            if(item && item.deadline && !item.done){
+              const td=new Date(item.deadline+'T12:00:00');
+              const key=td.toDateString();
+              if(!evs[key]) evs[key]=[];
+              evs[key].push({type:'deadline',name:item.text,couple:c.names,color:'#7B2D42'});
+            }
+          });
+        });
+      }
+    }
+  });
+  // Own tasks (con fecha asignada)
+  ownTasks.forEach(t=>{
+    if(t.date){
+      const td=new Date(t.date+'T12:00:00'), key=td.toDateString();
+      if(!evs[key]) evs[key]=[];
+      evs[key].push({type:'own',name:t.text,couple:'DEMIR',color:CHIP_COLORS[1],done:t.done});
+    }
+  });
+  // Tareas del Planner Diario del dashboard (plannerData)
+  // keys formato: "año-mes(0-idx)-día"  ej: "2026-2-11"
+  Object.entries(plannerData).forEach(([k, val])=>{
+    if(k.startsWith('obj-')) return; // saltar objetivos del mes
+    const parts = k.split('-');
+    if(parts.length === 3 && val && val.tasks){
+      const pending = val.tasks.filter(t => t && !t.done && t.text && t.text.trim());
+      if(pending.length > 0){
+        const td = new Date(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]));
+        const key = td.toDateString();
+        if(!evs[key]) evs[key]=[];
+        evs[key].push({type:'task', name:pending[0].text, couple:'DEMIR', color:CHIP_COLORS[1], done:false});
+      }
+    }
+  });
+  return evs;
+}
+
+let calEvents={};
+
+function renderCal(){
+  const m=curM, y=curY, today=new Date(); today.setHours(0,0,0,0);
+  document.getElementById('calNavLbl').textContent=`${MONTHS[m]} ${y}`;
+  document.getElementById('calMonthName').textContent=MONTHS[m];
+  document.getElementById('calYear').textContent=y;
+  calEvents = getCalEvents();
+
+  // Objetivo del mes
+  const objKey=`obj-${y}-${m}`;
+  const objIn=document.getElementById('calObj');
+  objIn.value=plannerData[objKey]||'';
+  objIn.oninput=()=>{ plannerData[objKey]=objIn.value; savePlanner(); };
+
+  const grid=document.getElementById('calGrid'); grid.innerHTML='';
+  DAYS_S.forEach(d=>{const c=document.createElement('div');c.className='cal-dow';c.textContent=d;grid.appendChild(c);});
+  const first=new Date(y,m,1).getDay(), dim=new Date(y,m+1,0).getDate(), diprev=new Date(y,m,0).getDate();
+  for(let i=first-1;i>=0;i--){const d=document.createElement('div');d.className='cal-day other';d.textContent=diprev-i;grid.appendChild(d);}
+  for(let day=1;day<=dim;day++){
+    const dt=new Date(y,m,day), key=dt.toDateString();
+    const ev=calEvents[key]||[];
+    const hasBoda=ev.some(e=>e.type==='boda');
+    const hasTask=ev.some(e=>e.type==='task'||e.type==='own');
+    const hasDeadline=ev.some(e=>e.type==='deadline');
+    const d=document.createElement('div'); d.className='cal-day'; d.textContent=day;
+    if(dt.getTime()===today.getTime()) d.classList.add('today');
+    else if(hasBoda) d.classList.add('has-boda');
+    if(hasTask) d.classList.add('has-task');
+    if(hasDeadline) d.classList.add('has-deadline');
+    // Al tocar un día → ir al planner con esa fecha
+    d.onclick=()=>{
+      dailyDate=new Date(y,m,day);
+      switchTab('planner');
+    };
+    grid.appendChild(d);
+  }
+  const tot=first+dim, rem=tot%7===0?0:7-(tot%7);
+  for(let i=1;i<=rem;i++){const d=document.createElement('div');d.className='cal-day other';d.textContent=i;grid.appendChild(d);}
+
+  // Leyenda
+  let leg = document.getElementById('calLegend');
+  if(!leg){
+    leg = document.createElement('div');
+    leg.id = 'calLegend';
+    leg.className = 'cal-legend';
+    leg.innerHTML = `
+      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--gold)"></div>Tareas pendientes</div>
+      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#7B2D42"></div>Fecha límite</div>
+      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--gold-lt);border:1px solid var(--gold);"></div>Boda</div>
+    `;
+    grid.parentElement.appendChild(leg);
+  }
+}
+
+// ══ PLANNER DIARIO ════════════════════════════════════════
+window.chDailyM = (dir) => {
+  dM+=dir; if(dM>11){dM=0;dY++;} if(dM<0){dM=11;dY--;}
+  renderMiniCal();
+  document.getElementById('miniCalLbl').textContent=`${MONTHS[dM]} ${dY}`;
+  updateChipsActive();
+};
+
+function renderDaily(){
+  const d=dailyDate;
+  document.getElementById('dayNum').textContent=String(d.getDate()).padStart(2,'0');
+  document.getElementById('dayDow').textContent=DAYS_L[d.getDay()].toUpperCase();
+  document.getElementById('dayMonth').textContent=MONTHS[d.getMonth()];
+  dM=d.getMonth(); dY=d.getFullYear();
+  document.getElementById('miniCalLbl').textContent=`${MONTHS[dM]} ${dY}`;
+  renderMiniCal(); renderTasks(); renderPendParejasHoy();
+  updateChipsActive();
+}
+
+function renderMiniCal(){
+  const m=dM, y=dY, grid=document.getElementById('miniCal'); grid.innerHTML='';
+  const calEvs=getCalEvents();
+  DAYS_S.forEach(d=>{const c=document.createElement('div');c.className='mc-dow';c.textContent=d;grid.appendChild(c);});
+  const first=new Date(y,m,1).getDay(), dim=new Date(y,m+1,0).getDate(), diprev=new Date(y,m,0).getDate();
+  for(let i=first-1;i>=0;i--){const c=document.createElement('div');c.className='mc-day mc-other';c.textContent=diprev-i;grid.appendChild(c);}
+  for(let day=1;day<=dim;day++){
+    const c=document.createElement('div'); c.className='mc-day'; c.textContent=day;
+    const dt=new Date(y,m,day), key=dt.toDateString();
+    if(dt.toDateString()===dailyDate.toDateString()) c.classList.add('mc-active');
+    if(calEvs[key]&&calEvs[key].some(e=>e.type==='boda')) c.classList.add('mc-has-boda');
+    c.onclick=()=>{ dailyDate=new Date(y,m,day); renderDaily(); };
+    grid.appendChild(c);
+  }
+}
+
+function taskKey(){ const d=dailyDate; return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; }
+const TASK_COLORS=['#F4A7B3','#9ECFE0','#C9A84C','#C4A8F2','#B5D9A0','#F9C5A1'];
+
+function renderTasks(){
+  const key=taskKey();
+  if(!plannerData[key]) plannerData[key]={tasks:[{text:'',done:false,color:TASK_COLORS[0]},{text:'',done:false,color:TASK_COLORS[1]},{text:'',done:false,color:TASK_COLORS[2]}],imp:'',notas:''};
+  const list=document.getElementById('taskList'); list.innerHTML='';
+  plannerData[key].tasks.forEach((task,i)=>{
+    const item=document.createElement('div'); item.className='task-item';
+    const dot=document.createElement('div');
+    dot.className='task-dot'+(task.done?' done-dot':'');
+    dot.style.color=task.color; dot.style.borderColor=task.color;
+    dot.onclick=()=>{ task.done=!task.done; savePlanner(); renderTasks(); };
+    const inp=document.createElement('input'); inp.type='text';
+    inp.className='task-inp'+(task.done?' done-txt':'');
+    inp.value=task.text; inp.placeholder='Tarea…';
+    inp.oninput=()=>{ task.text=inp.value; savePlanner(); };
+    const del=document.createElement('button'); del.className='task-del'; del.textContent='×';
+    del.onclick=()=>{ plannerData[key].tasks.splice(i,1); savePlanner(); renderTasks(); };
+    item.appendChild(dot); item.appendChild(inp); item.appendChild(del);
+    list.appendChild(item);
+  });
+  // Importante y notas
+  const imp=document.getElementById('importanteTA');
+  imp.value=plannerData[key].imp||'';
+  imp.oninput=()=>{ plannerData[key].imp=imp.value; savePlanner(); };
+  const notas=document.getElementById('notasTA');
+  notas.value=plannerData[key].notas||'';
+  notas.oninput=()=>{ plannerData[key].notas=notas.value; savePlanner(); };
+}
+
+window.addTask = () => {
+  const key=taskKey();
+  if(!plannerData[key]) plannerData[key]={tasks:[],imp:'',notas:''};
+  const color=TASK_COLORS[plannerData[key].tasks.length%TASK_COLORS.length];
+  plannerData[key].tasks.push({text:'',done:false,color});
+  savePlanner(); renderTasks();
+};
+
+function savePlanner(){ localStorage.setItem('demir_planner', JSON.stringify(plannerData)); if(currentTab==='calendario') renderCal(); }
+
+// Pendientes de parejas para el día seleccionado en el planner
+function renderPendParejasHoy(){
+  const container=document.getElementById('pend-parejas-hoy');
+  const dateStr=`${dailyDate.getFullYear()}-${dailyDate.getMonth()}-${dailyDate.getDate()}`;
+
+  if(!couples.length){ container.innerHTML='<div class="pend-card"><div class="pend-empty">Agrega parejas para ver sus tareas aquí</div></div>'; return; }
+
+  container.innerHTML = couples.map((c,i)=>{
+    const fb=firebaseTasks[i];
+    const fbTasks = fb && fb.tasks ? fb.tasks : null;
+    let tasks=[];
+    if(fbTasks && fbTasks[dateStr]){
+      const raw = fbTasks[dateStr];
+      tasks = Array.isArray(raw) ? raw : Object.values(raw);
+      tasks = tasks.filter(t => t && !t.done && t.text && t.text.trim());
+    }
+    const fbBadge=fb?'<span style="font-size:9px;background:#C6EFCE;color:#006100;padding:2px 7px;border-radius:10px;margin-left:6px;">🔥</span>':'';
+    const debugInfo='';
+    return `<div class="pend-card">
+      <div class="pend-card-title" style="color:${CHIP_COLORS[i%CHIP_COLORS.length]}">${c.names}${fbBadge}</div>
+      ${debugInfo}
+      ${tasks.length?tasks.map(t=>`<div class="pend-item"><div class="pend-dot" style="background:${CHIP_COLORS[i%CHIP_COLORS.length]}"></div><div class="pend-txt">${t.text}</div></div>`).join(''):'<div class="pend-empty">Sin tareas para este día ✓</div>'}
+    </div>`;
+  }).join('');
+}
+
+// ══ PENDIENTES PROPIOS ════════════════════════════════════
+window.addOwnTask = () => {
+  const txt=document.getElementById('own-txt').value.trim();
+  if(!txt) return;
+  const date=document.getElementById('own-date').value||new Date().toISOString().split('T')[0];
+  ownTasks.push({id:Date.now(),text:txt,date,done:false});
+  localStorage.setItem('demir_own_tasks',JSON.stringify(ownTasks));
+  document.getElementById('own-txt').value='';
+  document.getElementById('own-date').value='';
+  renderOwnTasks(); renderStats();
+};
+
+window.toggleOwnTask = (id) => {
+  const t=ownTasks.find(t=>t.id===id); if(t) t.done=!t.done;
+  localStorage.setItem('demir_own_tasks',JSON.stringify(ownTasks));
+  renderOwnTasks(); renderStats();
+};
+
+window.deleteOwnTask = (id) => {
+  ownTasks=ownTasks.filter(t=>t.id!==id);
+  localStorage.setItem('demir_own_tasks',JSON.stringify(ownTasks));
+  renderOwnTasks(); renderStats();
+};
+
+function renderOwnTasks(){
+  const list=document.getElementById('own-tasks-list'), todayStr=new Date().toISOString().split('T')[0];
+  const sorted=[...ownTasks].sort((a,b)=>(a.date||'')>(b.date||'')?1:-1);
+  if(!sorted.length){ list.innerHTML='<div class="pend-empty">Sin pendientes propios ✓</div>'; return; }
+  list.innerHTML=sorted.map(t=>{
+    const ov=!t.done&&t.date&&t.date<todayStr, tod=t.date===todayStr;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--blush-lt);">
+      <input type="checkbox" ${t.done?'checked':''} onchange="toggleOwnTask(${t.id})" style="width:16px;height:16px;accent-color:var(--wine);cursor:pointer;flex-shrink:0;">
+      <div style="flex:1;">
+        <div style="font-size:13px;${t.done?'text-decoration:line-through;color:var(--muted);':''}">${t.text}</div>
+        <div style="font-size:10px;color:${ov?'#c0392b':tod?'var(--wine)':'var(--muted)'};">${t.date?(tod?'📌 Hoy':ov?'⚠️ Vencido · '+fmtDate(t.date):fmtDate(t.date)):'Sin fecha'}</div>
+      </div>
+      <button onclick="deleteOwnTask(${t.id})" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;">✕</button>
+    </div>`;
+  }).join('');
+}
+
+// ══ PENDIENTES DE PAREJAS ═════════════════════════════════
+function renderPendientes(){
+  const grid=document.getElementById('pend-grid'), todayStr=new Date().toISOString().split('T')[0];
+  const today=new Date(), todayKey=`${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+  if(!couples.length){ grid.innerHTML='<div class="pend-card"><div class="pend-empty">Agrega parejas en "Parejas" para ver sus pendientes</div></div>'; return; }
+  grid.innerHTML=couples.map((c,i)=>{
+    const fb=firebaseTasks[i];
+    const fbTasks2 = fb && fb.tasks ? fb.tasks : null;
+    let tasks=[];
+    if(fbTasks2 && fbTasks2[todayKey]){
+      const raw=fbTasks2[todayKey];
+      tasks = Array.isArray(raw) ? raw : Object.values(raw);
+      tasks = tasks.filter(t => t && !t.done && t.text && t.text.trim());
+    }
+    const fbBadge=fb?'<span style="font-size:9px;background:#C6EFCE;color:#006100;padding:2px 7px;border-radius:10px;margin-left:6px;">🔥</span>':'<span style="font-size:9px;background:#FFEB9C;color:#9C6500;padding:2px 7px;border-radius:10px;margin-left:6px;">Sin Firebase</span>';
+    return `<div class="pend-card">
+      <div class="pend-card-title" style="color:${CHIP_COLORS[i%CHIP_COLORS.length]}">${c.names}${fbBadge}</div>
+      ${tasks.length?tasks.map(t=>`<div class="pend-item"><div class="pend-dot" style="background:${CHIP_COLORS[i%CHIP_COLORS.length]}"></div><div class="pend-txt">${t.text}</div></div>`).join(''):'<div class="pend-empty">Sin tareas para hoy ✓</div>'}
+    </div>`;
+  }).join('');
+}
+
+// ══ PAREJAS ═══════════════════════════════════════════════
+window.addCouple = () => {
+  const names=document.getElementById('new-names').value.trim();
+  if(!names){alert('Escribe el nombre de la pareja');return;}
+  couples.push({
+    names, date:document.getElementById('new-date').value,
+    pwd:document.getElementById('new-pwd').value.trim(),
+    url:document.getElementById('new-url').value.trim(),
+    fburl:document.getElementById('new-fburl').value.trim(),
+    apikey:document.getElementById('new-apikey').value.trim(),
+    parejaid:document.getElementById('new-parejaid').value.trim()
+  });
+  saveCouples();
+  ['new-names','new-date','new-pwd','new-url','new-fburl','new-apikey','new-parejaid'].forEach(id=>document.getElementById(id).value='');
+  loadAllFirebaseTasks();
+};
+
+window.deleteCouple = (i) => {
+  if(!confirm(`¿Eliminar a ${couples[i].names}?`)) return;
+  couples.splice(i,1); saveCouples(); loadAllFirebaseTasks();
+};
+
+function renderCouplesList(){
+  const list=document.getElementById('couples-list'), today=new Date();
+  if(!couples.length){ list.innerHTML='<div style="color:rgba(250,246,240,.4);font-style:italic;font-size:13px;padding:14px 0;">Aún no has agregado parejas</div>'; return; }
+  list.innerHTML=couples.map((c,i)=>{
+    const d=c.date?new Date(c.date+'T12:00:00'):null;
+    const diff=d?Math.ceil((d-today)/864e5):null;
+    const diasTxt=diff===null?'Sin fecha':diff<0?`Hace ${Math.abs(diff)}d`:diff===0?'¡Hoy!':diff+'d';
+    const fb=firebaseTasks[i] && (firebaseTasks[i].tasks||firebaseTasks[i].checklist)?'🔥':'⚠️';
+    return `<div class="couple-row">
+      <div class="cr-info">
+        <div class="cr-name">${c.names} <span style="font-size:12px;">${fb}</span></div>
+        <div class="cr-date">${c.date?fmtDate(c.date):'Sin fecha'} · Pwd: ${c.pwd||'—'}</div>
+      </div>
+      <div class="cr-dias">${diasTxt}</div>
+      ${c.url?`<a href="${cleanUrl(c.url)}" target="_blank" class="cr-link">Ver agenda</a>`:'<span></span>'}
+      <button class="cr-del" onclick="deleteCouple(${i})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function saveCouples(){
+  localStorage.setItem('demir_couples', JSON.stringify(couples));
+  // También guardar en Firebase para sincronizar entre dispositivos
+  set(ref(dashDb, 'demir-config/couples'), couples)
+    .then(() => console.log('✅ Parejas guardadas en Firebase'))
+    .catch(e => {
+      console.warn('Firebase save error:', e.message);
+      // Si falla Firebase, al menos localStorage funciona
+    });
+}
+
+// Cargar parejas desde Firebase al iniciar
+function loadCouplesFromFirebase(){
+  get(ref(dashDb, 'demir-config/couples')).then((snap) => {
+    if(snap.exists() && Array.isArray(snap.val()) && snap.val().length > 0){
+      couples = snap.val();
+      localStorage.setItem('demir_couples', JSON.stringify(couples));
+      console.log('✅ Parejas cargadas desde Firebase:', couples.length);
+    } else if(couples.length > 0){
+      // Si Firebase está vacío pero localStorage tiene datos, subir a Firebase
+      console.log('Subiendo parejas locales a Firebase...');
+      set(ref(dashDb, 'demir-config/couples'), couples)
+        .then(() => console.log('✅ Parejas subidas a Firebase'));
+    }
+    loadAllFirebaseTasks();
+  }).catch(e => {
+    console.warn('Error cargando Firebase:', e.message);
+    loadAllFirebaseTasks(); // Continuar con localStorage
+  });
+}
+
+function exportCouples(){
+  if(!couples.length){ alert('No hay parejas configuradas'); return; }
+  const code = btoa(unescape(encodeURIComponent(JSON.stringify(couples))));
+  const box = document.getElementById('import-box');
+  box.value = code;
+  // Intentar copiar al portapapeles
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(code)
+      .then(() => alert('✅ Código copiado al portapapeles.\nTambién aparece en el cuadro de texto por si acaso.'))
+      .catch(() => alert('El código aparece en el cuadro de texto.\nSelecciónalo todo y cópialo manualmente.'));
+  } else {
+    try { box.select(); document.execCommand('copy'); alert('✅ Código copiado.\nTambién aparece en el cuadro de texto.'); }
+    catch(e) { alert('El código aparece en el cuadro de texto.\nMantenlo presionado para copiar todo.'); }
+  }
+  // Scroll hasta el cuadro para que lo vea
+  box.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function importCouples(){
+  const raw = document.getElementById('import-box').value.trim();
+  if(!raw){ alert('Pega primero el código'); return; }
+  try {
+    const data = JSON.parse(decodeURIComponent(escape(atob(raw))));
+    if(!Array.isArray(data)) throw new Error();
+    if(!confirm('¿Importar ' + data.length + ' parejas? Esto reemplazará las actuales.')) return;
+    couples = data;
+    saveCouples();
+    loadAllFirebaseTasks();
+    alert('✅ Parejas importadas correctamente');
+    document.getElementById('import-box').value = '';
+  } catch(e) { alert('Código inválido. Asegúrate de copiar el código completo.'); }
+}
+function fmtDate(str){ if(!str)return''; const d=new Date(str+'T12:00:00'); return`${d.getDate()} ${MONTHS[d.getMonth()].slice(0,3)} ${d.getFullYear()}`; }
+
+// Limpia URLs — maneja paths relativos y URLs completas sin duplicar dominio
+function cleanUrl(url){
+  if(!url) return '#';
+  if(url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `https://demir.com.mx/${url.replace(/^\//,'')}`;
+}
+
+// ══ INGRESOS DEMIR ══════════════════════════════════════════════
+
+function saveIngresos(){ localStorage.setItem('demir_ingresos', JSON.stringify(ingresos)); }
+
+function initIngFecha(){
+  const f = document.getElementById('ing-fecha');
+  if(f && !f.value){ f.value = new Date().toISOString().split('T')[0]; }
+}
+
+function fmtMXN(n){ return '$'+Number(n||0).toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+function fmtFechaIng(s){ if(!s) return ''; const [y,m,d]=s.split('-'); const ms=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']; return `${parseInt(d)} ${ms[parseInt(m)-1]} ${y}`; }
+
+const ING_SERVICIOS = {
+  'Wedding Planner': {emoji:'💍', color:'#F2C4CE', fg:'#7B2D42'},
+  'Wedding Day':     {emoji:'🌸', color:'#F9E4EE', fg:'#9C2752'},
+  'Coordinación':    {emoji:'📋', color:'#FFF3CD', fg:'#856404'},
+  'Asesoría':        {emoji:'✨', color:'#EDE7F6', fg:'#4527A0'},
+  'Comisión':        {emoji:'🤝', color:'#D4EDFC', fg:'#1A4A6E'},
+  'Propina':         {emoji:'🎁', color:'#D4EDDA', fg:'#1A5E2A'},
+  'Otro':            {emoji:'💫', color:'#F5F5F5', fg:'#555'},
+};
+
+window.addIngreso = function(){
+  const pareja  = document.getElementById('ing-pareja').value.trim();
+  const servicio= document.getElementById('ing-servicio').value;
+  const total   = parseFloat(document.getElementById('ing-total-srv').value)||0;
+  const anticipo= parseFloat(document.getElementById('ing-anticipo').value)||0;
+  const fecha   = document.getElementById('ing-fecha').value;
+  const notas   = document.getElementById('ing-notas').value.trim();
+  if(!pareja){ document.getElementById('ing-pareja').focus(); return; }
+  if(!total){ document.getElementById('ing-total-srv').focus(); return; }
+  ingresos.unshift({
+    id: Date.now().toString(36)+Math.random().toString(36).substr(2,5),
+    pareja, servicio, total, cobrado: anticipo, fecha, notas
+  });
+  saveIngresos();
+  document.getElementById('ing-pareja').value='';
+  document.getElementById('ing-total-srv').value='';
+  document.getElementById('ing-anticipo').value='';
+  document.getElementById('ing-notas').value='';
+  renderIngresos();
+};
+
+window.deleteIngreso = function(id){
+  if(!confirm('\u00bfEliminar este ingreso?')) return;
+  ingresos = ingresos.filter(i=>i.id!==id);
+  saveIngresos(); renderIngresos();
+};
+
+window.editIngreso = function(id){
+  const ing = ingresos.find(i=>i.id===id);
+  if(!ing) return;
+  const existing = document.getElementById('editIngModal');
+  if(existing) existing.remove();
+  const m = document.createElement('div');
+  m.id='editIngModal';
+  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;';
+  const serviciosOpts = ['Wedding Planner','Wedding Day','Coordinación','Asesoría','Comisión','Propina','Otro']
+    .map(s=>`<option value="${s}" ${s===ing.servicio?'selected':''}>${s}</option>`).join('');
+  m.innerHTML=`<div style="background:white;border-radius:16px;width:100%;max-width:440px;overflow:hidden;font-family:inherit;">
+    <div style="background:var(--wine);padding:18px 20px;">
+      <div style="color:rgba(255,255,255,.6);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;">Editar ingreso</div>
+      <div style="color:white;font-size:17px;font-weight:700;margin-top:4px;">${ing.pareja}</div>
+    </div>
+    <div style="padding:20px;display:flex;flex-direction:column;gap:12px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><label style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Pareja / Fuente</label>
+          <input id="ei-pareja" value="${ing.pareja}" style="width:100%;padding:10px;border:1px solid var(--sand,#e8ddd5);border-radius:10px;font-size:13px;box-sizing:border-box;"></div>
+        <div><label style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Servicio</label>
+          <select id="ei-servicio" style="width:100%;padding:10px;border:1px solid var(--sand,#e8ddd5);border-radius:10px;font-size:13px;background:white;box-sizing:border-box;">${serviciosOpts}</select></div>
+        <div><label style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Costo total ($)</label>
+          <input id="ei-total" type="number" value="${ing.total}" style="width:100%;padding:10px;border:1px solid var(--sand,#e8ddd5);border-radius:10px;font-size:13px;box-sizing:border-box;"></div>
+        <div><label style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Ya cobrado ($)</label>
+          <input id="ei-cobrado" type="number" value="${ing.cobrado}" style="width:100%;padding:10px;border:1px solid var(--sand,#e8ddd5);border-radius:10px;font-size:13px;box-sizing:border-box;"></div>
+        <div><label style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Fecha</label>
+          <input id="ei-fecha" type="date" value="${ing.fecha}" style="width:100%;padding:10px;border:1px solid var(--sand,#e8ddd5);border-radius:10px;font-size:13px;box-sizing:border-box;"></div>
+        <div><label style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Notas</label>
+          <input id="ei-notas" value="${ing.notas||''}" placeholder="Detalles…" style="width:100%;padding:10px;border:1px solid var(--sand,#e8ddd5);border-radius:10px;font-size:13px;box-sizing:border-box;"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;">
+        <button onclick="document.getElementById('editIngModal').remove()"
+          style="padding:13px;border:1px solid var(--sand,#e8ddd5);background:white;border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit;">Cancelar</button>
+        <button onclick="saveEditIngreso('${id}')"
+          style="padding:13px;background:var(--wine);color:white;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Guardar cambios</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.appendChild(m);
+  m.addEventListener('click', e=>{ if(e.target===m) m.remove(); });
+};
+
+window.editPago = function(ingId, pi){
+  const ing = ingresos.find(i=>i.id===ingId);
+  if(!ing || !ing.pagos || !ing.pagos[pi]) return;
+  const p = ing.pagos[pi];
+  const existing = document.getElementById('editPagoModal');
+  if(existing) existing.remove();
+  const m = document.createElement('div');
+  m.id='editPagoModal';
+  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;';
+  m.innerHTML=`<div style="background:white;border-radius:16px;width:100%;max-width:380px;overflow:hidden;font-family:inherit;">
+    <div style="background:var(--wine);padding:18px 20px;">
+      <div style="color:rgba(255,255,255,.6);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;">Editar cobro</div>
+      <div style="color:white;font-size:17px;font-weight:700;margin-top:4px;">${ing.pareja}</div>
+    </div>
+    <div style="padding:20px;display:flex;flex-direction:column;gap:12px;">
+      <div><label style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Monto ($)</label>
+        <input id="ep-monto" type="number" value="${p.monto}" style="width:100%;padding:12px;border:1px solid var(--sand,#e8ddd5);border-radius:10px;font-size:16px;font-weight:700;color:var(--wine);box-sizing:border-box;"></div>
+      <div><label style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Fecha</label>
+        <input id="ep-fecha" type="date" value="${p.fecha||''}" style="width:100%;padding:12px;border:1px solid var(--sand,#e8ddd5);border-radius:10px;font-size:14px;box-sizing:border-box;"></div>
+      <div><label style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Nota</label>
+        <input id="ep-nota" type="text" value="${p.nota||''}" placeholder="Ej: Transferencia BBVA…" style="width:100%;padding:12px;border:1px solid var(--sand,#e8ddd5);border-radius:10px;font-size:13px;box-sizing:border-box;"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;">
+        <button onclick="document.getElementById('editPagoModal').remove()"
+          style="padding:13px;border:1px solid var(--sand,#e8ddd5);background:white;border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit;">Cancelar</button>
+        <button onclick="saveEditPago('${ingId}',${pi})"
+          style="padding:13px;background:var(--wine);color:white;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Guardar</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.appendChild(m);
+  m.addEventListener('click', e=>{ if(e.target===m) m.remove(); });
+  setTimeout(()=>{ const el=document.getElementById('ep-monto'); if(el){el.focus();el.select();} },100);
+};
+
+window.saveEditPago = function(ingId, pi){
+  const ing = ingresos.find(i=>i.id===ingId);
+  if(!ing || !ing.pagos || !ing.pagos[pi]) return;
+  const monto = parseFloat(document.getElementById('ep-monto').value)||0;
+  if(!monto || monto<=0) return;
+  ing.pagos[pi].monto = monto;
+  ing.pagos[pi].fecha = document.getElementById('ep-fecha').value;
+  ing.pagos[pi].nota  = document.getElementById('ep-nota').value.trim();
+  // Recalcular cobrado total
+  ing.cobrado = Math.min(ing.pagos.reduce((s,p)=>s+Number(p.monto),0), Number(ing.total));
+  document.getElementById('editPagoModal').remove();
+  saveIngresos(); renderIngresos();
+};
+
+window.deletePago = function(ingId, pi){
+  if(!confirm('\u00bfEliminar este cobro?')) return;
+  const ing = ingresos.find(i=>i.id===ingId);
+  if(!ing || !ing.pagos) return;
+  ing.pagos.splice(pi, 1);
+  // Recalcular cobrado total
+  ing.cobrado = Math.min(ing.pagos.reduce((s,p)=>s+Number(p.monto),0), Number(ing.total));
+  saveIngresos(); renderIngresos();
+};
+
+window.saveEditIngreso = function(id){
+  const ing = ingresos.find(i=>i.id===id);
+  if(!ing) return;
+  ing.pareja  = document.getElementById('ei-pareja').value.trim();
+  ing.servicio= document.getElementById('ei-servicio').value;
+  ing.total   = parseFloat(document.getElementById('ei-total').value)||0;
+  ing.cobrado = parseFloat(document.getElementById('ei-cobrado').value)||0;
+  ing.fecha   = document.getElementById('ei-fecha').value;
+  ing.notas   = document.getElementById('ei-notas').value.trim();
+  document.getElementById('editIngModal').remove();
+  saveIngresos(); renderIngresos();
+};
+
+window.addPago = function(id){
+  const ing = ingresos.find(i=>i.id===id);
+  if(!ing) return;
+  const pend = Number(ing.total||0)-Number(ing.cobrado||0);
+  // Crear modal de cobro
+  const existing = document.getElementById('pagoModal');
+  if(existing) existing.remove();
+  const today = new Date().toISOString().split('T')[0];
+  const m = document.createElement('div');
+  m.id='pagoModal';
+  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;';
+  m.innerHTML=`<div style="background:white;border-radius:16px;width:100%;max-width:400px;overflow:hidden;font-family:inherit;">
+    <div style="background:var(--wine);padding:18px 20px;">
+      <div style="color:rgba(255,255,255,.6);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;">Registrar cobro</div>
+      <div style="color:white;font-size:17px;font-weight:700;margin-top:4px;">${ing.pareja}</div>
+      <div style="color:var(--gold-lt,#D4B96A);font-size:12px;margin-top:2px;">Pendiente: ${fmtMXN(pend)}</div>
+    </div>
+    <div style="padding:20px;display:flex;flex-direction:column;gap:12px;">
+      <div><label style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Monto recibido ($)</label>
+        <input id="pago-monto" type="number" min="0" placeholder="0" value="${pend}"
+          style="width:100%;padding:12px;border:1px solid var(--sand,#e8ddd5);border-radius:10px;font-size:16px;font-weight:700;color:var(--wine);box-sizing:border-box;"></div>
+      <div><label style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Fecha del cobro</label>
+        <input id="pago-fecha" type="date" value="${today}"
+          style="width:100%;padding:12px;border:1px solid var(--sand,#e8ddd5);border-radius:10px;font-size:14px;box-sizing:border-box;"></div>
+      <div><label style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Nota (opcional)</label>
+        <input id="pago-nota" type="text" placeholder="Ej: Transferencia BBVA…"
+          style="width:100%;padding:12px;border:1px solid var(--sand,#e8ddd5);border-radius:10px;font-size:13px;box-sizing:border-box;"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;">
+        <button onclick="document.getElementById('pagoModal').remove()"
+          style="padding:13px;border:1px solid var(--sand,#e8ddd5);background:white;border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit;">Cancelar</button>
+        <button onclick="confirmPago('${id}')"
+          style="padding:13px;background:var(--wine);color:white;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">✅ Guardar cobro</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.appendChild(m);
+  m.addEventListener('click', e=>{ if(e.target===m) m.remove(); });
+  setTimeout(()=>{ const el=document.getElementById('pago-monto'); if(el){el.focus();el.select();} },100);
+};
+
+window.confirmPago = function(id){
+  const monto = parseFloat(document.getElementById('pago-monto').value)||0;
+  const fecha = document.getElementById('pago-fecha').value;
+  const nota  = document.getElementById('pago-nota').value.trim();
+  if(!monto || monto<=0) return;
+  const ing = ingresos.find(i=>i.id===id);
+  if(!ing) return;
+  if(!ing.pagos) ing.pagos=[];
+  ing.pagos.push({monto, fecha, nota});
+  ing.cobrado = Math.min(Number(ing.cobrado||0)+monto, Number(ing.total));
+  document.getElementById('pagoModal').remove();
+  saveIngresos(); renderIngresos();
+};
+
+function renderIngresos(){
+  // ── Stats globales ──
+  const totalSrv  = ingresos.reduce((s,i)=>s+Number(i.total||0),0);
+  const totalCob  = ingresos.reduce((s,i)=>s+Number(i.cobrado||0),0);
+  const totalPend = totalSrv - totalCob;
+  document.getElementById('ing-gran-total').textContent= fmtMXN(totalSrv);
+  document.getElementById('ing-total').textContent    = fmtMXN(totalCob);
+  document.getElementById('ing-pendiente').textContent= fmtMXN(totalPend);
+
+  // ── Tabla principal ──
+  const tabla = document.getElementById('ing-tabla');
+  tabla.innerHTML='';
+  if(ingresos.length===0){
+    tabla.innerHTML='<div style="padding:24px;text-align:center;color:var(--muted);font-size:12px;font-style:italic;">Sin ingresos registrados aún ✨</div>';
+  } else {
+    ingresos.forEach((ing,idx)=>{
+      const meta = ING_SERVICIOS[ing.servicio]||ING_SERVICIOS['Otro'];
+      const pend = Number(ing.total||0)-Number(ing.cobrado||0);
+      const pct  = ing.total>0?Math.round((ing.cobrado/ing.total)*100):0;
+      const liquidado = pend<=0;
+      const bg = idx%2===0?'#FAFAFA':'white';
+      const row = document.createElement('div');
+      row.style.cssText=`display:grid;grid-template-columns:2fr 1.2fr 1fr 1fr 1.2fr 36px;gap:8px;align-items:center;padding:11px 14px;background:${bg};border-bottom:1px solid var(--sand);`;
+      row.innerHTML=`
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--dark);">${ing.pareja}</div>
+          ${ing.notas?`<div style="font-size:10px;color:var(--muted);">${ing.notas}</div>`:''}
+          <div style="font-size:10px;color:var(--muted);margin-top:1px;">${fmtFechaIng(ing.fecha)}</div>
+        </div>
+        <div>
+          <span style="background:${meta.color};color:${meta.fg};font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;">${meta.emoji} ${ing.servicio}</span>
+        </div>
+        <div style="text-align:right;font-size:13px;font-weight:700;color:var(--dark);">${fmtMXN(ing.total)}</div>
+        <div style="text-align:right;">
+          <div style="font-size:13px;font-weight:700;color:#1A5E2A;">${fmtMXN(ing.cobrado)}</div>
+          ${pend>0?`<div style="font-size:10px;color:var(--wine);font-weight:600;">-${fmtMXN(pend)}</div>`:''}
+        </div>
+        <div style="text-align:center;">
+          ${liquidado
+            ? `<span style="background:#D4EDDA;color:#1A5E2A;font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;">✅ Liquidado</span>`
+            : `<button onclick="addPago('${ing.id}')" style="background:#F2C4CE;color:#7B2D42;border:none;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;">+ Cobro (${pct}%)</button>`
+          }
+        </div>
+        <div style="display:flex;gap:4px;justify-content:center;">
+          <button onclick="editIngreso('${ing.id}')" title="Editar" style="background:none;border:none;color:var(--gold);font-size:15px;cursor:pointer;line-height:1;padding:2px 4px;">✏️</button>
+          <button onclick="deleteIngreso('${ing.id}')" title="Eliminar" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;padding:2px 4px;">×</button>
+        </div>`;
+      // Historial de cobros desplegable
+      if(ing.pagos && ing.pagos.length>0){
+        const histId = 'hist-'+ing.id;
+        // Agregar indicador de cobros en la fila de fecha
+        const fechaDiv = row.querySelector('div > div:last-child');
+        // Botón toggle en la fila principal
+        const toggleBtn = document.createElement('div');
+        toggleBtn.style.cssText='grid-column:1/-1;background:#F5F2EE;border-top:1px dashed var(--sand);padding:7px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;';
+        toggleBtn.innerHTML=`<span style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--wine);font-weight:700;">📋 ${ing.pagos.length} cobro${ing.pagos.length>1?'s':''} registrado${ing.pagos.length>1?'s':''}</span><span id="arr-${ing.id}" style="color:var(--wine);font-size:14px;transition:transform .2s;">▼</span>`;
+        const hist = document.createElement('div');
+        hist.id = histId;
+        hist.style.cssText='grid-column:1/-1;padding:0 14px;background:#FAFAF7;border-top:1px dashed var(--sand);display:none;';
+        hist.innerHTML='<div style="padding:8px 0;">'
+          + ing.pagos.map((p,pi)=>`<div style="display:flex;gap:8px;align-items:center;font-size:12px;padding:5px 0;border-bottom:1px solid var(--sand);">
+            <span style="color:var(--muted);flex-shrink:0;min-width:80px;">${fmtFechaIng(p.fecha)}</span>
+            <span style="font-weight:700;color:#1A5E2A;flex:1;">+${fmtMXN(p.monto)}</span>
+            ${p.nota?`<span style="color:var(--muted);font-style:italic;flex:1;">${p.nota}</span>`:'<span style="flex:1;"></span>'}
+            <button onclick="editPago('${ing.id}',${pi})" style="background:none;border:none;color:var(--gold);font-size:13px;cursor:pointer;padding:2px 4px;" title="Editar">✏️</button>
+            <button onclick="deletePago('${ing.id}',${pi})" style="background:none;border:none;color:var(--muted);font-size:15px;cursor:pointer;padding:2px 4px;line-height:1;" title="Eliminar">×</button>
+          </div>`).join('')+'</div>';
+        toggleBtn.onclick = ()=>{
+          const open = hist.style.display!=='none';
+          hist.style.display = open?'none':'block';
+          const arr = document.getElementById('arr-'+ing.id);
+          if(arr) arr.style.transform = open?'rotate(0deg)':'rotate(180deg)';
+        };
+        row.style.display='grid';
+        row.style.gridTemplateColumns='2fr 1.2fr 1fr 1fr 1.2fr 36px';
+        row.appendChild(toggleBtn);
+        row.appendChild(hist);
+      }
+      tabla.appendChild(row);
+    });
+  }
+
+  // ── Por tipo de servicio ──
+  const porSrv = {};
+  ingresos.forEach(i=>{
+    if(!porSrv[i.servicio]) porSrv[i.servicio]={total:0,cobrado:0,count:0};
+    porSrv[i.servicio].total  +=Number(i.total||0);
+    porSrv[i.servicio].cobrado+=Number(i.cobrado||0);
+    porSrv[i.servicio].count++;
+  });
+  const psel = document.getElementById('ing-por-servicio');
+  psel.innerHTML='';
+  if(Object.keys(porSrv).length===0){
+    psel.innerHTML='<div style="padding:16px;color:var(--muted);font-size:12px;font-style:italic;text-align:center;">Aquí verás el desglose por servicio</div>';
+    return;
+  }
+  const grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:10px;';
+  Object.entries(porSrv).forEach(([srv,d])=>{
+    const meta=ING_SERVICIOS[srv]||ING_SERVICIOS['Otro'];
+    const pend=d.total-d.cobrado;
+    const box=document.createElement('div');
+    box.style.cssText=`background:${meta.color};border-radius:12px;padding:14px;`;
+    box.innerHTML=`
+      <div style="font-size:11px;font-weight:700;color:${meta.fg};margin-bottom:6px;">${meta.emoji} ${srv} <span style="opacity:.6;font-weight:400;">(${d.count})</span></div>
+      <div style="font-size:15px;font-weight:800;color:${meta.fg};">${fmtMXN(d.cobrado)}</div>
+      <div style="font-size:10px;color:${meta.fg};opacity:.7;margin-top:2px;">de ${fmtMXN(d.total)}</div>
+      ${pend>0?`<div style="font-size:10px;color:${meta.fg};font-weight:600;margin-top:3px;">⏳ ${fmtMXN(pend)} por cobrar</div>`:'<div style="font-size:10px;color:'+meta.fg+';margin-top:3px;">✅ Al corriente</div>'}`;
+    grid.appendChild(box);
+  });
+  psel.appendChild(grid);
+}
+</script>
