@@ -68,7 +68,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
 .dash-main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px;}
 
 /* Month chips (tabs laterales del mes) */
-.month-tabs{position:fixed;right:0;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:2px;z-index:200;}
+.month-tabs{position:fixed;right:0;top:50%;transform:translateY(-50%);display:none;flex-direction:column;gap:2px;z-index:200;}
 .mtab{
   writing-mode:vertical-rl;transform:rotate(180deg);
   width:26px;padding:10px 4px;font-size:8px;font-weight:700;letter-spacing:1.5px;
@@ -418,7 +418,7 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getDatabase, ref, get, set, onValue } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
 // ══ CONFIG ═══════════════════════════════════════════════
-const MASTER_PASSWORD = 'demir.admin2024';
+const MASTER_PASSWORD = 'demir12';
 
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const MONTHS_S = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
@@ -905,22 +905,31 @@ function saveCouples(){
   localStorage.setItem('demir_couples', JSON.stringify(couples));
   // También guardar en Firebase para sincronizar entre dispositivos
   set(ref(dashDb, 'demir-config/couples'), couples)
-    .catch(e => console.warn('Firebase save error:', e));
+    .then(() => console.log('✅ Parejas guardadas en Firebase'))
+    .catch(e => {
+      console.warn('Firebase save error:', e.message);
+      // Si falla Firebase, al menos localStorage funciona
+    });
 }
 
 // Cargar parejas desde Firebase al iniciar
 function loadCouplesFromFirebase(){
-  onValue(ref(dashDb, 'demir-config/couples'), (snap) => {
-    if(snap.exists() && snap.val() && snap.val().length > 0){
-      const fbCouples = snap.val();
-      // Si Firebase tiene más parejas que localStorage, usar Firebase
-      if(fbCouples.length >= couples.length){
-        couples = fbCouples;
-        localStorage.setItem('demir_couples', JSON.stringify(couples));
-      }
+  get(ref(dashDb, 'demir-config/couples')).then((snap) => {
+    if(snap.exists() && Array.isArray(snap.val()) && snap.val().length > 0){
+      couples = snap.val();
+      localStorage.setItem('demir_couples', JSON.stringify(couples));
+      console.log('✅ Parejas cargadas desde Firebase:', couples.length);
+    } else if(couples.length > 0){
+      // Si Firebase está vacío pero localStorage tiene datos, subir a Firebase
+      console.log('Subiendo parejas locales a Firebase...');
+      set(ref(dashDb, 'demir-config/couples'), couples)
+        .then(() => console.log('✅ Parejas subidas a Firebase'));
     }
     loadAllFirebaseTasks();
-  }, { onlyOnce: false });
+  }).catch(e => {
+    console.warn('Error cargando Firebase:', e.message);
+    loadAllFirebaseTasks(); // Continuar con localStorage
+  });
 }
 
 function exportCouples(){
@@ -968,4 +977,3 @@ function cleanUrl(url){
 </script>
 </body>
 </html>
-
