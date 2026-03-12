@@ -420,10 +420,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
 
     <!-- ── INGRESOS DEMIR ──────────────────────────── -->
     <div class="view" id="view-ingresos">
-      <div style="margin-top:16px;">
+      <div style="margin-top:16px;padding-bottom:120px;">
 
         <!-- Tarjetas resumen -->
         <div class="stats-row">
+          <div class="stat-box"><div class="n" id="ing-gran-total" style="color:var(--dark);">$0</div><div class="l">Total ingresos</div></div>
           <div class="stat-box"><div class="n" id="ing-total" style="color:var(--gold);">$0</div><div class="l">Total cobrado</div></div>
           <div class="stat-box"><div class="n" id="ing-pendiente" style="color:var(--wine);">$0</div><div class="l">Por cobrar</div></div>
         </div>
@@ -1141,7 +1142,7 @@ const ING_SERVICIOS = {
   'Otro':            {emoji:'💫', color:'#F5F5F5', fg:'#555'},
 };
 
-function addIngreso(){
+window.addIngreso = function(){
   const pareja  = document.getElementById('ing-pareja').value.trim();
   const servicio= document.getElementById('ing-servicio').value;
   const total   = parseFloat(document.getElementById('ing-total-srv').value)||0;
@@ -1160,28 +1161,129 @@ function addIngreso(){
   document.getElementById('ing-anticipo').value='';
   document.getElementById('ing-notas').value='';
   renderIngresos();
-}
+};
 
-function deleteIngreso(id){
-  if(!confirm('¿Eliminar este ingreso?')) return;
+window.deleteIngreso = function(id){
+  if(!confirm('\u00bfEliminar este ingreso?')) return;
   ingresos = ingresos.filter(i=>i.id!==id);
   saveIngresos(); renderIngresos();
-}
+};
 
-function addPago(id){
-  const monto = parseFloat(prompt('¿Cuánto pagaron? ($)'));
-  if(!monto || isNaN(monto) || monto<=0) return;
+window.editIngreso = function(id){
   const ing = ingresos.find(i=>i.id===id);
   if(!ing) return;
-  ing.cobrado = Math.min(Number(ing.cobrado||0)+monto, Number(ing.total));
+  const existing = document.getElementById('editIngModal');
+  if(existing) existing.remove();
+  const m = document.createElement('div');
+  m.id='editIngModal';
+  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;';
+  const serviciosOpts = ['Wedding Planner','Wedding Day','Coordinación','Asesoría','Comisión','Propina','Otro']
+    .map(s=>`<option value="${s}" ${s===ing.servicio?'selected':''}>${s}</option>`).join('');
+  m.innerHTML=`<div style="background:white;border-radius:16px;width:100%;max-width:440px;overflow:hidden;font-family:inherit;">
+    <div style="background:var(--wine);padding:18px 20px;">
+      <div style="color:rgba(255,255,255,.6);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;">Editar ingreso</div>
+      <div style="color:white;font-size:17px;font-weight:700;margin-top:4px;">${ing.pareja}</div>
+    </div>
+    <div style="padding:20px;display:flex;flex-direction:column;gap:12px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><label style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Pareja / Fuente</label>
+          <input id="ei-pareja" value="${ing.pareja}" style="width:100%;padding:10px;border:1px solid var(--sand,#e8ddd5);border-radius:10px;font-size:13px;box-sizing:border-box;"></div>
+        <div><label style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Servicio</label>
+          <select id="ei-servicio" style="width:100%;padding:10px;border:1px solid var(--sand,#e8ddd5);border-radius:10px;font-size:13px;background:white;box-sizing:border-box;">${serviciosOpts}</select></div>
+        <div><label style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Costo total ($)</label>
+          <input id="ei-total" type="number" value="${ing.total}" style="width:100%;padding:10px;border:1px solid var(--sand,#e8ddd5);border-radius:10px;font-size:13px;box-sizing:border-box;"></div>
+        <div><label style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Ya cobrado ($)</label>
+          <input id="ei-cobrado" type="number" value="${ing.cobrado}" style="width:100%;padding:10px;border:1px solid var(--sand,#e8ddd5);border-radius:10px;font-size:13px;box-sizing:border-box;"></div>
+        <div><label style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Fecha</label>
+          <input id="ei-fecha" type="date" value="${ing.fecha}" style="width:100%;padding:10px;border:1px solid var(--sand,#e8ddd5);border-radius:10px;font-size:13px;box-sizing:border-box;"></div>
+        <div><label style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Notas</label>
+          <input id="ei-notas" value="${ing.notas||''}" placeholder="Detalles…" style="width:100%;padding:10px;border:1px solid var(--sand,#e8ddd5);border-radius:10px;font-size:13px;box-sizing:border-box;"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;">
+        <button onclick="document.getElementById('editIngModal').remove()"
+          style="padding:13px;border:1px solid var(--sand,#e8ddd5);background:white;border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit;">Cancelar</button>
+        <button onclick="saveEditIngreso('${id}')"
+          style="padding:13px;background:var(--wine);color:white;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Guardar cambios</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.appendChild(m);
+  m.addEventListener('click', e=>{ if(e.target===m) m.remove(); });
+};
+
+window.saveEditIngreso = function(id){
+  const ing = ingresos.find(i=>i.id===id);
+  if(!ing) return;
+  ing.pareja  = document.getElementById('ei-pareja').value.trim();
+  ing.servicio= document.getElementById('ei-servicio').value;
+  ing.total   = parseFloat(document.getElementById('ei-total').value)||0;
+  ing.cobrado = parseFloat(document.getElementById('ei-cobrado').value)||0;
+  ing.fecha   = document.getElementById('ei-fecha').value;
+  ing.notas   = document.getElementById('ei-notas').value.trim();
+  document.getElementById('editIngModal').remove();
   saveIngresos(); renderIngresos();
-}
+};
+
+window.addPago = function(id){
+  const ing = ingresos.find(i=>i.id===id);
+  if(!ing) return;
+  const pend = Number(ing.total||0)-Number(ing.cobrado||0);
+  // Crear modal de cobro
+  const existing = document.getElementById('pagoModal');
+  if(existing) existing.remove();
+  const today = new Date().toISOString().split('T')[0];
+  const m = document.createElement('div');
+  m.id='pagoModal';
+  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;';
+  m.innerHTML=`<div style="background:white;border-radius:16px;width:100%;max-width:400px;overflow:hidden;font-family:inherit;">
+    <div style="background:var(--wine);padding:18px 20px;">
+      <div style="color:rgba(255,255,255,.6);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;">Registrar cobro</div>
+      <div style="color:white;font-size:17px;font-weight:700;margin-top:4px;">${ing.pareja}</div>
+      <div style="color:var(--gold-lt,#D4B96A);font-size:12px;margin-top:2px;">Pendiente: ${fmtMXN(pend)}</div>
+    </div>
+    <div style="padding:20px;display:flex;flex-direction:column;gap:12px;">
+      <div><label style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Monto recibido ($)</label>
+        <input id="pago-monto" type="number" min="0" placeholder="0" value="${pend}"
+          style="width:100%;padding:12px;border:1px solid var(--sand,#e8ddd5);border-radius:10px;font-size:16px;font-weight:700;color:var(--wine);box-sizing:border-box;"></div>
+      <div><label style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Fecha del cobro</label>
+        <input id="pago-fecha" type="date" value="${today}"
+          style="width:100%;padding:12px;border:1px solid var(--sand,#e8ddd5);border-radius:10px;font-size:14px;box-sizing:border-box;"></div>
+      <div><label style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Nota (opcional)</label>
+        <input id="pago-nota" type="text" placeholder="Ej: Transferencia BBVA…"
+          style="width:100%;padding:12px;border:1px solid var(--sand,#e8ddd5);border-radius:10px;font-size:13px;box-sizing:border-box;"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;">
+        <button onclick="document.getElementById('pagoModal').remove()"
+          style="padding:13px;border:1px solid var(--sand,#e8ddd5);background:white;border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit;">Cancelar</button>
+        <button onclick="confirmPago('${id}')"
+          style="padding:13px;background:var(--wine);color:white;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">✅ Guardar cobro</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.appendChild(m);
+  m.addEventListener('click', e=>{ if(e.target===m) m.remove(); });
+  setTimeout(()=>{ const el=document.getElementById('pago-monto'); if(el){el.focus();el.select();} },100);
+};
+
+window.confirmPago = function(id){
+  const monto = parseFloat(document.getElementById('pago-monto').value)||0;
+  const fecha = document.getElementById('pago-fecha').value;
+  const nota  = document.getElementById('pago-nota').value.trim();
+  if(!monto || monto<=0) return;
+  const ing = ingresos.find(i=>i.id===id);
+  if(!ing) return;
+  if(!ing.pagos) ing.pagos=[];
+  ing.pagos.push({monto, fecha, nota});
+  ing.cobrado = Math.min(Number(ing.cobrado||0)+monto, Number(ing.total));
+  document.getElementById('pagoModal').remove();
+  saveIngresos(); renderIngresos();
+};
 
 function renderIngresos(){
   // ── Stats globales ──
   const totalSrv  = ingresos.reduce((s,i)=>s+Number(i.total||0),0);
   const totalCob  = ingresos.reduce((s,i)=>s+Number(i.cobrado||0),0);
   const totalPend = totalSrv - totalCob;
+  document.getElementById('ing-gran-total').textContent= fmtMXN(totalSrv);
   document.getElementById('ing-total').textContent    = fmtMXN(totalCob);
   document.getElementById('ing-pendiente').textContent= fmtMXN(totalPend);
 
@@ -1219,9 +1321,39 @@ function renderIngresos(){
             : `<button onclick="addPago('${ing.id}')" style="background:#F2C4CE;color:#7B2D42;border:none;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;">+ Cobro (${pct}%)</button>`
           }
         </div>
-        <div style="text-align:center;">
-          <button onclick="deleteIngreso('${ing.id}')" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;">×</button>
+        <div style="display:flex;gap:4px;justify-content:center;">
+          <button onclick="editIngreso('${ing.id}')" title="Editar" style="background:none;border:none;color:var(--gold);font-size:15px;cursor:pointer;line-height:1;padding:2px 4px;">✏️</button>
+          <button onclick="deleteIngreso('${ing.id}')" title="Eliminar" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;padding:2px 4px;">×</button>
         </div>`;
+      // Historial de cobros desplegable
+      if(ing.pagos && ing.pagos.length>0){
+        const histId = 'hist-'+ing.id;
+        // Agregar indicador de cobros en la fila de fecha
+        const fechaDiv = row.querySelector('div > div:last-child');
+        // Botón toggle en la fila principal
+        const toggleBtn = document.createElement('div');
+        toggleBtn.style.cssText='grid-column:1/-1;background:#F5F2EE;border-top:1px dashed var(--sand);padding:7px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;';
+        toggleBtn.innerHTML=`<span style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--wine);font-weight:700;">📋 ${ing.pagos.length} cobro${ing.pagos.length>1?'s':''} registrado${ing.pagos.length>1?'s':''}</span><span id="arr-${ing.id}" style="color:var(--wine);font-size:14px;transition:transform .2s;">▼</span>`;
+        const hist = document.createElement('div');
+        hist.id = histId;
+        hist.style.cssText='grid-column:1/-1;padding:0 14px;background:#FAFAF7;border-top:1px dashed var(--sand);display:none;';
+        hist.innerHTML='<div style="padding:8px 0;">'
+          + ing.pagos.map(p=>`<div style="display:flex;gap:10px;align-items:center;font-size:12px;padding:5px 0;border-bottom:1px solid var(--sand);">
+            <span style="color:var(--muted);flex-shrink:0;min-width:80px;">${fmtFechaIng(p.fecha)}</span>
+            <span style="font-weight:700;color:#1A5E2A;">+${fmtMXN(p.monto)}</span>
+            ${p.nota?`<span style="color:var(--muted);font-style:italic;">${p.nota}</span>`:''}
+          </div>`).join('')+'</div>';
+        toggleBtn.onclick = ()=>{
+          const open = hist.style.display!=='none';
+          hist.style.display = open?'none':'block';
+          const arr = document.getElementById('arr-'+ing.id);
+          if(arr) arr.style.transform = open?'rotate(0deg)':'rotate(180deg)';
+        };
+        row.style.display='grid';
+        row.style.gridTemplateColumns='2fr 1.2fr 1fr 1fr 1.2fr 36px';
+        row.appendChild(toggleBtn);
+        row.appendChild(hist);
+      }
       tabla.appendChild(row);
     });
   }
