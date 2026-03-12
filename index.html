@@ -186,20 +186,25 @@
 
   /* RESEÑAS */
   #resenas{background:var(--cream);}
-  .testi-carousel-wrap{position:relative;margin-top:60px;display:flex;align-items:center;gap:12px;}
-  .testi-carousel{display:flex;gap:28px;overflow:hidden;flex:1;}
-  .testi-card{min-width:calc((100% - 56px)/3);padding:44px 36px;background:var(--cream2);border-top:2px solid transparent;transition:border-color .3s;flex-shrink:0;}
+  .testi-carousel-wrap{position:relative;margin-top:60px;}
+  .testi-viewport{overflow:hidden;width:100%;}
+  .testi-track{display:flex;transition:transform .5s ease;}
+  .testi-slide{display:grid;gap:28px;flex-shrink:0;width:100%;box-sizing:border-box;grid-template-columns:repeat(3,1fr);}
+  .testi-card{padding:44px 36px;background:var(--cream2);border-top:2px solid transparent;transition:border-color .3s;box-sizing:border-box;min-width:0;}
   .testi-card:hover{border-color:var(--gold);}
   .testi-q{font-family:"Cormorant Garamond",serif;font-size:72px;color:var(--gold);opacity:.25;line-height:.6;margin-bottom:22px;}
-  .testi-txt{font-family:"Lora",serif;font-style:italic;font-size:14px;line-height:1.9;color:var(--text);margin-bottom:28px;}
+  .testi-txt{font-family:"Lora",serif;font-style:italic;font-size:14px;line-height:1.9;color:var(--text);margin-bottom:28px;word-wrap:break-word;}
   .testi-stars{color:var(--gold);letter-spacing:4px;font-size:13px;margin-bottom:14px;}
   .testi-name{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--wine);font-weight:500;}
   .testi-date{font-size:11px;color:var(--gray);margin-top:4px;}
-  .testi-arr{background:none;border:1px solid rgba(185,148,56,.4);color:var(--gold);font-size:32px;width:44px;height:44px;cursor:pointer;flex-shrink:0;transition:all .3s;display:flex;align-items:center;justify-content:center;line-height:1;}
+  .testi-nav{display:flex;align-items:center;justify-content:center;gap:20px;margin-top:32px;}
+  .testi-arr{background:none;border:1px solid rgba(185,148,56,.4);color:var(--gold);font-size:32px;width:44px;height:44px;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;line-height:1;}
   .testi-arr:hover{background:var(--gold);color:var(--cream);}
-  .testi-dots{display:flex;justify-content:center;gap:8px;margin-top:32px;}
+  .testi-dots{display:flex;gap:8px;align-items:center;}
   .testi-dot{width:6px;height:6px;border-radius:50%;background:rgba(185,148,56,.3);cursor:pointer;transition:all .3s;}
   .testi-dot.active{background:var(--gold);width:20px;border-radius:4px;}
+  @media(max-width:960px){.testi-slide{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:600px){.testi-slide{grid-template-columns:1fr;}}
 
   /* QUOTE */
   #quote{background:var(--wine2);padding:100px 60px;text-align:center;}
@@ -587,63 +592,67 @@
   </div>
 
   <div class="testi-carousel-wrap">
-    <button class="testi-arr testi-prev" onclick="moveCarousel(-1)">‹</button>
-    <div class="testi-carousel" id="testiCarousel">
+    <div class="testi-viewport">
+      <div class="testi-track" id="testiTrack">
 
-      <div class="testi-card">
-        <div class="testi-q">"</div>
-        <p class="testi-txt">Me apoyó en todo el evento, con el seguimiento con proveedores, pagos, coordinación. Me acompañó en todo momento. Nuevamente muchas gracias a ti y a tu equipo, no sé qué hubiera hecho. La verdad es que el chavo de tu team super atento y super movido.</p>
-        <div class="testi-stars">★★★★☆ <span style="font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:1px;opacity:.7;">4.8</span></div>
-        <div class="testi-name">Pamela · Pam &amp; Victor</div>
-        <div class="testi-date">19 de Octubre 2024</div>
+        <!-- Slide 1: reseñas 1-3 -->
+        <div class="testi-slide" id="slide-0">
+          <div class="testi-card">
+            <div class="testi-q">"</div>
+            <p class="testi-txt">Me apoyó en todo el evento, con el seguimiento con proveedores, pagos, coordinación. Me acompañó en todo momento. Nuevamente muchas gracias a ti y a tu equipo, no sé qué hubiera hecho. La verdad es que el chavo de tu team super atento y super movido.</p>
+            <div class="testi-stars">★★★★☆ <span style="font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:1px;opacity:.7;">4.8</span></div>
+            <div class="testi-name">Pamela · Pam &amp; Victor</div>
+            <div class="testi-date">19 de Octubre 2024</div>
+          </div>
+          <div class="testi-card">
+            <div class="testi-q">"</div>
+            <p class="testi-txt">Excelente servicio, muy amables, excelente organización, muy recomendable. Calidad del servicio, tiempo de respuesta, profesionalidad, relación calidad/precio y flexibilidad, todo con la máxima puntuación. Sin duda una experiencia que superó todas nuestras expectativas.</p>
+            <div class="testi-stars">★★★★★ <span style="font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:1px;opacity:.7;">5.0</span></div>
+            <div class="testi-name">Martha · Idalia &amp; Edgar</div>
+            <div class="testi-date">20 de Julio 2024</div>
+          </div>
+          <div class="testi-card">
+            <div class="testi-q">"</div>
+            <p class="testi-txt">De verdad estamos muy agradecidos contigo, con Jenny y Mario, hicieron un trabajo increíble. Su organización estuvo demasiado bien. Gracias por apoyarnos en cada detalle, por estar súper atentos ese día. Todo salió increíble, gracias por resolvernos todos los inconvenientes. Eres la mejor organizadora.</p>
+            <div class="testi-stars">★★★★★ <span style="font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:1px;opacity:.7;">5.0</span></div>
+            <div class="testi-name">Danny · Daniela &amp; Daniel</div>
+            <div class="testi-date">25 de Octubre 2025</div>
+          </div>
+        </div>
+
+        <!-- Slide 2: reseñas 4-6 -->
+        <div class="testi-slide" id="slide-1">
+          <div class="testi-card">
+            <div class="testi-q">"</div>
+            <p class="testi-txt">Si buscas precio con calidad, DEMIR es tu opción. Se ajusta a tu presupuesto, excelente trato, responsabilidad en todo el evento. Recomiendo ampliamente a DEMIR por la calidez humana, por la disposición para hacer de tu evento todo un sueño hecho realidad, por saber escuchar, por tener paciencia y por su buen gusto. 100% recomendado.</p>
+            <div class="testi-stars">★★★★★ <span style="font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:1px;opacity:.7;">5.0</span></div>
+            <div class="testi-name">Miguel · Miguel &amp; Sarai</div>
+            <div class="testi-date">02 de Diciembre 2023</div>
+          </div>
+          <div class="testi-card">
+            <div class="testi-q">"</div>
+            <p class="testi-txt">Den, solo agradecerte a ti y a tu equipo por el gran trabajo que hicieron en nuestra boda, no lo habríamos logrado sin ustedes. Muchísimas gracias por todo. No se hubiera logrado sin ustedes, se rifaron, muchas gracias por todo.</p>
+            <div class="testi-stars">★★★★★ <span style="font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:1px;opacity:.7;">5.0</span></div>
+            <div class="testi-name">Sandy &amp; Jorge</div>
+            <div class="testi-date">26 de Julio 2025</div>
+          </div>
+          <div class="testi-card">
+            <div class="testi-q">"</div>
+            <p class="testi-txt">Estamos contentos con el servicio que nos ofrecieron, en especial por Denisse, fue muy atenta con su trabajo.</p>
+            <div class="testi-stars">★★★★☆ <span style="font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:1px;opacity:.7;">4.4</span></div>
+            <div class="testi-name">Lucero &amp; Paco</div>
+            <div class="testi-date">27 de Abril 2024</div>
+          </div>
+        </div>
+
       </div>
-
-      <div class="testi-card">
-        <div class="testi-q">"</div>
-        <p class="testi-txt">Excelente servicio, muy amables, excelente organización, muy recomendable. Calidad del servicio, tiempo de respuesta, profesionalidad, relación calidad/precio y flexibilidad, todo con la máxima puntuación. Sin duda una experiencia que superó todas nuestras expectativas.</p>
-        <div class="testi-stars">★★★★★ <span style="font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:1px;opacity:.7;">5.0</span></div>
-        <div class="testi-name">Martha · Idalia &amp; Edgar</div>
-        <div class="testi-date">20 de Julio 2024</div>
-      </div>
-
-      <div class="testi-card">
-        <div class="testi-q">"</div>
-        <p class="testi-txt">De verdad estamos muy agradecidos contigo, con Jenny y Mario, hicieron un trabajo increíble. Su organización estuvo demasiado bien. Gracias por apoyarnos en cada detalle, por estar súper atentos ese día. Todo salió increíble, gracias por resolvernos todos los inconvenientes. Eres la mejor organizadora.</p>
-        <div class="testi-stars">★★★★★ <span style="font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:1px;opacity:.7;">5.0</span></div>
-        <div class="testi-name">Danny · Daniela &amp; Daniel</div>
-        <div class="testi-date">25 de Octubre 2025</div>
-      </div>
-
-      <div class="testi-card">
-        <div class="testi-q">"</div>
-        <p class="testi-txt">Si buscas precio con calidad, DEMIR es tu opción. Se ajusta a tu presupuesto, excelente trato, responsabilidad en todo el evento. Recomiendo ampliamente a DEMIR por la calidez humana, por la disposición para hacer de tu evento todo un sueño hecho realidad, por saber escuchar, por tener paciencia y por su buen gusto. 100% recomendado.</p>
-        <div class="testi-stars">★★★★★ <span style="font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:1px;opacity:.7;">5.0</span></div>
-        <div class="testi-name">Miguel · Miguel &amp; Sarai</div>
-        <div class="testi-date">02 de Diciembre 2023</div>
-      </div>
-
-      <div class="testi-card">
-        <div class="testi-q">"</div>
-        <p class="testi-txt">Den, solo agradecerte a ti y a tu equipo por el gran trabajo que hicieron en nuestra boda, no lo habríamos logrado sin ustedes. Muchísimas gracias por todo. No se hubiera logrado sin ustedes, se rifaron, muchas gracias por todo.</p>
-        <div class="testi-stars">★★★★★ <span style="font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:1px;opacity:.7;">5.0</span></div>
-        <div class="testi-name">Sandy &amp; Jorge</div>
-        <div class="testi-date">26 de Julio 2025</div>
-      </div>
-
-      <div class="testi-card">
-        <div class="testi-q">"</div>
-        <p class="testi-txt">Estamos contentos con el servicio que nos ofrecieron, en especial por Denisse, fue muy atenta con su trabajo.</p>
-        <div class="testi-stars">★★★★☆ <span style="font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:1px;opacity:.7;">4.4</span></div>
-        <div class="testi-name">Lucero &amp; Paco</div>
-        <div class="testi-date">27 de Abril 2024</div>
-      </div>
-
     </div>
-    <button class="testi-arr testi-next" onclick="moveCarousel(1)">›</button>
+    <div class="testi-nav">
+      <button class="testi-arr" onclick="moveCarousel(-1)">‹</button>
+      <div class="testi-dots" id="testiDots"></div>
+      <button class="testi-arr" onclick="moveCarousel(1)">›</button>
+    </div>
   </div>
-
-  <!-- Dots -->
-  <div class="testi-dots" id="testiDots"></div>
 </section>
 
 <!-- QUOTE -->
@@ -858,24 +867,17 @@
 <script>
 // ── CARRUSEL DE RESEÑAS ──
 (function() {
-  const carousel = document.getElementById('testiCarousel');
+  const track = document.getElementById('testiTrack');
   const dotsWrap = document.getElementById('testiDots');
-  if (!carousel) return;
+  if (!track) return;
 
-  const cards = Array.from(carousel.querySelectorAll('.testi-card'));
+  const slides = Array.from(track.querySelectorAll('.testi-slide'));
+  const total = slides.length;
   let current = 0;
-
-  function visibleCount() {
-    return window.innerWidth <= 600 ? 1 : window.innerWidth <= 960 ? 2 : 3;
-  }
-
-  function totalSlides() {
-    return Math.ceil(cards.length / visibleCount());
-  }
 
   function buildDots() {
     dotsWrap.innerHTML = '';
-    for (let i = 0; i < totalSlides(); i++) {
+    for (let i = 0; i < total; i++) {
       const d = document.createElement('div');
       d.className = 'testi-dot' + (i === current ? ' active' : '');
       d.onclick = () => goTo(i);
@@ -884,13 +886,8 @@
   }
 
   function goTo(index) {
-    const slides = totalSlides();
-    current = (index + slides) % slides;
-    const cols = visibleCount();
-    const gap = 28;
-    const cardW = cards[0].offsetWidth;
-    carousel.style.transition = 'transform .5s ease';
-    carousel.style.transform = 'translateX(-' + (current * cols * (cardW + gap)) + 'px)';
+    current = (index + total) % total;
+    track.style.transform = 'translateX(-' + (current * 100) + '%)';
     dotsWrap.querySelectorAll('.testi-dot').forEach((d, i) => {
       d.classList.toggle('active', i === current);
     });
@@ -898,17 +895,10 @@
 
   window.moveCarousel = function(dir) { goTo(current + dir); };
 
-  let timer = setInterval(() => goTo(current + 1), 5000);
-  carousel.addEventListener('mouseenter', () => clearInterval(timer));
-  carousel.addEventListener('mouseleave', () => {
-    timer = setInterval(() => goTo(current + 1), 5000);
-  });
-
-  window.addEventListener('resize', () => {
-    current = 0;
-    carousel.style.transition = 'none';
-    carousel.style.transform = 'translateX(0)';
-    buildDots();
+  let timer = setInterval(() => goTo(current + 1), 6000);
+  track.addEventListener('mouseenter', () => clearInterval(timer));
+  track.addEventListener('mouseleave', () => {
+    timer = setInterval(() => goTo(current + 1), 6000);
   });
 
   buildDots();
