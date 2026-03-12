@@ -405,14 +405,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
           <div class="add-grp"><label>ID de la pareja en Firebase</label><input type="text" id="new-parejaid" placeholder="Ej: nat-luis  (carpeta en agendas/)"></div>
           <button class="add-btn" onclick="addCouple()">+ Agregar pareja</button>
 
-          <!-- Exportar / Importar -->
-          <div style="margin-top:24px;border-top:1px solid var(--sand);padding-top:20px;">
-            <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Sincronizar entre dispositivos</div>
-            <button class="add-btn" style="background:var(--gold);margin-bottom:10px;" onclick="exportCouples()">📋 Copiar código de parejas</button>
-            <textarea id="import-box" placeholder="Pega aquí el código copiado desde otro dispositivo..." style="width:100%;height:80px;border:1px solid var(--sand);border-radius:8px;padding:10px;font-size:12px;font-family:inherit;resize:none;margin-bottom:8px;"></textarea>
-            <button class="add-btn" style="background:#4a7c59;" onclick="importCouples()">📥 Importar parejas</button>
-          </div>
-
           <div id="couples-list" style="margin-top:16px;"></div>
         </div>
       </div>
@@ -423,7 +415,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getDatabase, ref, get } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+import { getDatabase, ref, get, set, onValue } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
 // ══ CONFIG ═══════════════════════════════════════════════
 const MASTER_PASSWORD = 'demir.admin2024';
@@ -433,6 +425,14 @@ const MONTHS_S = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','N
 const DAYS_S = ['D','L','M','M','J','V','S'];
 const DAYS_L = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 const CHIP_COLORS = ['#7B2D42','#B99438','#5a1e2e','#c4607a','#d4ac4a','#3a2028','#8a7070','#c0392b','#6B4C9A','#2D5986','#5D8A5E','#7a6040'];
+
+// ══ FIREBASE DASHBOARD CONFIG ════════════════════════════
+const DASH_FB_CONFIG = {
+  apiKey: 'AIzaSyBSUYwd2cagF8GVv2E7IpMXinHNphPjMRM',
+  databaseURL: 'https://nat-luis-bf4d8-default-rtdb.firebaseio.com'
+};
+const dashApp = initializeApp(DASH_FB_CONFIG, 'dashboard');
+const dashDb = getDatabase(dashApp);
 
 let couples = JSON.parse(localStorage.getItem('demir_couples') || '[]');
 let ownTasks = JSON.parse(localStorage.getItem('demir_own_tasks') || '[]');
@@ -452,7 +452,7 @@ window.checkPwd = () => {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('dashboard').classList.add('show');
     buildMonthChipsAndTabs();
-    loadAllFirebaseTasks();
+    loadCouplesFromFirebase(); // carga parejas desde Firebase y luego llama loadAllFirebaseTasks
   } else {
     const err = document.getElementById('l-error'); err.classList.add('show');
     document.getElementById('pwd-input').value = '';
@@ -901,7 +901,27 @@ function renderCouplesList(){
   }).join('');
 }
 
-function saveCouples(){ localStorage.setItem('demir_couples',JSON.stringify(couples)); }
+function saveCouples(){
+  localStorage.setItem('demir_couples', JSON.stringify(couples));
+  // También guardar en Firebase para sincronizar entre dispositivos
+  set(ref(dashDb, 'demir-config/couples'), couples)
+    .catch(e => console.warn('Firebase save error:', e));
+}
+
+// Cargar parejas desde Firebase al iniciar
+function loadCouplesFromFirebase(){
+  onValue(ref(dashDb, 'demir-config/couples'), (snap) => {
+    if(snap.exists() && snap.val() && snap.val().length > 0){
+      const fbCouples = snap.val();
+      // Si Firebase tiene más parejas que localStorage, usar Firebase
+      if(fbCouples.length >= couples.length){
+        couples = fbCouples;
+        localStorage.setItem('demir_couples', JSON.stringify(couples));
+      }
+    }
+    loadAllFirebaseTasks();
+  }, { onlyOnce: false });
+}
 
 function exportCouples(){
   if(!couples.length){ alert('No hay parejas configuradas'); return; }
@@ -948,3 +968,4 @@ function cleanUrl(url){
 </script>
 </body>
 </html>
+
