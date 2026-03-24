@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEMIR · Mi Pase</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --vino:#6B2D3E; --vino-deep:#4A1C2A; --dorado:#C9A84C;
+  --crema:#FAF6F0; --verde:#2D6B4A; --rojo:#C0392B;
+}
+body { font-family:'Montserrat',sans-serif; background:var(--crema); min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:1.5rem; }
+
+.loading { text-align:center; }
+.loading-logo { font-family:'Cormorant Garamond',serif; font-size:2rem; letter-spacing:8px; color:var(--vino-deep); margin-bottom:1rem; }
+.spinner { width:32px; height:32px; border:2px solid var(--crema); border-top-color:var(--vino); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto; }
+@keyframes spin { to{transform:rotate(360deg)} }
+
+.pase-wrap { width:100%; max-width:400px; }
+
+/* PASE CARD */
+.pase-card {
+  background:var(--vino-deep); border-radius:0; overflow:hidden;
+  box-shadow:0 20px 60px rgba(74,28,42,.4); margin-bottom:1.5rem;
+  position:relative;
+}
+.pase-card::before {
+  content:''; position:absolute; inset:0;
+  background:repeating-linear-gradient(45deg,transparent,transparent 18px,rgba(255,255,255,.02) 18px,rgba(255,255,255,.02) 19px);
+  pointer-events:none;
+}
+.pase-top { height:4px; background:var(--dorado); }
+.pase-inner { padding:2rem 1.75rem; position:relative; }
+
+.pase-logo { text-align:center; margin-bottom:1.25rem; }
+.pase-logo-text { font-family:'Cormorant Garamond',serif; font-size:1.4rem; letter-spacing:8px; color:var(--dorado); }
+.pase-logo-line { height:.5px; background:rgba(201,168,76,.3); margin:.5rem auto; width:80px; }
+
+.pase-evento-tipo { text-align:center; font-size:9px; letter-spacing:3px; color:rgba(255,255,255,.5); margin-bottom:.4rem; }
+.pase-evento-nombre { text-align:center; font-family:'Cormorant Garamond',serif; font-size:1.6rem; font-weight:300; color:white; margin-bottom:.25rem; }
+.pase-evento-fecha { text-align:center; font-size:10px; letter-spacing:2px; color:var(--dorado); margin-bottom:.25rem; }
+.pase-evento-venue { text-align:center; font-size:10px; color:rgba(255,255,255,.4); margin-bottom:1.5rem; }
+
+.pase-divider { height:.5px; background:rgba(201,168,76,.25); margin-bottom:1.5rem; }
+
+.pase-invitado-label { text-align:center; font-size:9px; letter-spacing:3px; color:rgba(255,255,255,.4); margin-bottom:.5rem; }
+.pase-invitado-nombre { text-align:center; font-family:'Cormorant Garamond',serif; font-size:1.8rem; font-weight:300; color:white; margin-bottom:.5rem; }
+.pase-acomp { text-align:center; font-size:10px; color:rgba(201,168,76,.8); letter-spacing:1px; margin-bottom:.75rem; }
+.pase-mesa { text-align:center; font-size:11px; letter-spacing:3px; font-weight:600; color:var(--dorado); }
+
+.pase-qr-wrap { display:flex; justify-content:center; margin:1.5rem 0 1rem; }
+.pase-qr-box { background:white; padding:12px; display:inline-block; }
+#qr-container img, #qr-container canvas { display:block; }
+
+.pase-nota { text-align:center; font-size:9px; color:rgba(255,255,255,.25); letter-spacing:1.5px; margin-bottom:1.5rem; }
+
+.pase-bottom { height:4px; background:var(--dorado); }
+
+/* RSVP */
+.rsvp-card { background:white; border:1px solid #e8e0d6; padding:2rem; }
+.rsvp-titulo { font-family:'Cormorant Garamond',serif; font-size:1.4rem; color:var(--vino-deep); margin-bottom:.25rem; }
+.rsvp-sub { font-size:10px; color:#999; letter-spacing:2px; text-transform:uppercase; margin-bottom:1.5rem; }
+.rsvp-estado { display:flex; align-items:center; gap:.75rem; margin-bottom:1.5rem; }
+.estado-badge { padding:.4rem 1rem; font-size:10px; letter-spacing:1px; font-weight:600; text-transform:uppercase; }
+.estado-pendiente { background:rgba(201,168,76,.1); color:#8a6d00; border:1px solid rgba(201,168,76,.3); }
+.estado-confirmado { background:rgba(45,107,74,.1); color:var(--verde); border:1px solid rgba(45,107,74,.3); }
+.estado-declinado  { background:rgba(192,57,43,.1);  color:var(--rojo);  border:1px solid rgba(192,57,43,.3); }
+
+.rsvp-btns { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; margin-bottom:1rem; }
+.btn-rsvp {
+  padding:1rem; border:none; cursor:pointer; font-family:'Montserrat',sans-serif;
+  font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase;
+  transition:all .2s; display:flex; flex-direction:column; align-items:center; gap:.4rem;
+}
+.btn-confirmar { background:var(--verde); color:white; }
+.btn-confirmar:hover { background:#1e4d33; }
+.btn-declinar  { background:transparent; color:var(--rojo); border:1.5px solid var(--rojo); }
+.btn-declinar:hover { background:var(--rojo); color:white; }
+.btn-rsvp .emoji { font-size:1.4rem; }
+.btn-rsvp-full {
+  width:100%; padding:.85rem; background:var(--vino); color:white; border:none;
+  cursor:pointer; font-family:'Montserrat',sans-serif; font-size:11px;
+  font-weight:600; letter-spacing:2px; text-transform:uppercase; margin-bottom:.75rem;
+}
+.btn-rsvp-full:hover { background:var(--vino-deep); }
+
+.rsvp-forms-link { text-align:center; }
+.rsvp-forms-link a { font-size:10px; color:var(--vino); letter-spacing:1px; text-decoration:none; }
+.rsvp-forms-link a:hover { text-decoration:underline; }
+
+.rsvp-confirmado { text-align:center; padding:1rem 0; }
+.rsvp-confirmado-icon { font-size:2.5rem; margin-bottom:.75rem; }
+.rsvp-confirmado-txt { font-family:'Cormorant Garamond',serif; font-size:1.3rem; color:var(--verde); margin-bottom:.5rem; }
+.rsvp-confirmado-sub { font-size:11px; color:#999; }
+
+.rsvp-declinado { text-align:center; padding:1rem 0; }
+.rsvp-declinado-icon { font-size:2.5rem; margin-bottom:.75rem; }
+.rsvp-declinado-txt { font-family:'Cormorant Garamond',serif; font-size:1.3rem; color:var(--rojo); margin-bottom:.5rem; }
+
+/* Footer */
+.page-footer { text-align:center; margin-top:1.5rem; }
+.page-footer-text { font-size:9px; color:#bbb; letter-spacing:2px; }
+.page-footer-brand { font-family:'Cormorant Garamond',serif; font-size:14px; color:var(--vino); letter-spacing:3px; }
+
+.error-wrap { text-align:center; max-width:340px; }
+.error-icon { font-size:3rem; margin-bottom:1rem; }
+.error-txt { font-family:'Cormorant Garamond',serif; font-size:1.4rem; color:var(--vino-deep); margin-bottom:.5rem; }
+.error-sub { font-size:12px; color:#999; }
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loading-wrap" class="loading">
+  <div class="loading-logo">DEMIR</div>
+  <div class="spinner"></div>
+</div>
+
+<!-- Error -->
+<div id="error-wrap" class="error-wrap" style="display:none;">
+  <div class="error-icon">🌸</div>
+  <div class="error-txt">Pase no encontrado</div>
+  <div class="error-sub">El link de tu pase puede ser incorrecto.<br>Por favor contacta a tu organizadora.</div>
+</div>
+
+<!-- Pase -->
+<div id="pase-wrap" class="pase-wrap" style="display:none;">
+  <div class="pase-card">
+    <div class="pase-top" id="pase-top"></div>
+    <div class="pase-inner">
+      <div class="pase-logo">
+        <div class="pase-logo-text">DEMIR</div>
+        <div class="pase-logo-line"></div>
+      </div>
+      <div class="pase-evento-tipo" id="p-tipo">BODA</div>
+      <div class="pase-evento-nombre" id="p-nombre">—</div>
+      <div class="pase-evento-fecha" id="p-fecha">—</div>
+      <div class="pase-evento-venue" id="p-venue"></div>
+      <div class="pase-divider"></div>
+      <div class="pase-invitado-label">INVITADO</div>
+      <div class="pase-invitado-nombre" id="p-inv-nombre">—</div>
+      <div class="pase-acomp" id="p-acomp"></div>
+      <div class="pase-mesa" id="p-mesa"></div>
+      <div class="pase-qr-wrap">
+        <div class="pase-qr-box"><div id="qr-container"></div></div>
+      </div>
+      <div class="pase-nota">PASE PERSONAL · NO TRANSFERIBLE</div>
+    </div>
+    <div class="pase-bottom" id="pase-bottom"></div>
+  </div>
+
+  <!-- RSVP -->
+  <div class="rsvp-card" id="rsvp-card">
+    <div class="rsvp-titulo">Confirmar asistencia</div>
+    <div class="rsvp-sub">¿Nos acompañarás?</div>
+
+    <div class="rsvp-estado">
+      <span>Tu estado:</span>
+      <span class="estado-badge estado-pendiente" id="estado-badge">⏳ Pendiente</span>
+    </div>
+
+    <div id="rsvp-acciones">
+      <div class="rsvp-btns">
+        <button class="btn-rsvp btn-confirmar" onclick="responderRsvp('confirmado')">
+          <span class="emoji">✅</span> Sí asistiré
+        </button>
+        <button class="btn-rsvp btn-declinar" onclick="responderRsvp('declinado')">
+          <span class="emoji">❌</span> No podré ir
+        </button>
+      </div>
+      <div class="rsvp-forms-link" id="forms-link" style="display:none;">
+        <a id="forms-url" href="#" target="_blank">📝 También puedes confirmar por formulario →</a>
+      </div>
+    </div>
+
+    <div id="rsvp-confirmado" class="rsvp-confirmado" style="display:none;">
+      <div class="rsvp-confirmado-icon">🎉</div>
+      <div class="rsvp-confirmado-txt">¡Te esperamos!</div>
+      <div class="rsvp-confirmado-sub">Tu asistencia ha sido confirmada.<br>Guarda tu pase para el día del evento.</div>
+    </div>
+
+    <div id="rsvp-declinado" class="rsvp-declinado" style="display:none;">
+      <div class="rsvp-declinado-icon">💐</div>
+      <div class="rsvp-declinado-txt">¡Gracias por avisar!</div>
+      <div class="rsvp-confirmado-sub" style="font-size:11px;color:#999">Tu respuesta ha sido registrada.</div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="page-footer-brand">DEMIR</div>
+    <div class="page-footer-text">Wedding & Event Planner · Puebla, México</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+// ⚠️ REEMPLAZA CON TU CONFIG
+const firebaseConfig = {
+  apiKey: "TU_API_KEY",
+  authDomain: "TU_PROJECT.firebaseapp.com",
+  databaseURL: "https://TU_PROJECT-default-rtdb.firebaseio.com",
+  projectId: "TU_PROJECT",
+  storageBucket: "TU_PROJECT.appspot.com",
+  messagingSenderId: "TU_SENDER_ID",
+  appId: "TU_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+
+// Leer params
+const params   = new URLSearchParams(window.location.search);
+const invId    = params.get('id');
+const eventoId = params.get('evento');
+
+if(!invId || !eventoId){ mostrarError(); }
+else { cargar(); }
+
+async function cargar() {
+  try {
+    const [evSnap, invSnap] = await Promise.all([
+      get(ref(db,`eventos/${eventoId}`)),
+      get(ref(db,`invitados/${eventoId}/${invId}`))
+    ]);
+
+    if(!evSnap.exists()||!invSnap.exists()){ mostrarError(); return; }
+
+    const ev  = evSnap.val();
+    const inv = invSnap.val();
+
+    // Colores dinámicos
+    const fondo  = ev.colorFondo  || '#4A1C2A';
+    const acento = ev.colorAcento || '#C9A84C';
+    document.getElementById('pase-top').style.background    = acento;
+    document.getElementById('pase-bottom').style.background = acento;
+    document.querySelector('.pase-card').style.background   = fondo;
+
+    // Datos
+    document.getElementById('p-tipo').textContent      = (ev.tipo||'EVENTO').toUpperCase();
+    document.getElementById('p-nombre').textContent    = ev.nombre;
+    document.getElementById('p-fecha').textContent     = formatFecha(ev.fecha);
+    document.getElementById('p-venue').textContent     = ev.venue||'';
+    document.getElementById('p-inv-nombre').textContent = inv.nombre;
+
+    if(inv.acompanantes){
+      document.getElementById('p-acomp').textContent = inv.acompanantes;
+      document.getElementById('p-acomp').style.display='block';
+    }
+    if(inv.mesa){
+      document.getElementById('p-mesa').textContent = inv.mesa.toUpperCase();
+    }
+
+    // Forms link
+    if(ev.formsUrl){
+      document.getElementById('forms-link').style.display='block';
+      document.getElementById('forms-url').href=ev.formsUrl;
+    }
+
+    // QR
+    new QRCode(document.getElementById('qr-container'),{
+      text: window.location.href,
+      width:160, height:160,
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    // Estado RSVP
+    actualizarEstado(inv.rsvp||'pendiente');
+
+    // Guardar para uso posterior
+    window._invId=invId; window._eventoId=eventoId; window._db=db; window._ref=ref; window._update=update;
+
+    // Mostrar
+    document.getElementById('loading-wrap').style.display='none';
+    document.getElementById('pase-wrap').style.display='block';
+
+  } catch(e){ console.error(e); mostrarError(); }
+}
+
+function mostrarError(){
+  document.getElementById('loading-wrap').style.display='none';
+  document.getElementById('error-wrap').style.display='block';
+}
+
+function formatFecha(f){
+  if(!f) return '—';
+  const [y,m,d]=f.split('-');
+  const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  return `${parseInt(d)} de ${meses[parseInt(m)-1]} de ${y}`;
+}
+
+function actualizarEstado(rsvp){
+  const badge = document.getElementById('estado-badge');
+  const acc   = document.getElementById('rsvp-acciones');
+  const conf  = document.getElementById('rsvp-confirmado');
+  const decl  = document.getElementById('rsvp-declinado');
+
+  badge.className='estado-badge';
+  conf.style.display='none'; decl.style.display='none'; acc.style.display='block';
+
+  if(rsvp==='confirmado'){
+    badge.classList.add('estado-confirmado'); badge.textContent='✅ Confirmado';
+    acc.style.display='none'; conf.style.display='block';
+  } else if(rsvp==='declinado'){
+    badge.classList.add('estado-declinado'); badge.textContent='❌ No asistirá';
+    acc.style.display='none'; decl.style.display='block';
+  } else {
+    badge.classList.add('estado-pendiente'); badge.textContent='⏳ Pendiente';
+  }
+}
+
+window.responderRsvp = async function(valor) {
+  try {
+    await window._update(window._ref(window._db,`invitados/${window._eventoId}/${window._invId}`),{rsvp:valor});
+    actualizarEstado(valor);
+  } catch(e){ alert('Error al guardar. Intenta de nuevo.'); }
+};
+</script>
+</body>
+</html>
