@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Experiencias DEMIR — Wedding & Event Planner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Lora:ital,wght@0,400;0,500;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Variables ─────────────────────────────────────── */
+    :root {
+      --wine:   #6B2737;
+      --wine2:  #4e1a26;
+      --gold:   #C9A96E;
+      --gold2:  #e8c98a;
+      --cream:  #F7F0E6;
+      --cream2: #ede3d4;
+      --text:   #2e1a1a;
+      --muted:  #7a5c5c;
+
+      --cg: 'Cormorant Garamond', serif;
+      --lr: 'Lora', serif;
+      --mn: 'Montserrat', sans-serif;
+    }
+
+    /* ── Reset ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--cream);
+      color: var(--text);
+      font-family: var(--mn);
+      overflow-x: hidden;
+    }
+    img { display: block; max-width: 100%; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ── NAV ────────────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.1rem 4rem;
+      background: rgba(247,240,230,0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(201,169,110,0.25);
+      transition: background .3s;
+    }
+    .nav-logo {
+      display: flex; flex-direction: column; gap: 1px;
+    }
+    .nav-logo span:first-child {
+      font-family: var(--cg); font-size: 1.45rem; font-weight: 500;
+      letter-spacing: .18em; color: var(--wine);
+    }
+    .nav-logo span:last-child {
+      font-family: var(--mn); font-size: .55rem; font-weight: 600;
+      letter-spacing: .28em; text-transform: uppercase; color: var(--gold);
+    }
+    .nav-links {
+      display: flex; gap: 2.2rem; list-style: none;
+    }
+    .nav-links a {
+      font-family: var(--mn); font-size: .72rem; font-weight: 500;
+      letter-spacing: .15em; text-transform: uppercase; color: var(--wine);
+      position: relative; padding-bottom: 2px;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 100%;
+      height: 1px; background: var(--gold); transition: right .3s;
+    }
+    .nav-links a:hover::after { right: 0; }
+    .nav-cta {
+      display: flex; align-items: center; gap: .5rem;
+      background: var(--wine); color: var(--cream); border: none; cursor: pointer;
+      padding: .6rem 1.4rem; font-family: var(--mn); font-size: .7rem;
+      font-weight: 600; letter-spacing: .15em; text-transform: uppercase;
+      transition: background .25s, transform .2s;
+    }
+    .nav-cta:hover { background: var(--wine2); transform: translateY(-1px); }
+
+    /* ── HERO ───────────────────────────────────────────── */
+    #hero {
+      min-height: 100vh;
+      position: relative;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 7rem 2rem 4rem;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(107,39,55,.10) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(201,169,110,.13) 0%, transparent 60%),
+        linear-gradient(170deg, var(--cream) 0%, var(--cream2) 100%);
+    }
+    /* ornamental circles */
+    .hero-orb {
+      position: absolute; border-radius: 50%;
+      border: 1px solid rgba(201,169,110,.22);
+      animation: orbSpin 32s linear infinite;
+    }
+    .hero-orb:nth-child(1) { width: 520px; height: 520px; top: -80px; right: -140px; animation-duration: 40s; }
+    .hero-orb:nth-child(2) { width: 320px; height: 320px; bottom: 60px; left: -100px; animation-direction: reverse; animation-duration: 28s; }
+    .hero-orb:nth-child(3) { width: 200px; height: 200px; top: 30%; left: 10%; animation-duration: 22s; }
+    @keyframes orbSpin { to { transform: rotate(360deg); } }
+
+    .hero-tag {
+      position: relative; z-index: 1;
+      font-family: var(--mn); font-size: .65rem; font-weight: 600;
+      letter-spacing: .3em; text-transform: uppercase; color: var(--gold);
+      margin-bottom: 1.4rem;
+      display: flex; align-items: center; gap: .8rem;
+    }
+    .hero-tag::before, .hero-tag::after {
+      content: ''; flex: 1; max-width: 60px; height: 1px; background: var(--gold); opacity: .6;
+    }
+    .hero-title {
+      position: relative; z-index: 1;
+      font-family: var(--cg); font-weight: 300; font-style: italic;
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      line-height: 1.08;
+      color: var(--wine);
+      margin-bottom: .6rem;
+    }
+    .hero-title em { font-style: normal; font-weight: 600; }
+    .hero-subtitle {
+      position: relative; z-index: 1;
+      font-family: var(--lr); font-size: clamp(1rem, 2vw, 1.25rem);
+      font-style: italic; color: var(--muted); margin-bottom: 2.5rem; max-width: 520px;
+    }
+    .hero-divider {
+      position: relative; z-index: 1;
+      width: 1px; height: 60px; background: linear-gradient(to bottom, var(--gold), transparent);
+      margin: 0 auto 2.5rem;
+    }
+    .hero-btns {
+      position: relative; z-index: 1;
+      display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+    }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: .6rem;
+      background: var(--wine); color: var(--cream);
+      padding: .85rem 2.2rem; font-family: var(--mn); font-size: .72rem;
+      font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+      border: none; cursor: pointer;
+      transition: background .25s, box-shadow .25s, transform .2s;
+      box-shadow: 0 4px 20px rgba(107,39,55,.25);
+    }
+    .btn-primary:hover { background: var(--wine2); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(107,39,55,.3); }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: .6rem;
+      background: transparent; color: var(--wine);
+      padding: .85rem 2.2rem; font-family: var(--mn); font-size: .72rem;
+      font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+      border: 1.5px solid var(--wine); cursor: pointer;
+      transition: background .25s, color .25s, transform .2s;
+    }
+    .btn-secondary:hover { background: var(--wine); color: var(--cream); transform: translateY(-2px); }
+
+    .hero-scroll {
+      position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%); z-index: 1;
+      display: flex; flex-direction: column; align-items: center; gap: .4rem;
+      font-family: var(--mn); font-size: .58rem; letter-spacing: .2em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    .hero-scroll span { display: block; width: 1px; height: 36px; background: linear-gradient(to bottom, var(--muted), transparent); animation: scrollPulse 2s ease-in-out infinite; }
+    @keyframes scrollPulse { 0%,100%{opacity:.3} 50%{opacity:1} }
+
+    /* ── SECCIÓN INTRO ─────────────────────────────────── */
+    .intro {
+      padding: 5rem 4rem;
+      text-align: center;
+      background: var(--wine);
+      position: relative; overflow: hidden;
+    }
+    .intro::before {
+      content: 'D'; position: absolute; right: -2rem; bottom: -4rem;
+      font-family: var(--cg); font-size: 28rem; font-weight: 600; font-style: italic;
+      color: rgba(255,255,255,.04); pointer-events: none; line-height: 1;
+    }
+    .intro-label {
+      font-family: var(--mn); font-size: .62rem; font-weight: 600;
+      letter-spacing: .3em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.2rem;
+    }
+    .intro-heading {
+      font-family: var(--cg); font-weight: 300; font-style: italic;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      color: var(--cream); margin-bottom: 1.2rem; line-height: 1.2;
+    }
+    .intro-text {
+      font-family: var(--lr); font-size: .95rem; color: rgba(247,240,230,.75);
+      max-width: 580px; margin: 0 auto; line-height: 1.75;
+    }
+    .gold-rule {
+      width: 60px; height: 1px; background: var(--gold); margin: 1.8rem auto;
+    }
+
+    /* ── SERVICIOS ──────────────────────────────────────── */
+    #servicios {
+      padding: 6rem 4rem;
+      background: var(--cream);
+    }
+    .section-label {
+      font-family: var(--mn); font-size: .62rem; font-weight: 600;
+      letter-spacing: .3em; text-transform: uppercase; color: var(--gold);
+      text-align: center; margin-bottom: .8rem;
+    }
+    .section-title {
+      font-family: var(--cg); font-weight: 300; font-style: italic;
+      font-size: clamp(2.2rem, 4vw, 3.4rem);
+      color: var(--wine); text-align: center; margin-bottom: .5rem;
+    }
+    .section-sub {
+      font-family: var(--lr); font-size: .92rem; font-style: italic;
+      color: var(--muted); text-align: center; max-width: 480px; margin: 0 auto 3.5rem;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .service-card {
+      background: #fff;
+      border: 1px solid rgba(201,169,110,.2);
+      padding: 2rem 1.8rem;
+      position: relative;
+      transition: transform .3s, box-shadow .3s, border-color .3s;
+      cursor: default;
+      overflow: hidden;
+    }
+    .service-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 100%; height: 2px;
+      background: linear-gradient(90deg, var(--wine), var(--gold));
+      transition: right .4s ease;
+    }
+    .service-card:hover::before { right: 0; }
+    .service-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 16px 40px rgba(107,39,55,.12);
+      border-color: rgba(201,169,110,.45);
+    }
+    .card-icon {
+      font-size: 2rem; margin-bottom: 1rem; display: block;
+      transition: transform .3s;
+    }
+    .service-card:hover .card-icon { transform: scale(1.15); }
+    .card-title {
+      font-family: var(--cg); font-weight: 500; font-size: 1.3rem;
+      color: var(--wine); margin-bottom: .5rem;
+    }
+    .card-desc {
+      font-family: var(--lr); font-size: .85rem; color: var(--muted);
+      line-height: 1.65; font-style: italic;
+    }
+    .card-tag {
+      display: inline-block; margin-top: 1.1rem;
+      font-family: var(--mn); font-size: .58rem; font-weight: 600;
+      letter-spacing: .18em; text-transform: uppercase;
+      color: var(--gold); border-bottom: 1px solid var(--gold); padding-bottom: 1px;
+    }
+
+    /* ── EXPERIENCIA / STATS ────────────────────────────── */
+    .stats {
+      background: var(--cream2);
+      border-top: 1px solid rgba(201,169,110,.25);
+      border-bottom: 1px solid rgba(201,169,110,.25);
+      padding: 3.5rem 4rem;
+      display: flex; justify-content: center; flex-wrap: wrap; gap: 3rem;
+    }
+    .stat-item { text-align: center; }
+    .stat-num {
+      font-family: var(--cg); font-size: 3.2rem; font-weight: 600;
+      color: var(--wine); line-height: 1;
+    }
+    .stat-label {
+      font-family: var(--mn); font-size: .6rem; font-weight: 600;
+      letter-spacing: .2em; text-transform: uppercase; color: var(--muted);
+      margin-top: .3rem;
+    }
+
+    /* ── GALERÍA ────────────────────────────────────────── */
+    #galeria {
+      padding: 6rem 4rem;
+      background: var(--wine);
+    }
+    #galeria .section-title { color: var(--cream); }
+    #galeria .section-sub { color: rgba(247,240,230,.6); }
+    #galeria .section-label { color: var(--gold); }
+
+    .gallery-grid {
+      max-width: 1200px; margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(3, 220px);
+      gap: 10px;
+    }
+    .gallery-item {
+      overflow: hidden; position: relative;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(201,169,110,.15);
+    }
+    .gallery-item:nth-child(1) { grid-column: span 2; grid-row: span 2; }
+    .gallery-item:nth-child(5) { grid-column: span 2; }
+    .gallery-item:nth-child(8) { grid-column: span 2; }
+
+    .gallery-placeholder {
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: .5rem;
+      background: linear-gradient(135deg, rgba(255,255,255,.06) 0%, rgba(201,169,110,.08) 100%);
+      transition: background .3s;
+    }
+    .gallery-item:hover .gallery-placeholder {
+      background: linear-gradient(135deg, rgba(201,169,110,.12) 0%, rgba(255,255,255,.1) 100%);
+    }
+    .gallery-placeholder .gp-icon { font-size: 2.5rem; opacity: .5; }
+    .gallery-placeholder .gp-label {
+      font-family: var(--mn); font-size: .6rem; font-weight: 500;
+      letter-spacing: .18em; text-transform: uppercase;
+      color: rgba(247,240,230,.45);
+    }
+
+    .gallery-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(78,26,38,.85) 0%, transparent 50%);
+      opacity: 0; transition: opacity .3s;
+      display: flex; align-items: flex-end; padding: 1.2rem;
+    }
+    .gallery-item:hover .gallery-overlay { opacity: 1; }
+    .gallery-overlay span {
+      font-family: var(--cg); font-style: italic; font-size: 1rem;
+      color: var(--cream); font-weight: 300;
+    }
+
+    .gallery-note {
+      text-align: center; margin-top: 1.8rem;
+      font-family: var(--lr); font-size: .82rem; font-style: italic;
+      color: rgba(247,240,230,.45);
+    }
+
+    /* ── PROCESO ────────────────────────────────────────── */
+    #proceso {
+      padding: 6rem 4rem;
+      background: var(--cream);
+    }
+    .proceso-grid {
+      max-width: 900px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0;
+      position: relative;
+    }
+    .proceso-grid::before {
+      content: ''; position: absolute;
+      top: 2.2rem; left: 10%; right: 10%; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+    .proceso-step {
+      text-align: center; padding: 1rem 1.5rem 2rem;
+      position: relative;
+    }
+    .step-num {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--wine); color: var(--cream);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--cg); font-size: 1.1rem; font-weight: 500;
+      margin: 0 auto 1rem; position: relative; z-index: 1;
+    }
+    .step-title {
+      font-family: var(--cg); font-size: 1.05rem; font-weight: 500;
+      color: var(--wine); margin-bottom: .4rem;
+    }
+    .step-desc {
+      font-family: var(--lr); font-size: .8rem; font-style: italic;
+      color: var(--muted); line-height: 1.5;
+    }
+
+    /* ── CTA FINAL ──────────────────────────────────────── */
+    #contacto {
+      background: linear-gradient(135deg, var(--wine2) 0%, var(--wine) 60%, #8b3346 100%);
+      padding: 7rem 4rem;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    #contacto::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C9A96E' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .cta-label {
+      position: relative; z-index: 1;
+      font-family: var(--mn); font-size: .62rem; font-weight: 600;
+      letter-spacing: .3em; text-transform: uppercase; color: var(--gold);
+      margin-bottom: 1.2rem;
+    }
+    .cta-title {
+      position: relative; z-index: 1;
+      font-family: var(--cg); font-weight: 300; font-style: italic;
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      color: var(--cream); line-height: 1.1; margin-bottom: .8rem;
+    }
+    .cta-sub {
+      position: relative; z-index: 1;
+      font-family: var(--lr); font-size: 1rem; font-style: italic;
+      color: rgba(247,240,230,.7); max-width: 500px; margin: 0 auto 2.5rem;
+      line-height: 1.7;
+    }
+    .btn-whatsapp {
+      position: relative; z-index: 1;
+      display: inline-flex; align-items: center; gap: .8rem;
+      background: #25D366; color: #fff;
+      padding: 1rem 2.6rem; font-family: var(--mn); font-size: .78rem;
+      font-weight: 700; letter-spacing: .15em; text-transform: uppercase;
+      border: none; cursor: pointer;
+      box-shadow: 0 6px 28px rgba(0,0,0,.3);
+      transition: background .25s, transform .2s, box-shadow .25s;
+    }
+    .btn-whatsapp:hover { background: #1fb558; transform: translateY(-3px); box-shadow: 0 12px 36px rgba(0,0,0,.35); }
+    .btn-whatsapp svg { width: 22px; height: 22px; fill: #fff; flex-shrink: 0; }
+
+    .cta-alt {
+      position: relative; z-index: 1;
+      margin-top: 1.5rem;
+      font-family: var(--mn); font-size: .68rem; font-weight: 400;
+      color: rgba(247,240,230,.45); letter-spacing: .08em;
+    }
+    .cta-alt a { color: var(--gold); border-bottom: 1px solid rgba(201,169,110,.4); }
+
+    /* ── FOOTER ─────────────────────────────────────────── */
+    footer {
+      background: var(--wine2);
+      padding: 2.5rem 4rem;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+      border-top: 1px solid rgba(201,169,110,.2);
+    }
+    .footer-logo span:first-child {
+      font-family: var(--cg); font-size: 1.2rem; font-weight: 500; font-style: italic;
+      color: var(--cream);
+    }
+    .footer-logo span:last-child {
+      display: block; font-family: var(--mn); font-size: .52rem; font-weight: 600;
+      letter-spacing: .28em; text-transform: uppercase; color: var(--gold);
+    }
+    .footer-links {
+      display: flex; gap: 2rem; list-style: none;
+    }
+    .footer-links a {
+      font-family: var(--mn); font-size: .62rem; font-weight: 500;
+      letter-spacing: .12em; text-transform: uppercase; color: rgba(247,240,230,.5);
+      transition: color .2s;
+    }
+    .footer-links a:hover { color: var(--gold); }
+    .footer-copy {
+      font-family: var(--mn); font-size: .6rem; color: rgba(247,240,230,.35);
+      letter-spacing: .1em;
+    }
+
+    /* ── SCROLL ANIMATIONS ──────────────────────────────── */
+    .reveal {
+      opacity: 0; transform: translateY(28px); transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+    .reveal-d1 { transition-delay: .1s; }
+    .reveal-d2 { transition-delay: .2s; }
+    .reveal-d3 { transition-delay: .3s; }
+    .reveal-d4 { transition-delay: .4s; }
+    .reveal-d5 { transition-delay: .5s; }
+
+    /* ── RESPONSIVE ─────────────────────────────────────── */
+    @media (max-width: 900px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      #hero, .intro, #servicios, #galeria, #proceso, #testimonios, #contacto { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .gallery-grid { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(5, 180px); }
+      .gallery-item:nth-child(1) { grid-column: span 2; }
+      .stats { padding: 2.5rem 1.5rem; gap: 1.8rem; }
+      .proceso-grid::before { display: none; }
+      footer { flex-direction: column; align-items: flex-start; padding: 2rem 1.5rem; }
+      .footer-links { flex-wrap: wrap; gap: 1rem; }
+    }
+    @media (max-width: 600px) {
+      .gallery-grid { grid-template-columns: 1fr 1fr; grid-template-rows: auto; }
+      .gallery-item { grid-column: span 1 !important; height: 160px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">
+      <span>DEMIR</span>
+      <span>Wedding &amp; Event Planner</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#servicios">Experiencias</a></li>
+      <li><a href="#galeria">Galería</a></li>
+      <li><a href="#proceso">Proceso</a></li>
+      <li><a href="https://demir.com.mx" target="_blank">Bodas</a></li>
+    </ul>
+    <a class="nav-cta" href="https://wa.me/522221234567?text=Hola%2C%20me%20interesa%20cotizar%20un%20servicio%20adicional%20con%20DEMIR%20%F0%9F%8C%B8" target="_blank">
+      Cotizar ahora
+    </a>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-orb"></div>
+    <div class="hero-orb"></div>
+    <div class="hero-orb"></div>
+
+    <p class="hero-tag">experiencias demir</p>
+    <h1 class="hero-title">
+      Cada detalle,<br/><em>una experiencia</em>
+    </h1>
+    <p class="hero-subtitle">Invitaciones digitales, dulces, decoración, recuerdos y más — todo bajo la firma DEMIR</p>
+    <div class="hero-divider"></div>
+    <div class="hero-btns">
+      <a class="btn-primary" href="#servicios">Ver servicios</a>
+      <a class="btn-secondary" href="#contacto">Cotizar por WhatsApp</a>
+    </div>
+    <div class="hero-scroll">scroll <span></span></div>
+  </section>
+
+  <!-- INTRO -->
+  <section class="intro">
+    <p class="intro-label">nuestra propuesta</p>
+    <h2 class="intro-heading">Experiencias que se recuerdan</h2>
+    <div class="gold-rule"></div>
+    <p class="intro-text">En DEMIR sabemos que los detalles construyen la magia. Por eso ofrecemos una colección de servicios adicionales para complementar tu boda, baby shower o evento especial — desde la invitación digital hasta el último recuerdo en las manos de tus invitados.</p>
+  </section>
+
+  <!-- SERVICIOS -->
+  <section id="servicios">
+    <p class="section-label reveal">experiencias</p>
+    <h2 class="section-title reveal reveal-d1">Nuestras Experiencias</h2>
+    <p class="section-sub reveal reveal-d2">Personalizado, elegante y a tu medida</p>
+
+    <div class="services-grid">
+
+      <div class="service-card reveal reveal-d1">
+        <span class="card-icon">💌</span>
+        <h3 class="card-title">Invitaciones Digitales</h3>
+        <p class="card-desc">Diseños animados y personalizados con confirmación de asistencia, mapa y cuenta regresiva integrados.</p>
+        <span class="card-tag">Bodas · Baby Showers · XV Años</span>
+      </div>
+
+      <div class="service-card reveal reveal-d2">
+        <span class="card-icon">🍬</span>
+        <h3 class="card-title">Mesa de Dulces</h3>
+        <p class="card-desc">Montaje temático con dulcería fina, glasas, galletas decoradas y arreglos florales en tu paleta de color.</p>
+        <span class="card-tag">Todo tipo de eventos</span>
+      </div>
+
+      <div class="service-card reveal reveal-d3">
+        <span class="card-icon">🪞</span>
+        <h3 class="card-title">Selfie Mirror</h3>
+        <p class="card-desc">Renta de espejo fotográfico personalizado con letras en vinil — el elemento perfecto para que tus invitados se lleven el recuerdo.</p>
+        <span class="card-tag">Bodas · Graduaciones · Corporativos</span>
+      </div>
+
+      <div class="service-card reveal reveal-d4">
+        <span class="card-icon">🍭</span>
+        <h3 class="card-title">Barra de Dulces</h3>
+        <p class="card-desc">Selección gourmet de dulces mexicanos e internacionales, montada y presentada con un diseño temático acorde a tu evento.</p>
+        <span class="card-tag">Para todos los gustos</span>
+      </div>
+
+      <div class="service-card reveal reveal-d5">
+        <span class="card-icon">👶</span>
+        <h3 class="card-title">Stand de Mamelucos</h3>
+        <p class="card-desc">Stand para baby shower donde cada invitado personaliza su mameluco con vinil textil — un recuerdo único hecho con sus propias manos.</p>
+        <span class="card-tag">Baby Shower · Gender Reveal</span>
+      </div>
+
+      <div class="service-card reveal reveal-d1">
+        <span class="card-icon">🎁</span>
+        <h3 class="card-title">Cajas Personalizadas</h3>
+        <p class="card-desc">Cajas de cartón personalizadas con vinil adherible — diseño a tu gusto, perfectas como recuerdo o detalle de bienvenida para tus invitados.</p>
+        <span class="card-tag">Regalos · Recuerdos · Detalles</span>
+      </div>
+
+      <div class="service-card reveal reveal-d2">
+        <span class="card-icon">🌿</span>
+        <h3 class="card-title">Kit Anticruda</h3>
+        <p class="card-desc">Sets personalizados con sobres hidratantes, snacks, pastillas y un toque de humor para el día siguiente.</p>
+        <span class="card-tag">El detalle que tus invitados agradecerán</span>
+      </div>
+
+      <div class="service-card reveal reveal-d3">
+        <span class="card-icon">🎈</span>
+        <h3 class="card-title">Decoración con Globos</h3>
+        <p class="card-desc">Arcos orgánicos, columnas, muros y escenografías de globos en latex, cromo o burbuja para cualquier evento.</p>
+        <span class="card-tag">Montajes · Escenografías · Stands</span>
+      </div>
+
+      <div class="service-card reveal reveal-d4">
+        <span class="card-icon">✨</span>
+        <h3 class="card-title">Artículos Personalizados</h3>
+        <p class="card-desc">Libretas, tazas, botellas, llaveros y más con tu nombre, fecha o mensaje — detalles únicos que tus invitados van a querer conservar.</p>
+        <span class="card-tag">Souvenirs · Regalos VIP</span>
+      </div>
+
+      <div class="service-card reveal reveal-d5">
+        <span class="card-icon">📸</span>
+        <h3 class="card-title">Photobook & Fotos Instantáneas</h3>
+        <p class="card-desc">Álbum impreso artesanal o sesión de fotos Polaroid durante el evento para capturar los momentos espontáneos.</p>
+        <span class="card-tag">Recuerdo tangible e inmediato</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-item reveal">
+      <div class="stat-num">+120</div>
+      <div class="stat-label">Eventos realizados</div>
+    </div>
+    <div class="stat-item reveal reveal-d2">
+      <div class="stat-num">10+</div>
+      <div class="stat-label">Servicios disponibles</div>
+    </div>
+    <div class="stat-item reveal reveal-d3">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Personalizado</div>
+    </div>
+    <div class="stat-item reveal reveal-d4">
+      <div class="stat-num">Puebla</div>
+      <div class="stat-label">y área metropolitana</div>
+    </div>
+  </div>
+
+  <!-- GALERÍA -->
+  <section id="galeria">
+    <p class="section-label reveal">galería</p>
+    <h2 class="section-title reveal reveal-d1">Momentos que creamos</h2>
+    <p class="section-sub reveal reveal-d2">Cada servicio, diseñado con alma</p>
+
+    <div class="gallery-grid reveal">
+      <div class="gallery-item">
+        <div class="gallery-placeholder">
+          <span class="gp-icon">💌</span>
+          <span class="gp-label">Invitación Digital</span>
+        </div>
+        <div class="gallery-overlay"><span>Invitación Digital</span></div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-placeholder">
+          <span class="gp-icon">🍬</span>
+          <span class="gp-label">Mesa de Dulces</span>
+        </div>
+        <div class="gallery-overlay"><span>Mesa de Dulces</span></div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-placeholder">
+          <span class="gp-icon">🪞</span>
+          <span class="gp-label">Selfie Mirror</span>
+        </div>
+        <div class="gallery-overlay"><span>Selfie Mirror</span></div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-placeholder">
+          <span class="gp-icon">🎈</span>
+          <span class="gp-label">Decoración Globos</span>
+        </div>
+        <div class="gallery-overlay"><span>Decoración con Globos</span></div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-placeholder">
+          <span class="gp-icon">👶</span>
+          <span class="gp-label">Stand Mamelucos</span>
+        </div>
+        <div class="gallery-overlay"><span>Stand de Mamelucos</span></div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-placeholder">
+          <span class="gp-icon">🎁</span>
+          <span class="gp-label">Cajas Personalizadas</span>
+        </div>
+        <div class="gallery-overlay"><span>Cajas Personalizadas</span></div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-placeholder">
+          <span class="gp-icon">📸</span>
+          <span class="gp-label">Fotos Instantáneas</span>
+        </div>
+        <div class="gallery-overlay"><span>Fotos Instantáneas</span></div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-placeholder">
+          <span class="gp-icon">✨</span>
+          <span class="gp-label">Artículos Personalizados</span>
+        </div>
+        <div class="gallery-overlay"><span>Artículos Personalizados</span></div>
+      </div>
+    </div>
+    <p class="gallery-note reveal">Sube tus fotos reales reemplazando los placeholders ↑ — cada celda admite una imagen con <code>object-fit: cover</code></p>
+  </section>
+
+  <!-- PROCESO -->
+  <section id="proceso">
+    <p class="section-label reveal">¿cómo funciona?</p>
+    <h2 class="section-title reveal reveal-d1">Tu servicio en 4 pasos</h2>
+    <p class="section-sub reveal reveal-d2">Sencillo, rápido y sin estrés</p>
+
+    <div class="proceso-grid">
+      <div class="proceso-step reveal reveal-d1">
+        <div class="step-num">1</div>
+        <h3 class="step-title">Cotización</h3>
+        <p class="step-desc">Escríbenos por WhatsApp con el servicio que te interesa y la fecha de tu evento.</p>
+      </div>
+      <div class="proceso-step reveal reveal-d2">
+        <div class="step-num">2</div>
+        <h3 class="step-title">Propuesta</h3>
+        <p class="step-desc">Te enviamos opciones personalizadas con precios y referencias visuales en 24 h.</p>
+      </div>
+      <div class="proceso-step reveal reveal-d3">
+        <div class="step-num">3</div>
+        <h3 class="step-title">Confirmación</h3>
+        <p class="step-desc">Apruebas diseño y detalles, apartamos fecha con anticipo del 50 %.</p>
+      </div>
+      <div class="proceso-step reveal reveal-d4">
+        <div class="step-num">4</div>
+        <h3 class="step-title">Tu evento</h3>
+        <p class="step-desc">Llegamos, montamos y nos aseguramos de que todo quede perfecto. Tú solo disfruta.</p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- CTA FINAL -->
+  <section id="contacto">
+    <p class="cta-label">¿lista para empezar?</p>
+    <h2 class="cta-title">Hagamos tu evento<br/><em>inolvidable</em></h2>
+    <p class="cta-sub">Cuéntanos qué tienes en mente y te respondemos en menos de 24 horas con una propuesta a tu medida.</p>
+    <a class="btn-whatsapp" href="https://wa.me/522221234567?text=Hola%20DEMIR%20%F0%9F%8C%B8%20me%20interesa%20cotizar%20un%20servicio%20adicional%20para%20mi%20evento." target="_blank">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Escribir a WhatsApp
+    </a>
+    <p class="cta-alt">¿Prefieres el correo? <a href="mailto:hola@demir.com.mx">hola@demir.com.mx</a> &nbsp;·&nbsp; También en <a href="https://instagram.com" target="_blank">@demir.planner</a></p>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">
+      <span>DEMIR</span>
+      <span>Wedding &amp; Event Planner · Puebla, México</span>
+    </div>
+    <ul class="footer-links">
+      <li><a href="https://demir.com.mx" target="_blank">demir.com.mx</a></li>
+      <li><a href="#servicios">Experiencias</a></li>
+      <li><a href="#contacto">Contacto</a></li>
+    </ul>
+    <p class="footer-copy">© 2025 DEMIR. Todos los derechos reservados.</p>
+  </footer>
+
+  <!-- SCROLL REVEAL SCRIPT -->
+  <script>
+    const reveals = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => io.observe(el));
+  </script>
+</body>
+</html>
