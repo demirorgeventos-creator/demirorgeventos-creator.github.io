@@ -4,46 +4,40 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-body{
-    margin:0;
-    padding:20px;
-    font-family: Arial, sans-serif;
-    background: transparent;
-}
+<link rel="stylesheet" href="style.css">
 
-.player{
-    max-width:400px;
-    margin:auto;
-    background:rgba(255,255,255,.9);
-    border-radius:20px;
-    padding:20px;
-    box-shadow:0 4px 15px rgba(0,0,0,.1);
-    text-align:center;
-}
-
-.titulo{
-    font-size:18px;
-    margin-bottom:15px;
-    color:#555;
-}
-
-audio{
-    width:100%;
-}
-</style>
 </head>
 
 <body>
 
 <div class="player">
-    <div class="titulo">❤️ Nuestra Canción ❤️</div>
 
-    <audio controls>
+    <div class="titulo">
+        Nuestra canción ♡
+    </div>
+
+    <button class="boton" id="play">
+        ▶
+    </button>
+
+    <input 
+    type="range" 
+    id="barra" 
+    value="0"
+    class="barra">
+
+    <div class="tiempo" id="tiempo">
+        0:00 / 0:00
+    </div>
+
+    <audio id="audio">
         <source src="cancion.mp3" type="audio/mpeg">
-        Tu navegador no soporta audio.
     </audio>
+
 </div>
+
+
+<script src="script.js"></script>
 
 </body>
 </html>
