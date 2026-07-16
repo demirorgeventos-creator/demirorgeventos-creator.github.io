@@ -1,7 +1,7 @@
 body {
     margin: 0;
     background: transparent;
-    font-family: 'Arial', sans-serif;
+    font-family: Arial, sans-serif;
 }
 
 .player {
@@ -13,28 +13,35 @@ body {
 
 .titulo {
     font-size: 18px;
-    color: #777;
-    margin-bottom: 20px;
+    letter-spacing: 1px;
+    color: #b89b5e;
+    margin-bottom: 18px;
 }
 
 .boton {
     width: 65px;
     height: 65px;
     border-radius: 50%;
-    border: none;
-    background: #c8a46a;
-    color: white;
-    font-size: 25px;
+    border: 1px solid #b89b5e;
+    background: white;
+    color: #b89b5e;
+    font-size: 24px;
     cursor: pointer;
+}
+
+.boton:hover {
+    background: #b89b5e;
+    color: white;
 }
 
 .barra {
     width: 100%;
     margin-top: 25px;
+    accent-color: #b89b5e;
 }
 
 .tiempo {
+    font-size: 12px;
+    color: #999;
     margin-top: 10px;
-    font-size: 13px;
-    color: #888;
 }
