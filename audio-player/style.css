@@ -1,1 +1,40 @@
+body {
+    margin: 0;
+    background: transparent;
+    font-family: 'Arial', sans-serif;
+}
 
+.player {
+    width: 90%;
+    max-width: 350px;
+    margin: 20px auto;
+    text-align: center;
+}
+
+.titulo {
+    font-size: 18px;
+    color: #777;
+    margin-bottom: 20px;
+}
+
+.boton {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    border: none;
+    background: #c8a46a;
+    color: white;
+    font-size: 25px;
+    cursor: pointer;
+}
+
+.barra {
+    width: 100%;
+    margin-top: 25px;
+}
+
+.tiempo {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #888;
+}
