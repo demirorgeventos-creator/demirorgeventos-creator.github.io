@@ -20,13 +20,13 @@ body {
 }
 
 .boton {
-    width: 52px;
-    height: 52px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
     border: 1.5px solid #b89b5e;
-    background: white;
+    background: rgba(255,255,255,0.9);
     color: #b89b5e;
-    font-size: 18px;
+    font-size: 15px;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
