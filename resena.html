@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparte tu experiencia · DEMIR Wedding & Event Planner</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --wine:#7B2D42; --wine2:#5a1e2e; --gold:#B99438; --gold2:#d4ac4a;
+    --cream:#FAF6F0; --cream2:#F2EBE0; --dark:#1a0a0f; --text:#3a2028; --gray:#8a7070;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--text);
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+  }
+  .card{
+    max-width:520px;width:100%;background:#fff;border:1px solid rgba(185,148,56,.25);
+    padding:48px 40px;box-shadow:0 20px 60px rgba(90,30,46,.08);
+  }
+  .eyebrow{font-size:10px;letter-spacing:5px;text-transform:uppercase;color:var(--gold);margin-bottom:14px;text-align:center;}
+  h1{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:400;color:var(--wine);text-align:center;margin-bottom:8px;line-height:1.2;}
+  .sub{font-family:'Lora',serif;font-style:italic;font-size:14px;color:var(--gray);text-align:center;margin-bottom:36px;}
+  .pareja-tag{
+    text-align:center;font-size:11px;letter-spacing:2px;text-transform:uppercase;
+    color:var(--wine);background:var(--cream2);padding:10px 16px;margin-bottom:28px;
+  }
+  label{display:block;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-bottom:8px;}
+  .field{margin-bottom:24px;}
+  input[type=text], textarea{
+    width:100%;border:1px solid rgba(185,148,56,.3);background:var(--cream);
+    padding:12px 14px;font-family:'Lora',serif;font-size:14px;color:var(--text);
+    outline:none;transition:border-color .3s;
+  }
+  input[type=text]:focus, textarea:focus{border-color:var(--gold);}
+  textarea{resize:vertical;min-height:120px;}
+  .stars{display:flex;gap:8px;justify-content:center;font-size:38px;line-height:1;margin-bottom:4px;}
+  .stars span{cursor:pointer;color:rgba(185,148,56,.3);transition:color .2s,transform .15s;}
+  .stars span.on{color:var(--gold);}
+  .stars span:hover{transform:scale(1.12);}
+  .stars-wrap{text-align:center;margin-bottom:28px;}
+  .stars-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-top:6px;}
+  button{
+    width:100%;padding:16px;border:none;background:var(--wine);color:var(--cream);
+    font-size:11px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;
+    transition:background .3s;
+  }
+  button:hover{background:var(--wine2);}
+  button:disabled{opacity:.6;cursor:not-allowed;}
+  .msg{text-align:center;font-family:'Lora',serif;font-size:14px;margin-top:18px;display:none;}
+  .msg.error{color:#b0392b;}
+  .msg.info{color:var(--gray);}
+  #successView, #invalidView{display:none;text-align:center;}
+  #successView .icon, #invalidView .icon{font-size:44px;color:var(--gold);margin-bottom:20px;}
+  #successView h2, #invalidView h2{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--wine);margin-bottom:12px;font-weight:400;}
+  #successView p, #invalidView p{font-family:'Lora',serif;font-size:14px;color:var(--gray);line-height:1.7;}
+  #loadingView{text-align:center;font-family:'Lora',serif;font-style:italic;color:var(--gray);padding:20px 0;}
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- Vista: cargando / validando -->
+  <div id="loadingView">
+    <div class="eyebrow">DEMIR · Wedding &amp; Event Planner</div>
+    <p>Cargando…</p>
+  </div>
+
+  <!-- Vista: link inválido o incompleto -->
+  <div id="invalidView">
+    <div class="icon">✕</div>
+    <h2>Este enlace no es válido</h2>
+    <p>Parece que falta información en el enlace. Por favor pide a DEMIR que te comparta nuevamente el link para dejar tu reseña.</p>
+  </div>
+
+  <!-- Vista: formulario -->
+  <div id="formView" style="display:none;">
+    <div class="eyebrow">DEMIR · Wedding &amp; Event Planner</div>
+    <h1>Comparte tu experiencia</h1>
+    <p class="sub">Tu opinión ayuda a otras parejas a conocernos</p>
+    <div class="pareja-tag" id="parejaTag"></div>
+
+    <form id="resenaForm">
+      <div class="stars-wrap">
+        <div class="stars" id="starsPicker">
+          <span data-v="1">★</span>
+          <span data-v="2">★</span>
+          <span data-v="3">★</span>
+          <span data-v="4">★</span>
+          <span data-v="5">★</span>
+        </div>
+        <div class="stars-label">Toca para calificar</div>
+      </div>
+
+      <div class="field">
+        <label for="nombreInput">Tu nombre (o nombres de ambos)</label>
+        <input type="text" id="nombreInput" placeholder="Ej. Ana &amp; Luis" required>
+      </div>
+
+      <div class="field">
+        <label for="textoInput">Cuéntanos cómo fue tu experiencia</label>
+        <textarea id="textoInput" placeholder="Escribe tu reseña aquí…" required></textarea>
+      </div>
+
+      <button type="submit" id="submitBtn">Enviar reseña</button>
+      <div class="msg error" id="errorMsg"></div>
+    </form>
+  </div>
+
+  <!-- Vista: éxito -->
+  <div id="successView">
+    <div class="icon">✓</div>
+    <h2>¡Gracias por tu reseña!</h2>
+    <p>La recibimos y será publicada en nuestra página muy pronto, después de una breve revisión.</p>
+  </div>
+
+</div>
+
+<script type="module">
+  import { initializeApp, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+  // ── Firebase EVENTOS (misma base compartida "demirqr" ya usada en Panel de Eventos y en las Agendas) ──
+  const eventosFirebaseConfig = {
+    apiKey:      "AIzaSyB45I1lwpPZmUJxFB5hu_xtXAwX709PPxc",
+    authDomain:  "demirqr-cb84d.firebaseapp.com",
+    databaseURL: "https://demirqr-cb84d-default-rtdb.firebaseio.com",
+    projectId:   "demirqr-cb84d",
+    storageBucket: "demirqr-cb84d.appspot.com",
+    messagingSenderId: "172090319379",
+    appId: "1:172090319379:web:b9577cb84f0e6c2c4495e6"
+  };
+
+  let db;
+  try {
+    const app = initializeApp(eventosFirebaseConfig, 'demir-eventos-shared');
+    db = getDatabase(app);
+  } catch (e) {
+    db = getDatabase(getApp('demir-eventos-shared'));
+  }
+
+  // ── Leer parámetros del link: ?pareja=nat-luis&nombre=Ana%20%26%20Luis ──
+  const params = new URLSearchParams(window.location.search);
+  const parejaId = (params.get('pareja') || '').trim();
+  const nombrePrecargado = params.get('nombre') || '';
+
+  const loadingView = document.getElementById('loadingView');
+  const invalidView = document.getElementById('invalidView');
+  const formView    = document.getElementById('formView');
+  const successView = document.getElementById('successView');
+
+  if (!parejaId) {
+    loadingView.style.display = 'none';
+    invalidView.style.display = 'block';
+  } else {
+    loadingView.style.display = 'none';
+    formView.style.display = 'block';
+    document.getElementById('parejaTag').textContent = nombrePrecargado || parejaId;
+    if (nombrePrecargado) {
+      document.getElementById('nombreInput').value = nombrePrecargado;
+    }
+  }
+
+  // ── Selector de estrellas ──
+  let calificacion = 0;
+  const starsWrap = document.getElementById('starsPicker');
+  const starEls = Array.from(starsWrap.querySelectorAll('span'));
+  function pintarEstrellas(v) {
+    starEls.forEach(s => s.classList.toggle('on', Number(s.dataset.v) <= v));
+  }
+  starEls.forEach(s => {
+    s.addEventListener('click', () => { calificacion = Number(s.dataset.v); pintarEstrellas(calificacion); });
+  });
+
+  // ── Envío del formulario ──
+  const form = document.getElementById('resenaForm');
+  const errorMsg = document.getElementById('errorMsg');
+  const submitBtn = document.getElementById('submitBtn');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorMsg.style.display = 'none';
+
+    const nombre = document.getElementById('nombreInput').value.trim();
+    const texto = document.getElementById('textoInput').value.trim();
+
+    if (!calificacion) {
+      errorMsg.textContent = 'Por favor selecciona una calificación con las estrellas.';
+      errorMsg.style.display = 'block';
+      return;
+    }
+    if (!nombre || !texto) {
+      errorMsg.textContent = 'Por favor completa tu nombre y tu reseña.';
+      errorMsg.style.display = 'block';
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Enviando…';
+
+    try {
+      const resenasRef = ref(db, `resenas/${parejaId}`);
+      const nuevaRef = push(resenasRef);
+      await set(nuevaRef, {
+        nombre,
+        texto,
+        calificacion,
+        parejaId,
+        fecha: new Date().toISOString(),
+        aprobada: false
+      });
+
+      formView.style.display = 'none';
+      successView.style.display = 'block';
+    } catch (err) {
+      errorMsg.textContent = 'Ocurrió un error al enviar. Por favor intenta de nuevo.';
+      errorMsg.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Enviar reseña';
+    }
+  });
+</script>
+
+</body>
+</html>
