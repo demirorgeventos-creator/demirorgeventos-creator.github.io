@@ -871,9 +871,10 @@
   const dotsWrap = document.getElementById('testiDots');
   if (!track) return;
 
-  const slides = Array.from(track.querySelectorAll('.testi-slide'));
-  const total = slides.length;
+  let slides = [];
+  let total = 0;
   let current = 0;
+  let timer = null;
 
   function buildDots() {
     dotsWrap.innerHTML = '';
@@ -886,6 +887,7 @@
   }
 
   function goTo(index) {
+    if (!total) return;
     current = (index + total) % total;
     track.style.transform = 'translateX(-' + (current * 100) + '%)';
     dotsWrap.querySelectorAll('.testi-dot').forEach((d, i) => {
@@ -895,12 +897,102 @@
 
   window.moveCarousel = function(dir) { goTo(current + dir); };
 
-  let timer = setInterval(() => goTo(current + 1), 10000);
-  track.addEventListener('mouseenter', () => clearInterval(timer));
+  // Reconstruye el carrusel — se llama al cargar y de nuevo cuando llegan reseñas de Firebase
+  window.refreshTestiCarousel = function() {
+    slides = Array.from(track.querySelectorAll('.testi-slide'));
+    total = slides.length;
+    current = 0;
+    track.style.transform = 'translateX(0%)';
+    buildDots();
+    if (timer) clearInterval(timer);
+    timer = setInterval(() => goTo(current + 1), 10000);
+  };
+
+  track.addEventListener('mouseenter', () => { if (timer) clearInterval(timer); });
   track.addEventListener('mouseleave', () => {
+    if (timer) clearInterval(timer);
     timer = setInterval(() => goTo(current + 1), 10000);
   });
 
-  buildDots();
+  window.refreshTestiCarousel();
 })();
+</script>
+
+<script type="module">
+// ── RESEÑAS DINÁMICAS DESDE FIREBASE (aprobadas por DEMIR en el dashboard) ──
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const resenasFirebaseConfig = {
+  apiKey:      "AIzaSyB45I1lwpPZmUJxFB5hu_xtXAwX709PPxc",
+  authDomain:  "demirqr-cb84d.firebaseapp.com",
+  databaseURL: "https://demirqr-cb84d-default-rtdb.firebaseio.com",
+  projectId:   "demirqr-cb84d",
+  storageBucket: "demirqr-cb84d.appspot.com",
+  messagingSenderId: "172090319379",
+  appId: "1:172090319379:web:b9577cb84f0e6c2c4495e6"
+};
+
+const app = initializeApp(resenasFirebaseConfig, 'demir-eventos-shared');
+const db = getDatabase(app);
+
+function estrellasHtml(n) {
+  const full = Math.round(n || 0);
+  return '★'.repeat(full) + '☆'.repeat(5 - full);
+}
+
+function fechaHtml(iso) {
+  if (!iso) return '';
+  try {
+    return new Date(iso).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
+  } catch (e) { return ''; }
+}
+
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str || '';
+  return d.innerHTML;
+}
+
+onValue(ref(db, 'resenas'), (snap) => {
+  const track = document.getElementById('testiTrack');
+  if (!track) return;
+
+  // Quitar slides dinámicos de una lectura anterior (deja intactos los fijos, marcados aparte)
+  track.querySelectorAll('.testi-slide[data-dinamico="1"]').forEach(s => s.remove());
+
+  if (!snap.exists()) { window.refreshTestiCarousel && window.refreshTestiCarousel(); return; }
+
+  // Aplanar todas las reseñas aprobadas de todas las parejas
+  const aprobadas = [];
+  const data = snap.val();
+  Object.values(data).forEach(grupo => {
+    Object.values(grupo || {}).forEach(r => { if (r && r.aprobada) aprobadas.push(r); });
+  });
+
+  // Más recientes primero
+  aprobadas.sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0));
+
+  // Agrupar de 3 en 3 para armar slides, igual que las fijas
+  const existentes = track.querySelectorAll('.testi-slide').length;
+  for (let i = 0; i < aprobadas.length; i += 3) {
+    const grupo = aprobadas.slice(i, i + 3);
+    const slide = document.createElement('div');
+    slide.className = 'testi-slide';
+    slide.dataset.dinamico = '1';
+    slide.id = 'slide-din-' + (existentes + Math.floor(i / 3));
+    slide.innerHTML = grupo.map(r => `
+      <div class="testi-card">
+        <div class="testi-q">"</div>
+        <p class="testi-txt">${escapeHtml(r.texto)}</p>
+        <div class="testi-stars">${estrellasHtml(r.calificacion)} <span style="font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:1px;opacity:.7;">${(r.calificacion || 0).toFixed(1)}</span></div>
+        <div class="testi-name">${escapeHtml(r.nombre)}</div>
+        <div class="testi-date">${fechaHtml(r.fecha)}</div>
+      </div>
+    `).join('');
+    track.appendChild(slide);
+  }
+
+  window.refreshTestiCarousel && window.refreshTestiCarousel();
+});
 </script>
