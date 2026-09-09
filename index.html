@@ -921,7 +921,7 @@
 <script type="module">
 // ── RESEÑAS DINÁMICAS DESDE FIREBASE (aprobadas por DEMIR en el dashboard) ──
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const resenasFirebaseConfig = {
   apiKey:      "AIzaSyB45I1lwpPZmUJxFB5hu_xtXAwX709PPxc",
@@ -933,18 +933,31 @@ const resenasFirebaseConfig = {
   appId: "1:172090319379:web:b9577cb84f0e6c2c4495e6"
 };
 
+// Misma base que usa el dashboard para "demir-config/couples" (fechas de boda reales)
+const dashFirebaseConfig = {
+  apiKey: 'AIzaSyBSUYwd2cagF8GVv2E7IpMXinHNphPjMRM',
+  databaseURL: 'https://nat-luis-bf4d8-default-rtdb.firebaseio.com'
+};
+
 const app = initializeApp(resenasFirebaseConfig, 'demir-eventos-shared');
 const db = getDatabase(app);
+
+const dashApp = initializeApp(dashFirebaseConfig, 'dashboard-couples');
+const dashDb = getDatabase(dashApp);
+
+let couplesById = {}; // { parejaid: { date, names, ... } }
 
 function estrellasHtml(n) {
   const full = Math.round(n || 0);
   return '★'.repeat(full) + '☆'.repeat(5 - full);
 }
 
-function fechaHtml(iso) {
-  if (!iso) return '';
+// Formatea una fecha de boda (YYYY-MM-DD, sin hora) evitando desfases de zona horaria
+function fechaBodaHtml(dateStr) {
+  if (!dateStr) return '';
   try {
-    return new Date(iso).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
+    const d = new Date(dateStr + 'T12:00:00');
+    return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
   } catch (e) { return ''; }
 }
 
@@ -954,7 +967,7 @@ function escapeHtml(str) {
   return d.innerHTML;
 }
 
-onValue(ref(db, 'resenas'), (snap) => {
+function pintarResenas(snap) {
   const track = document.getElementById('testiTrack');
   if (!track) return;
 
@@ -963,15 +976,17 @@ onValue(ref(db, 'resenas'), (snap) => {
 
   if (!snap.exists()) { window.refreshTestiCarousel && window.refreshTestiCarousel(); return; }
 
-  // Aplanar todas las reseñas aprobadas de todas las parejas
+  // Aplanar todas las reseñas aprobadas de todas las parejas, con su fecha de boda si existe
   const aprobadas = [];
   const data = snap.val();
-  Object.values(data).forEach(grupo => {
-    Object.values(grupo || {}).forEach(r => { if (r && r.aprobada) aprobadas.push(r); });
+  Object.entries(data).forEach(([parejaId, grupo]) => {
+    Object.values(grupo || {}).forEach(r => {
+      if (r && r.aprobada) aprobadas.push({ ...r, parejaId, fechaBoda: r.fechaBodaGuardada || (couplesById[parejaId] && couplesById[parejaId].date) || null });
+    });
   });
 
-  // Más recientes primero
-  aprobadas.sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0));
+  // Boda más reciente primero; si no hay fecha de boda, se van al final por fecha de envío
+  aprobadas.sort((a, b) => new Date(b.fechaBoda || b.fecha || 0) - new Date(a.fechaBoda || a.fecha || 0));
 
   // Agrupar de 3 en 3 para armar slides, igual que las fijas
   const existentes = track.querySelectorAll('.testi-slide').length;
@@ -987,12 +1002,23 @@ onValue(ref(db, 'resenas'), (snap) => {
         <p class="testi-txt">${escapeHtml(r.texto)}</p>
         <div class="testi-stars">${estrellasHtml(r.calificacion)} <span style="font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:1px;opacity:.7;">${(r.calificacion || 0).toFixed(1)}</span></div>
         <div class="testi-name">${escapeHtml(r.nombre)}</div>
-        <div class="testi-date">${fechaHtml(r.fecha)}</div>
+        <div class="testi-date">${fechaBodaHtml(r.fechaBoda)}</div>
       </div>
     `).join('');
     track.appendChild(slide);
   }
 
   window.refreshTestiCarousel && window.refreshTestiCarousel();
-});
+}
+
+// Primero cargamos las fechas de boda (una sola vez, cambian poco), luego escuchamos reseñas en tiempo real
+get(ref(dashDb, 'demir-config/couples')).then(snapCouples => {
+  if (snapCouples.exists() && Array.isArray(snapCouples.val())) {
+    snapCouples.val().forEach(c => { if (c.parejaid) couplesById[c.parejaid] = c; });
+  }
+}).catch(() => { /* si falla, seguimos sin fechas de boda — no bloquea las reseñas */ })
+  .finally(() => {
+    onValue(ref(db, 'resenas'), pintarResenas);
+  });
 </script>
+
