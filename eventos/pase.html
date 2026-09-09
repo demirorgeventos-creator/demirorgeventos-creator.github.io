@@ -127,6 +127,9 @@ body { font-family:'Montserrat',sans-serif; background:var(--crema); min-height:
 
 <!-- Pase -->
 <div id="pase-wrap" class="pase-wrap" style="display:none;">
+  <div id="pase-custom-wrap" style="display:none;text-align:center;margin-bottom:1.5rem;">
+    <canvas id="pase-custom-canvas" style="max-width:100%;height:auto;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.18);"></canvas>
+  </div>
   <div class="pase-card">
     <div class="pase-top" id="pase-top"></div>
     <div class="pase-inner">
@@ -271,6 +274,12 @@ async function cargar() {
     // Estado RSVP
     actualizarEstado(inv.rsvp||'pendiente');
 
+    // Si el evento tiene un pase personalizado configurado en el panel, se muestra ese
+    // diseño en lugar del genérico (mismo motor de dibujo que usa el panel al descargar pases)
+    if(ev.plantillaCustom){
+      await renderPaseCustom(ev.plantillaCustom, inv);
+    }
+
     // Marca que el invitado abrió su pase (alimenta la columna "Visto" del panel)
     update(ref(db,`invitados/${eventoId}/${invId}`), {
       visto: true,
@@ -286,6 +295,82 @@ async function cargar() {
     document.getElementById('pase-wrap').style.display='block';
 
   } catch(e){ console.error(e); mostrarError(); }
+}
+
+function cargarImgPase(src){
+  return new Promise((resolve,reject)=>{
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = ()=>resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+// Dibuja el mismo diseño personalizado que se configura y previsualiza en el Panel de Eventos
+// (fondo + nombre/mesa/acompañantes/QR posicionados) en vez de la tarjeta genérica.
+async function renderPaseCustom(pc, inv){
+  try{
+    const bgImg = await cargarImgPase(pc.imagenBase64);
+    const W = pc.naturalW || bgImg.naturalWidth;
+    const H = pc.naturalH || bgImg.naturalHeight;
+    const canvas = document.getElementById('pase-custom-canvas');
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(bgImg, 0, 0, W, H);
+
+    const pos    = pc.pos || { nombre:{x:50,y:50}, mesa:{x:50,y:90}, acomp:{x:50,y:120}, qr:{x:50,y:150} };
+    const color  = pc.color || '#3a1420';
+    const fsN    = parseInt(pc.fsNombre)||36;
+    const fsM    = parseInt(pc.fsMesa)||22;
+    const fsA    = parseInt(pc.fsAcomp)||18;
+    const qrSize = parseInt(pc.qrSize)||120;
+    const showN  = pc.showNombre!==false;
+    const showM  = pc.showMesa!==false;
+    const showA  = pc.showAcomp!==false;
+    const showQ  = pc.showQr!==false;
+
+    ctx.textAlign = 'center';
+    const maxTextWidth = W*0.88;
+    const fitFont=(texto,base,bold)=>{
+      let fs=base;
+      ctx.font = `${bold?'bold ':''}${fs}px ${bold?'Georgia,serif':'sans-serif'}`;
+      while(ctx.measureText(texto).width>maxTextWidth && fs>6){
+        fs-=1;
+        ctx.font = `${bold?'bold ':''}${fs}px ${bold?'Georgia,serif':'sans-serif'}`;
+      }
+      return fs;
+    };
+
+    if(showN && inv.nombre){
+      ctx.fillStyle=color;
+      const fs=fitFont(inv.nombre,fsN,true);
+      ctx.font=`bold ${fs}px Georgia,serif`;
+      ctx.fillText(inv.nombre, pos.nombre.x, pos.nombre.y+fsN);
+    }
+    if(showM && inv.mesa){
+      ctx.fillStyle=color;
+      const fs=fitFont(inv.mesa,fsM,false);
+      ctx.font=`${fs}px sans-serif`;
+      ctx.fillText(inv.mesa, pos.mesa.x, pos.mesa.y+fsM);
+    }
+    if(showA && inv.acompanantes){
+      ctx.fillStyle=color;
+      const fs=fitFont(inv.acompanantes,fsA,false);
+      ctx.font=`${fs}px sans-serif`;
+      ctx.fillText(inv.acompanantes, pos.acomp.x, pos.acomp.y+fsA);
+    }
+    if(showQ){
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(window.location.href)}`;
+      const qrImg = await cargarImgPase(qrUrl);
+      ctx.drawImage(qrImg, pos.qr.x, pos.qr.y, qrSize, qrSize);
+    }
+
+    document.querySelector('.pase-card').style.display='none';
+    document.getElementById('pase-custom-wrap').style.display='block';
+  } catch(e){
+    console.error('No se pudo mostrar el pase personalizado, se deja el diseño genérico:', e);
+  }
 }
 
 function mostrarError(){
