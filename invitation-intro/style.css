@@ -7,13 +7,13 @@
 body {
     min-height: 100vh;
     font-family: Georgia, serif;
-    background: #f5efe8;
+    background: #f7f2eb;
     overflow: hidden;
 }
 
 
 /* =========================
-   CONTENEDOR PRINCIPAL
+   CONTENEDOR
 ========================= */
 
 .intro {
@@ -33,38 +33,48 @@ body {
 ========================= */
 
 .sobre {
-    width: 320px;
-    height: 210px;
+    width: 330px;
+    height: 215px;
 
     position: relative;
 
     cursor: pointer;
 
-    transition: transform 0.5s ease;
+    filter: drop-shadow(0 20px 25px rgba(74, 28, 42, 0.15));
+
+    transition: transform 0.6s ease;
 }
 
 
-/* CUERPO DEL SOBRE */
+/* CUERPO */
 
 .cuerpo-sobre {
     width: 100%;
     height: 100%;
 
     position: absolute;
-
     left: 0;
     bottom: 0;
 
-    background: #e8ded2;
+    background:
+        linear-gradient(
+            135deg,
+            #fffdf9 0%,
+            #f1e9df 100%
+        );
 
-    border-radius: 4px;
+    border: 1px solid rgba(107, 45, 62, 0.12);
+
+    border-radius: 3px;
 
     box-shadow:
-        0 15px 35px rgba(0, 0, 0, 0.15);
+        inset 0 0 0 1px rgba(255,255,255,0.6);
 }
 
 
-/* SOLAPA */
+/* =========================
+   SOLAPA
+========================= */
 
 .solapa {
     width: 0;
@@ -77,25 +87,25 @@ body {
 
     z-index: 3;
 
-    border-left: 160px solid transparent;
-    border-right: 160px solid transparent;
-    border-top: 115px solid #d9cbbd;
+    border-left: 165px solid transparent;
+    border-right: 165px solid transparent;
+    border-top: 120px solid #e8ddd1;
 
     transform-origin: top center;
 
     transition:
-        transform 1s ease,
-        opacity 0.5s ease;
+        transform 1.2s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.7s ease;
 }
 
 
 /* =========================
-   SELLO
+   SELLO DE CERA
 ========================= */
 
 .sello {
-    width: 58px;
-    height: 58px;
+    width: 62px;
+    height: 62px;
 
     position: absolute;
 
@@ -109,25 +119,32 @@ body {
     border: none;
     border-radius: 50%;
 
-    background: #8d5b5b;
+    background:
+        radial-gradient(
+            circle at 35% 30%,
+            #8b4658 0%,
+            #6b2d3e 45%,
+            #4a1c2a 100%
+        );
 
-    color: white;
+    color: #d9b866;
 
-    font-size: 22px;
+    font-size: 23px;
 
     cursor: pointer;
 
     box-shadow:
-        0 5px 15px rgba(0, 0, 0, 0.2);
+        0 5px 12px rgba(74, 28, 42, 0.25),
+        inset 0 2px 3px rgba(255,255,255,0.12);
 
     transition:
-        transform 0.3s ease,
-        box-shadow 0.3s ease,
-        opacity 0.5s ease;
+        transform 0.35s ease,
+        box-shadow 0.35s ease,
+        opacity 0.6s ease;
 }
 
 
-/* EFECTO AL PASAR EL CURSOR */
+/* PEQUEÑO EFECTO */
 
 .sello:hover {
     transform:
@@ -135,7 +152,8 @@ body {
         scale(1.08);
 
     box-shadow:
-        0 8px 20px rgba(0, 0, 0, 0.25);
+        0 8px 18px rgba(74, 28, 42, 0.3),
+        inset 0 2px 3px rgba(255,255,255,0.15);
 }
 
 
@@ -163,8 +181,6 @@ body {
 }
 
 
-/* VIDEO */
-
 .video-container video {
     width: 100%;
     height: 100%;
@@ -175,28 +191,31 @@ body {
 }
 
 
-/* TRANSICIÓN DE SALIDA */
-
 .video-container.fade-out {
     opacity: 0;
 }
 
 
 /* =========================
-   RESPONSIVE
+   CELULARES
 ========================= */
 
 @media (max-width: 480px) {
 
     .sobre {
-        width: 280px;
-        height: 185px;
+        width: 290px;
+        height: 190px;
     }
 
     .solapa {
-        border-left-width: 140px;
-        border-right-width: 140px;
-        border-top-width: 100px;
+        border-left-width: 145px;
+        border-right-width: 145px;
+        border-top-width: 105px;
     }
 
+    .sello {
+        width: 58px;
+        height: 58px;
+        font-size: 21px;
+    }
 }
