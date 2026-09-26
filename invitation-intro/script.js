@@ -1,7 +1,3 @@
-// =========================
-// ELEMENTOS
-// =========================
-
 const sello = document.getElementById("sello");
 const sobre = document.getElementById("sobre");
 const solapa = document.querySelector(".solapa");
@@ -9,66 +5,89 @@ const solapa = document.querySelector(".solapa");
 const videoContainer = document.getElementById("videoContainer");
 const video = document.getElementById("video");
 
-const final = document.getElementById("final");
-const continuar = document.getElementById("continuar");
 
-
-// =========================
-// ABRIR SOBRE
-// =========================
+/* =========================
+   ABRIR SOBRE
+========================= */
 
 sello.addEventListener("click", () => {
 
-    // Evitamos que se pueda pulsar varias veces
+    /* Evita que se pueda pulsar varias veces */
     sello.disabled = true;
 
-    // Abrimos la solapa
+
+    /* Abrir la solapa */
+
     solapa.style.transform = "rotateX(180deg)";
 
-    // Ocultamos el sello
+
+    /* Desaparecer el sello */
+
     sello.style.opacity = "0";
 
-    // Esperamos a que termine la animación
+
+    /*
+       Esperamos a que termine
+       la animación del sobre
+    */
+
     setTimeout(() => {
 
-        // Ocultamos completamente el sobre
+        /* Ocultar sobre */
+
         sobre.style.display = "none";
 
-        // Mostramos el video
+
+        /* Mostrar contenedor del video */
+
         videoContainer.style.display = "flex";
 
-        // Pequeña transición de entrada
+
+        /*
+           Pequeña espera para permitir
+           que CSS detecte el cambio
+           y haga el fade correctamente
+        */
+
         setTimeout(() => {
+
             videoContainer.style.opacity = "1";
+
         }, 50);
 
-        // Intentamos reproducir el video
+
+        /* Reproducir video */
+
         video.play();
 
     }, 1000);
 
 });
-// =========================
-// CUANDO TERMINA EL VIDEO
-// =========================
+
+
+/* =========================
+   CUANDO TERMINA EL VIDEO
+========================= */
 
 video.addEventListener("ended", () => {
 
-    // El video comienza a desvanecerse
+    /*
+       Comienza el fade-out
+    */
+
     videoContainer.classList.add("fade-out");
+
+
+    /*
+       Esperamos a que termine
+       la transición y después
+       vamos a la invitación
+    */
 
     setTimeout(() => {
 
-        // AQUÍ PONDREMOS EL LINK REAL DE LA INVITACIÓN
         window.location.href = "https://google.com";
 
     }, 2200);
-
-});
-
-    // AQUÍ DESPUÉS PONDREMOS
-    // EL LINK REAL DE LA INVITACIÓN
-
-    window.location.href = "https://google.com";
 
 });
