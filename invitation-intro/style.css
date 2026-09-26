@@ -7,7 +7,7 @@
 body {
     min-height: 100vh;
     font-family: Georgia, serif;
-    background: #f7f2eb;
+    background: #f5f0e9;
     overflow: hidden;
 }
 
@@ -33,20 +33,23 @@ body {
 ========================= */
 
 .sobre {
-    width: 330px;
-    height: 215px;
+    width: 410px;
+    height: 275px;
 
     position: relative;
 
     cursor: pointer;
 
-    filter: drop-shadow(0 20px 25px rgba(74, 28, 42, 0.15));
+    filter:
+        drop-shadow(0 24px 28px rgba(62, 35, 38, 0.16));
 
     transition: transform 0.6s ease;
 }
 
 
-/* CUERPO */
+/* =========================
+   CUERPO DEL SOBRE
+========================= */
 
 .cuerpo-sobre {
     width: 100%;
@@ -56,19 +59,70 @@ body {
     left: 0;
     bottom: 0;
 
+    border-radius: 18px;
+
     background:
+
+        /* textura muy sutil */
+        radial-gradient(
+            circle at 20% 20%,
+            rgba(255,255,255,0.7) 0,
+            rgba(255,255,255,0) 45%
+        ),
+
+        radial-gradient(
+            circle at 80% 70%,
+            rgba(180,150,120,0.08) 0,
+            rgba(180,150,120,0) 50%
+        ),
+
         linear-gradient(
             135deg,
             #fffdf9 0%,
-            #f1e9df 100%
+            #f5eee5 45%,
+            #eee4d8 100%
         );
 
-    border: 1px solid rgba(107, 45, 62, 0.12);
-
-    border-radius: 3px;
+    border: 1px solid rgba(105, 69, 55, 0.15);
 
     box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,0.6);
+
+        inset 0 0 0 1px rgba(255,255,255,0.7),
+
+        inset 0 -15px 25px rgba(110,75,55,0.04),
+
+        inset 0 8px 15px rgba(255,255,255,0.5);
+}
+
+
+/* =========================
+   TEXTURA DE PAPEL
+========================= */
+
+.cuerpo-sobre::after {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    border-radius: 18px;
+
+    pointer-events: none;
+
+    opacity: 0.35;
+
+    background-image:
+
+        radial-gradient(
+            rgba(120,90,70,0.12) 0.7px,
+            transparent 0.8px
+        );
+
+    background-size: 7px 7px;
+
+    mix-blend-mode: multiply;
 }
 
 
@@ -77,6 +131,7 @@ body {
 ========================= */
 
 .solapa {
+
     width: 0;
     height: 0;
 
@@ -87,15 +142,19 @@ body {
 
     z-index: 3;
 
-    border-left: 165px solid transparent;
-    border-right: 165px solid transparent;
-    border-top: 120px solid #e8ddd1;
+    border-left: 205px solid transparent;
+    border-right: 205px solid transparent;
+
+    border-top: 145px solid #e7dbce;
 
     transform-origin: top center;
 
     transition:
-        transform 1.2s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 1.25s cubic-bezier(0.4, 0, 0.2, 1),
         opacity 0.7s ease;
+
+    filter:
+        drop-shadow(0 1px 1px rgba(80,50,40,0.05));
 }
 
 
@@ -104,38 +163,71 @@ body {
 ========================= */
 
 .sello {
-    width: 62px;
-    height: 62px;
+
+    width: 76px;
+    height: 76px;
 
     position: absolute;
 
     left: 50%;
-    top: 50%;
+    top: 52%;
 
     transform: translate(-50%, -50%);
 
     z-index: 10;
 
     border: none;
-    border-radius: 50%;
+
+    border-radius: 48% 52% 50% 46%;
 
     background:
+
+        /* brillo irregular de la cera */
         radial-gradient(
-            circle at 35% 30%,
-            #8b4658 0%,
-            #6b2d3e 45%,
-            #4a1c2a 100%
+            circle at 32% 27%,
+            rgba(255,255,255,0.22) 0%,
+            rgba(255,255,255,0) 20%
+        ),
+
+        radial-gradient(
+            circle at 68% 70%,
+            rgba(40,10,18,0.22) 0%,
+            rgba(40,10,18,0) 35%
+        ),
+
+        radial-gradient(
+            circle at 50% 50%,
+            #824354 0%,
+            #713345 45%,
+            #592536 75%,
+            #461a29 100%
         );
 
-    color: #d9b866;
+    color: #d8bd78;
+
+    font-family: Georgia, serif;
 
     font-size: 23px;
+
+    font-weight: bold;
+
+    letter-spacing: 2px;
 
     cursor: pointer;
 
     box-shadow:
-        0 5px 12px rgba(74, 28, 42, 0.25),
-        inset 0 2px 3px rgba(255,255,255,0.12);
+
+        0 7px 14px rgba(65, 25, 38, 0.25),
+
+        inset 2px 2px 4px rgba(255,255,255,0.12),
+
+        inset -3px -4px 6px rgba(35,8,17,0.28);
+
+    text-shadow:
+
+        1px 1px 1px rgba(255,255,255,0.15),
+
+        -1px -1px 1px rgba(40,10,18,0.65);
 
     transition:
         transform 0.35s ease,
@@ -144,16 +236,72 @@ body {
 }
 
 
-/* PEQUEÑO EFECTO */
+/* =========================
+   IRREGULARIDADES DE CERA
+========================= */
+
+.sello::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: -3px;
+
+    border-radius: 46% 54% 48% 52%;
+
+    background:
+
+        radial-gradient(
+            circle at 20% 35%,
+            rgba(255,255,255,0.18) 0 3px,
+            transparent 4px
+        ),
+
+        radial-gradient(
+            circle at 78% 22%,
+            rgba(40,10,20,0.18) 0 4px,
+            transparent 5px
+        ),
+
+        radial-gradient(
+            circle at 82% 75%,
+            rgba(255,255,255,0.1) 0 3px,
+            transparent 4px
+        );
+
+    pointer-events: none;
+}
+
+
+/* =========================
+   MD GRABADO EN LA CERA
+========================= */
+
+.sello {
+
+    /* sensación de relieve */
+    -webkit-text-stroke: 0.3px rgba(255,220,150,0.18);
+}
+
+
+/* =========================
+   EFECTO AL PASAR EL DEDO
+========================= */
 
 .sello:hover {
+
     transform:
         translate(-50%, -50%)
-        scale(1.08);
+        scale(1.05);
 
     box-shadow:
-        0 8px 18px rgba(74, 28, 42, 0.3),
-        inset 0 2px 3px rgba(255,255,255,0.15);
+
+        0 10px 20px rgba(65, 25, 38, 0.3),
+
+        inset 2px 2px 5px rgba(255,255,255,0.15),
+
+        inset -4px -5px 7px rgba(35,8,17,0.3);
 }
 
 
@@ -162,6 +310,7 @@ body {
 ========================= */
 
 .video-container {
+
     position: absolute;
 
     width: 100%;
@@ -182,6 +331,7 @@ body {
 
 
 .video-container video {
+
     width: 100%;
     height: 100%;
 
@@ -192,6 +342,7 @@ body {
 
 
 .video-container.fade-out {
+
     opacity: 0;
 }
 
@@ -203,19 +354,23 @@ body {
 @media (max-width: 480px) {
 
     .sobre {
-        width: 290px;
-        height: 190px;
+
+        width: 340px;
+        height: 225px;
     }
 
     .solapa {
-        border-left-width: 145px;
-        border-right-width: 145px;
-        border-top-width: 105px;
+
+        border-left-width: 170px;
+        border-right-width: 170px;
+        border-top-width: 120px;
     }
 
     .sello {
-        width: 58px;
-        height: 58px;
+
+        width: 68px;
+        height: 68px;
+
         font-size: 21px;
     }
 }
