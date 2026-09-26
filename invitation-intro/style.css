@@ -150,8 +150,9 @@ body {
     background: #000;
 
     opacity: 0;
+    
+    transition: opacity 2s ease;
 }
-
 
 .video-container video {
     width: 100%;
@@ -164,10 +165,6 @@ body {
 /* =========================
    TRANSICIÓN FINAL
 ========================= */
-
-.video-container {
-    transition: opacity 1.2s ease;
-}
 
 .video-container.fade-out {
     opacity: 0;
