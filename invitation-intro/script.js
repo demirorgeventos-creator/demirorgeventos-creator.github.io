@@ -62,7 +62,7 @@ video.addEventListener("ended", () => {
         // AQUÍ PONDREMOS EL LINK REAL DE LA INVITACIÓN
         window.location.href = "https://google.com";
 
-    }, 1200);
+    }, 2200);
 
 });
 
