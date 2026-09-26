@@ -9,7 +9,6 @@ body {
     font-family: Georgia, serif;
     overflow: hidden;
 
-    /* TEXTURA REAL DEL FONDO */
     background-color: #f5efe6;
     background-image: url("recursos/textura-papel.png");
     background-repeat: repeat;
@@ -20,7 +19,7 @@ body {
 
 
 /* =========================
-   LUZ SUAVE SOBRE EL FONDO
+   LUZ DEL FONDO
 ========================= */
 
 body::after {
@@ -56,7 +55,6 @@ body::after {
     justify-content: center;
 
     position: relative;
-
     z-index: 1;
 }
 
@@ -75,11 +73,9 @@ body::after {
 
     border-radius: 22px;
 
-    overflow: visible;
-
     filter:
-        drop-shadow(0 30px 25px rgba(58, 39, 31, 0.16))
-        drop-shadow(0 8px 10px rgba(58, 39, 31, 0.10));
+        drop-shadow(0 30px 25px rgba(58,39,31,0.17))
+        drop-shadow(0 8px 10px rgba(58,39,31,0.10));
 
     transition:
         transform 0.6s ease;
@@ -87,7 +83,7 @@ body::after {
 
 
 /* =========================
-   CUERPO DEL SOBRE
+   PAPEL DEL SOBRE
 ========================= */
 
 .cuerpo-sobre {
@@ -96,54 +92,57 @@ body::after {
     height: 100%;
 
     position: absolute;
-
     inset: 0;
 
     overflow: hidden;
 
     border-radius: 22px;
 
-    background-color: #f4ede3;
+    background-color: #f5eee4;
 
-    /* TEXTURA REAL */
+    /* TEXTURA REAL DEL SOBRE */
     background-image:
         linear-gradient(
-            rgba(255,255,255,0.20),
-            rgba(255,255,255,0.20)
+            135deg,
+            rgba(255,255,255,0.28),
+            rgba(225,211,195,0.08)
         ),
-        url("recursos/textura-papel.png");
+        url("recursos/textura-sobre.png");
 
-    background-repeat: repeat;
+    background-repeat:
+        no-repeat,
+        repeat;
 
     background-size:
-        auto,
-        650px 650px;
+        100% 100%,
+        1000px 1000px;
+
+    background-position:
+        center,
+        center;
 
     background-blend-mode:
-        screen,
+        soft-light,
         multiply;
 
-    border: 1px solid rgba(92, 65, 52, 0.18);
+    border: 1px solid rgba(92,65,52,0.16);
 
     box-shadow:
 
-        /* borde interior */
-        inset 0 0 0 1px rgba(255,255,255,0.65),
+        inset 0 1px 0 rgba(255,255,255,0.90),
 
-        /* luz superior */
-        inset 0 8px 15px rgba(255,255,255,0.35),
+        inset 0 10px 18px rgba(255,255,255,0.20),
 
-        /* sombra inferior */
-        inset 0 -20px 30px rgba(70,45,30,0.08),
+        inset 0 -22px 30px rgba(70,45,30,0.07),
 
-        /* pequeña profundidad lateral */
-        inset 8px 0 18px rgba(255,255,255,0.15),
-        inset -8px 0 18px rgba(70,45,30,0.04);
+        inset 8px 0 20px rgba(255,255,255,0.12),
+
+        inset -8px 0 20px rgba(70,45,30,0.035);
 }
 
 
 /* =========================
-   BRILLO NATURAL DEL PAPEL
+   LUZ NATURAL SOBRE EL PAPEL
 ========================= */
 
 .cuerpo-sobre::before {
@@ -160,9 +159,10 @@ body::after {
 
     background:
         radial-gradient(
-            ellipse at 25% 18%,
-            rgba(255,255,255,0.55) 0%,
-            rgba(255,255,255,0) 40%
+            ellipse at 27% 15%,
+            rgba(255,255,255,0.50) 0%,
+            rgba(255,255,255,0.12) 35%,
+            transparent 60%
         );
 
     mix-blend-mode: screen;
@@ -193,7 +193,7 @@ body::after {
     transform-origin: top center;
 
     transition:
-        transform 1.25s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 1.25s cubic-bezier(0.4,0,0.2,1),
         opacity 0.7s ease;
 
     filter:
@@ -306,9 +306,9 @@ body::after {
         scale(1.05);
 
     box-shadow:
-        0 10px 20px rgba(65,25,38,0.3),
+        0 10px 20px rgba(65,25,38,0.30),
         inset 2px 2px 5px rgba(255,255,255,0.15),
-        inset -4px -5px 7px rgba(35,8,17,0.3);
+        inset -4px -5px 7px rgba(35,8,17,0.30);
 }
 
 
