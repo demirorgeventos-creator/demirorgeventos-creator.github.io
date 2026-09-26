@@ -48,38 +48,23 @@ sello.addEventListener("click", () => {
     }, 1000);
 
 });
-
-
 // =========================
 // CUANDO TERMINA EL VIDEO
 // =========================
 
 video.addEventListener("ended", () => {
 
-    // Ocultamos el video
-    videoContainer.style.opacity = "0";
+    // El video comienza a desvanecerse
+    videoContainer.classList.add("fade-out");
 
     setTimeout(() => {
 
-        videoContainer.style.display = "none";
+        // AQUÍ PONDREMOS EL LINK REAL DE LA INVITACIÓN
+        window.location.href = "https://google.com";
 
-        // Mostramos pantalla final
-        final.style.display = "flex";
-
-        setTimeout(() => {
-            final.style.opacity = "1";
-        }, 50);
-
-    }, 600);
+    }, 1200);
 
 });
-
-
-// =========================
-// BOTÓN FINAL
-// =========================
-
-continuar.addEventListener("click", () => {
 
     // AQUÍ DESPUÉS PONDREMOS
     // EL LINK REAL DE LA INVITACIÓN
