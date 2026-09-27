@@ -181,10 +181,12 @@ body::after {
         multiply;
 
     clip-path: polygon(
-        0 0,
-        100% 0,
+        5% 0,
+        95% 0,
         50% 100%
     );
+
+    border-radius: 22px 22px 0 0;
 
     transform-origin: top center;
 
@@ -212,10 +214,12 @@ body::after {
         );
 
     clip-path: polygon(
-        0 0,
-        100% 0,
+        5% 0,
+        95% 0,
         50% 100%
     );
+
+    border-radius: 22px 22px 0 0;
 }
 
 
