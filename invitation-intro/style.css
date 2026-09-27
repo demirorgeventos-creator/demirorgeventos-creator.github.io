@@ -60,13 +60,15 @@ body::after {
 
     border-radius: 22px;
 
+    overflow: hidden;
+
     filter:
         drop-shadow(0 30px 25px rgba(58,39,31,0.17))
         drop-shadow(0 8px 10px rgba(58,39,31,0.10));
 
-    transition: transform 0.6s ease;
-
-    overflow: hidden;
+    transition:
+        opacity 0.8s ease,
+        transform 0.9s ease;
 }
 
 
@@ -117,6 +119,10 @@ body::after {
         inset 0 -22px 30px rgba(70,45,30,0.07),
         inset 8px 0 20px rgba(255,255,255,0.12),
         inset -8px 0 20px rgba(70,45,30,0.035);
+
+    transition:
+        opacity 0.8s ease,
+        transform 0.9s ease;
 }
 
 .cuerpo-sobre::before {
@@ -158,20 +164,17 @@ body::after {
     transform-origin: top center;
 
     transition:
-        transform 1.25s cubic-bezier(0.4,0,0.2,1),
-        opacity 0.7s ease;
+        transform 1.35s cubic-bezier(0.4,0,0.2,1),
+        opacity 0.5s ease;
 
     filter:
         drop-shadow(0 3px 3px rgba(65,45,35,0.10));
 }
 
 
-/*
-   La parte triangular de la solapa.
-   Se crea dentro de la solapa para que
-   las esquinas exteriores sigan siendo
-   las del sobre.
-*/
+/* =========================
+   PAPEL DE LA SOLAPA
+========================= */
 
 .solapa::before {
     content: "";
@@ -219,7 +222,7 @@ body::after {
 
 
 /* =========================
-   LUZ SOBRE LA SOLAPA
+   LUZ Y VOLUMEN DE LA SOLAPA
 ========================= */
 
 .solapa::after {
@@ -238,8 +241,9 @@ body::after {
     background:
         linear-gradient(
             to bottom,
-            rgba(255,255,255,0.16),
-            rgba(80,50,35,0.08)
+            rgba(255,255,255,0.22) 0%,
+            rgba(255,255,255,0.06) 35%,
+            rgba(80,50,35,0.10) 100%
         );
 
     clip-path: polygon(
@@ -306,9 +310,9 @@ body::after {
         inset -3px -4px 6px rgba(35,8,17,0.28);
 
     transition:
-        transform 0.35s ease,
-        box-shadow 0.35s ease,
-        opacity 0.6s ease;
+        transform 0.45s ease,
+        box-shadow 0.45s ease,
+        opacity 0.7s ease;
 }
 
 .sello:hover {
@@ -320,6 +324,32 @@ body::after {
         0 10px 20px rgba(65,25,38,0.30),
         inset 2px 2px 5px rgba(255,255,255,0.15),
         inset -4px -5px 7px rgba(35,8,17,0.30);
+}
+
+
+/* =========================
+   ESTADO: SOBRE ABIERTO
+========================= */
+
+.sobre.abriendo {
+    transform: translateY(-4px) scale(1.015);
+}
+
+.sobre.abriendo .cuerpo-sobre {
+    opacity: 0;
+    transform: scale(1.015);
+}
+
+.sobre.abriendo .sello {
+    opacity: 0;
+    transform:
+        translate(-50%, -50%)
+        scale(0.88);
+}
+
+.sobre.abriendo .solapa {
+    transform:
+        rotateX(180deg);
 }
 
 
