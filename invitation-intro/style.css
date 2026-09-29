@@ -395,3 +395,284 @@ body::after {
         height: 185px;
     }
 }
+
+/* =========================
+   TARJETA PERSONALIZADA
+========================= */
+
+.tarjeta-container {
+    position: absolute;
+
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    opacity: 0;
+    visibility: hidden;
+
+    transform: translateY(18px);
+
+    transition:
+        opacity 1.2s ease,
+        transform 1.2s cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 0s linear 1.2s;
+
+    z-index: 5;
+}
+
+
+/* Cuando la tarjeta aparece */
+
+.tarjeta-container.visible {
+    opacity: 1;
+    visibility: visible;
+
+    transform: translateY(0);
+
+    transition:
+        opacity 1.2s ease,
+        transform 1.2s cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 0s;
+}
+
+
+/* =========================
+   TARJETA
+========================= */
+
+.tarjeta {
+    width: 330px;
+    min-height: 235px;
+
+    position: relative;
+
+    padding: 48px 35px 32px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    background-color: #f8f3eb;
+
+    background-image:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,0.45),
+            rgba(225,211,195,0.10)
+        ),
+        url("recursos/textura-papel.png");
+
+    background-repeat:
+        no-repeat,
+        repeat;
+
+    background-size:
+        100% 100%,
+        700px 700px;
+
+    border-radius: 6px;
+
+    border: 1px solid rgba(135,105,75,0.18);
+
+    box-shadow:
+        0 25px 45px rgba(58,39,31,0.13),
+        0 8px 15px rgba(58,39,31,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.80);
+}
+
+
+/* =========================
+   DETALLE DORADO
+========================= */
+
+.detalle-dorado {
+    position: absolute;
+
+    top: 24px;
+    left: 50%;
+
+    width: 45px;
+    height: 1px;
+
+    transform: translateX(-50%);
+
+    background: rgba(157,126,79,0.65);
+}
+
+.detalle-dorado::after {
+    content: "";
+
+    position: absolute;
+
+    top: -2px;
+    left: 50%;
+
+    width: 5px;
+    height: 5px;
+
+    transform: translateX(-50%) rotate(45deg);
+
+    background: #a88a5a;
+}
+
+
+/* =========================
+   NOMBRE
+========================= */
+
+.nombre-invitado {
+    margin-bottom: 18px;
+
+    color: #4b4038;
+
+    font-family: Georgia, "Times New Roman", serif;
+
+    font-size: 25px;
+    font-weight: normal;
+
+    line-height: 1.2;
+
+    letter-spacing: 0.2px;
+}
+
+
+/* =========================
+   TEXTO
+========================= */
+
+.texto-pase {
+    margin-bottom: 7px;
+
+    color: #806f61;
+
+    font-family: Georgia, "Times New Roman", serif;
+
+    font-size: 13px;
+
+    letter-spacing: 1.3px;
+
+    text-transform: none;
+}
+
+
+/* =========================
+   NÚMERO DE PERSONAS
+========================= */
+
+.numero-pase {
+    margin-bottom: 25px;
+
+    color: #51443a;
+
+    font-family: Georgia, "Times New Roman", serif;
+
+    font-size: 17px;
+
+    letter-spacing: 0.5px;
+}
+
+
+/* =========================
+   ABRIR INVITACIÓN
+========================= */
+
+.abrir-invitacion {
+    position: relative;
+
+    padding: 8px 2px;
+
+    border: none;
+
+    border-bottom: 1px solid rgba(157,126,79,0.65);
+
+    background: transparent;
+
+    color: #806a4d;
+
+    font-family: Georgia, "Times New Roman", serif;
+
+    font-size: 11px;
+
+    letter-spacing: 2px;
+
+    cursor: pointer;
+
+    transition:
+        color 0.35s ease,
+        letter-spacing 0.35s ease,
+        border-color 0.35s ease;
+}
+
+.abrir-invitacion:hover {
+    color: #4b4038;
+
+    letter-spacing: 2.4px;
+
+    border-color: rgba(157,126,79,0.95);
+}
+
+
+/* =========================
+   SALIDA DE LA TARJETA
+========================= */
+
+.tarjeta-container.saliendo {
+    opacity: 0;
+
+    transform: translateY(-12px);
+
+    pointer-events: none;
+
+    transition:
+        opacity 0.7s ease,
+        transform 0.7s ease;
+}
+
+
+/* =========================
+   SOBRE — DESAPARICIÓN
+========================= */
+
+.sobre.desapareciendo {
+    opacity: 0;
+
+    transform: translateY(-8px) scale(0.985);
+
+    transition:
+        opacity 0.9s ease,
+        transform 0.9s ease;
+}
+
+
+/* =========================
+   MÓVIL
+========================= */
+
+@media (max-width: 480px) {
+
+    .tarjeta {
+        width: 300px;
+        min-height: 225px;
+
+        padding-left: 28px;
+        padding-right: 28px;
+    }
+
+    .nombre-invitado {
+        font-size: 23px;
+    }
+
+    .texto-pase {
+        font-size: 12px;
+    }
+
+    .numero-pase {
+        font-size: 16px;
+    }
+}
