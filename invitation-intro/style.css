@@ -242,8 +242,8 @@ body::after {
 ========================= */
 
 .sello {
-    width: 180px;
-    height: 180px;
+    width: 220px;
+    height: 220px;
 
     position: absolute;
 
@@ -285,12 +285,12 @@ body::after {
         drop-shadow(0 7px 8px rgba(65,25,38,0.25))
         drop-shadow(0 2px 3px rgba(45,25,20,0.16));
 
-    animation: latido 2.2s ease-in-out infinite;
+    animation: latido 2.4s ease-in-out infinite;
 }
 
 
 /* =========================
-   LATIDO DEL SELLO
+   LATIDO MARCADO
 ========================= */
 
 @keyframes latido {
@@ -299,22 +299,25 @@ body::after {
         transform: scale(1);
     }
 
-    10% {
-        transform: scale(1.07);
+    /* PRIMER GOLPE */
+    8% {
+        transform: scale(1.18);
     }
 
-    18% {
-        transform: scale(0.98);
+    16% {
+        transform: scale(0.94);
     }
 
-    26% {
-        transform: scale(1.05);
+    /* SEGUNDO GOLPE */
+    24% {
+        transform: scale(1.14);
     }
 
-    38% {
+    34% {
         transform: scale(1);
     }
 
+    /* PAUSA */
     100% {
         transform: scale(1);
     }
@@ -373,7 +376,7 @@ body::after {
     }
 
     .sello {
-        width: 150px;
-        height: 150px;
+        width: 185px;
+        height: 185px;
     }
 }
