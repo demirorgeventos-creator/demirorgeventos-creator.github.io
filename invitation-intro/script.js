@@ -1,5 +1,6 @@
 const sello = document.getElementById("sello");
 const sobre = document.getElementById("sobre");
+const solapa = document.querySelector(".solapa");
 
 const videoContainer = document.getElementById("videoContainer");
 const video = document.getElementById("video");
@@ -13,28 +14,8 @@ sello.addEventListener("click", () => {
 
     sello.disabled = true;
 
-    /* Inicia toda la animación */
-    sobre.classList.add("abriendo");
-
-
-    /*
-        Esperamos a que la solapa termine
-        de abrirse antes de retirar el sobre.
-    */
-
-    setTimeout(() => {
-
-        sobre.style.opacity = "0";
-        sobre.style.transform =
-            "translateY(-10px) scale(0.98)";
-
-    }, 1350);
-
-
-    /*
-        Una vez que el sobre ya desapareció,
-        mostramos el video.
-    */
+    solapa.style.transform = "rotateX(180deg)";
+    sello.style.opacity = "0";
 
     setTimeout(() => {
 
@@ -48,7 +29,7 @@ sello.addEventListener("click", () => {
 
         video.play();
 
-    }, 2150);
+    }, 1000);
 
 });
 
