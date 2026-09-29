@@ -66,7 +66,9 @@ body::after {
         drop-shadow(0 30px 25px rgba(58,39,31,0.17))
         drop-shadow(0 8px 10px rgba(58,39,31,0.10));
 
-    transition: transform 0.6s ease;
+    transition:
+        opacity 0.9s ease,
+        transform 0.9s ease;
 }
 
 
@@ -295,12 +297,10 @@ body::after {
 
 @keyframes latido {
 
-    /* Comienza tranquilo */
     0% {
         transform: scale(1);
     }
 
-    /* Crece MUY lentamente */
     12% {
         transform: scale(1.04);
     }
@@ -313,12 +313,10 @@ body::after {
         transform: scale(1.18);
     }
 
-    /* Llega al máximo */
     44% {
         transform: scale(1.22);
     }
 
-    /* Se relaja lentamente */
     55% {
         transform: scale(1.12);
     }
@@ -327,15 +325,294 @@ body::after {
         transform: scale(0.95);
     }
 
-    /* Regresa a su tamaño normal */
     76% {
         transform: scale(1);
     }
 
-    /* Pausa antes del siguiente latido */
     100% {
         transform: scale(1);
     }
+}
+
+
+/* =========================
+   DESAPARICIÓN DEL SOBRE
+========================= */
+
+.sobre.desapareciendo {
+    opacity: 0;
+    transform: translateY(-8px);
+
+    pointer-events: none;
+}
+
+
+/* =========================
+   TARJETA PERSONALIZADA
+========================= */
+
+.tarjeta-container {
+    position: absolute;
+
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    opacity: 0;
+    visibility: hidden;
+
+    transform: translateY(16px);
+
+    pointer-events: none;
+
+    z-index: 5;
+
+    transition:
+        opacity 1.15s ease,
+        transform 1.15s cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 0s linear 1.15s;
+}
+
+
+/* =========================
+   TARJETA VISIBLE
+========================= */
+
+.tarjeta-container.visible {
+    opacity: 1;
+    visibility: visible;
+
+    transform: translateY(0);
+
+    pointer-events: auto;
+
+    transition:
+        opacity 1.15s ease,
+        transform 1.15s cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 0s;
+}
+
+
+/* =========================
+   PAPEL DE LA TARJETA
+========================= */
+
+.tarjeta {
+    width: 305px;
+    min-height: 205px;
+
+    position: relative;
+
+    padding: 42px 30px 28px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    background-color: #f7f1e7;
+
+    background-image:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,0.32),
+            rgba(225,211,195,0.08)
+        ),
+        url("recursos/textura-papel.png");
+
+    background-repeat:
+        no-repeat,
+        repeat;
+
+    background-size:
+        100% 100%,
+        700px 700px;
+
+    background-position:
+        center,
+        center;
+
+    border: 1px solid rgba(112,86,64,0.14);
+
+    border-radius: 5px;
+
+    box-shadow:
+        0 14px 24px rgba(58,39,31,0.10),
+        0 3px 8px rgba(58,39,31,0.05),
+        inset 0 1px 0 rgba(255,255,255,0.75);
+}
+
+
+/* =========================
+   LÍNEA DORADA
+========================= */
+
+.tarjeta-linea {
+    position: absolute;
+
+    top: 23px;
+    left: 50%;
+
+    width: 38px;
+    height: 1px;
+
+    transform: translateX(-50%);
+
+    background: rgba(155,125,79,0.65);
+}
+
+
+/* pequeño punto central */
+
+.tarjeta-linea::after {
+    content: "";
+
+    position: absolute;
+
+    width: 4px;
+    height: 4px;
+
+    left: 50%;
+    top: -1.5px;
+
+    transform: translateX(-50%) rotate(45deg);
+
+    background: #a48961;
+}
+
+
+/* =========================
+   NOMBRE DEL INVITADO
+========================= */
+
+.nombre-invitado {
+    margin-bottom: 14px;
+
+    color: #463b34;
+
+    font-family:
+        "Baskerville",
+        "Times New Roman",
+        Georgia,
+        serif;
+
+    font-size: 23px;
+    font-weight: normal;
+
+    line-height: 1.25;
+
+    letter-spacing: 0.2px;
+}
+
+
+/* =========================
+   TEXTO
+========================= */
+
+.texto-pase {
+    margin-bottom: 5px;
+
+    color: #87776a;
+
+    font-family:
+        "Baskerville",
+        "Times New Roman",
+        Georgia,
+        serif;
+
+    font-size: 12px;
+
+    line-height: 1.4;
+
+    letter-spacing: 1px;
+}
+
+
+/* =========================
+   NÚMERO DE PERSONAS
+========================= */
+
+.numero-pase {
+    margin-bottom: 21px;
+
+    color: #51453c;
+
+    font-family:
+        "Baskerville",
+        "Times New Roman",
+        Georgia,
+        serif;
+
+    font-size: 16px;
+
+    line-height: 1.3;
+
+    letter-spacing: 0.5px;
+}
+
+
+/* =========================
+   ABRIR INVITACIÓN
+   NO ES UN BOTÓN WEB
+========================= */
+
+.abrir-invitacion {
+    padding: 5px 3px 6px;
+
+    border: none;
+    border-bottom: 1px solid rgba(155,125,79,0.58);
+
+    background: transparent;
+
+    color: #806b4f;
+
+    font-family:
+        "Baskerville",
+        "Times New Roman",
+        Georgia,
+        serif;
+
+    font-size: 10px;
+
+    font-weight: normal;
+
+    letter-spacing: 1.8px;
+
+    cursor: pointer;
+
+    transition:
+        color 0.35s ease,
+        border-color 0.35s ease,
+        letter-spacing 0.35s ease;
+}
+
+.abrir-invitacion:hover {
+    color: #55473c;
+
+    border-color: rgba(155,125,79,0.9);
+
+    letter-spacing: 2px;
+}
+
+
+/* =========================
+   SALIDA DE LA TARJETA
+========================= */
+
+.tarjeta-container.saliendo {
+    opacity: 0;
+
+    transform: translateY(-8px);
+
+    pointer-events: none;
+
+    transition:
+        opacity 0.65s ease,
+        transform 0.65s ease;
 }
 
 
@@ -359,6 +636,8 @@ body::after {
     opacity: 0;
 
     transition: opacity 2.2s ease;
+
+    z-index: 20;
 }
 
 .video-container video {
@@ -394,285 +673,28 @@ body::after {
         width: 185px;
         height: 185px;
     }
-}
-
-/* =========================
-   TARJETA PERSONALIZADA
-========================= */
-
-.tarjeta-container {
-    position: absolute;
-
-    width: 100%;
-    height: 100%;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    opacity: 0;
-    visibility: hidden;
-
-    transform: translateY(18px);
-
-    transition:
-        opacity 1.2s ease,
-        transform 1.2s cubic-bezier(0.22, 1, 0.36, 1),
-        visibility 0s linear 1.2s;
-
-    z-index: 5;
-}
-
-
-/* Cuando la tarjeta aparece */
-
-.tarjeta-container.visible {
-    opacity: 1;
-    visibility: visible;
-
-    transform: translateY(0);
-
-    transition:
-        opacity 1.2s ease,
-        transform 1.2s cubic-bezier(0.22, 1, 0.36, 1),
-        visibility 0s;
-}
-
-
-/* =========================
-   TARJETA
-========================= */
-
-.tarjeta {
-    width: 330px;
-    min-height: 235px;
-
-    position: relative;
-
-    padding: 48px 35px 32px;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    text-align: center;
-
-    background-color: #f8f3eb;
-
-    background-image:
-        linear-gradient(
-            135deg,
-            rgba(255,255,255,0.45),
-            rgba(225,211,195,0.10)
-        ),
-        url("recursos/textura-papel.png");
-
-    background-repeat:
-        no-repeat,
-        repeat;
-
-    background-size:
-        100% 100%,
-        700px 700px;
-
-    border-radius: 6px;
-
-    border: 1px solid rgba(135,105,75,0.18);
-
-    box-shadow:
-        0 25px 45px rgba(58,39,31,0.13),
-        0 8px 15px rgba(58,39,31,0.08),
-        inset 0 1px 0 rgba(255,255,255,0.80);
-}
-
-
-/* =========================
-   DETALLE DORADO
-========================= */
-
-.detalle-dorado {
-    position: absolute;
-
-    top: 24px;
-    left: 50%;
-
-    width: 45px;
-    height: 1px;
-
-    transform: translateX(-50%);
-
-    background: rgba(157,126,79,0.65);
-}
-
-.detalle-dorado::after {
-    content: "";
-
-    position: absolute;
-
-    top: -2px;
-    left: 50%;
-
-    width: 5px;
-    height: 5px;
-
-    transform: translateX(-50%) rotate(45deg);
-
-    background: #a88a5a;
-}
-
-
-/* =========================
-   NOMBRE
-========================= */
-
-.nombre-invitado {
-    margin-bottom: 18px;
-
-    color: #4b4038;
-
-    font-family: Georgia, "Times New Roman", serif;
-
-    font-size: 25px;
-    font-weight: normal;
-
-    line-height: 1.2;
-
-    letter-spacing: 0.2px;
-}
-
-
-/* =========================
-   TEXTO
-========================= */
-
-.texto-pase {
-    margin-bottom: 7px;
-
-    color: #806f61;
-
-    font-family: Georgia, "Times New Roman", serif;
-
-    font-size: 13px;
-
-    letter-spacing: 1.3px;
-
-    text-transform: none;
-}
-
-
-/* =========================
-   NÚMERO DE PERSONAS
-========================= */
-
-.numero-pase {
-    margin-bottom: 25px;
-
-    color: #51443a;
-
-    font-family: Georgia, "Times New Roman", serif;
-
-    font-size: 17px;
-
-    letter-spacing: 0.5px;
-}
-
-
-/* =========================
-   ABRIR INVITACIÓN
-========================= */
-
-.abrir-invitacion {
-    position: relative;
-
-    padding: 8px 2px;
-
-    border: none;
-
-    border-bottom: 1px solid rgba(157,126,79,0.65);
-
-    background: transparent;
-
-    color: #806a4d;
-
-    font-family: Georgia, "Times New Roman", serif;
-
-    font-size: 11px;
-
-    letter-spacing: 2px;
-
-    cursor: pointer;
-
-    transition:
-        color 0.35s ease,
-        letter-spacing 0.35s ease,
-        border-color 0.35s ease;
-}
-
-.abrir-invitacion:hover {
-    color: #4b4038;
-
-    letter-spacing: 2.4px;
-
-    border-color: rgba(157,126,79,0.95);
-}
-
-
-/* =========================
-   SALIDA DE LA TARJETA
-========================= */
-
-.tarjeta-container.saliendo {
-    opacity: 0;
-
-    transform: translateY(-12px);
-
-    pointer-events: none;
-
-    transition:
-        opacity 0.7s ease,
-        transform 0.7s ease;
-}
-
-
-/* =========================
-   SOBRE — DESAPARICIÓN
-========================= */
-
-.sobre.desapareciendo {
-    opacity: 0;
-
-    transform: translateY(-8px) scale(0.985);
-
-    transition:
-        opacity 0.9s ease,
-        transform 0.9s ease;
-}
-
-
-/* =========================
-   MÓVIL
-========================= */
-
-@media (max-width: 480px) {
 
     .tarjeta {
-        width: 300px;
-        min-height: 225px;
+        width: 285px;
+        min-height: 195px;
 
-        padding-left: 28px;
-        padding-right: 28px;
+        padding: 40px 25px 26px;
     }
 
     .nombre-invitado {
-        font-size: 23px;
+        font-size: 22px;
     }
 
     .texto-pase {
-        font-size: 12px;
+        font-size: 11px;
     }
 
     .numero-pase {
-        font-size: 16px;
+        font-size: 15px;
+    }
+
+    .abrir-invitacion {
+        font-size: 9px;
+        letter-spacing: 1.7px;
     }
 }
