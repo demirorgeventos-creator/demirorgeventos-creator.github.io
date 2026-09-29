@@ -285,39 +285,54 @@ body::after {
         drop-shadow(0 7px 8px rgba(65,25,38,0.25))
         drop-shadow(0 2px 3px rgba(45,25,20,0.16));
 
-    animation: latido 2.4s ease-in-out infinite;
+    animation: latido 5.5s ease-in-out infinite;
 }
 
 
 /* =========================
-   LATIDO MARCADO
+   LATIDO SLOW MOTION
 ========================= */
 
 @keyframes latido {
 
+    /* Comienza tranquilo */
     0% {
         transform: scale(1);
     }
 
-    /* PRIMER GOLPE */
-    8% {
+    /* Crece MUY lentamente */
+    12% {
+        transform: scale(1.04);
+    }
+
+    24% {
+        transform: scale(1.10);
+    }
+
+    36% {
         transform: scale(1.18);
     }
 
-    16% {
-        transform: scale(0.94);
+    /* Llega al máximo */
+    44% {
+        transform: scale(1.22);
     }
 
-    /* SEGUNDO GOLPE */
-    24% {
-        transform: scale(1.14);
+    /* Se relaja lentamente */
+    55% {
+        transform: scale(1.12);
     }
 
-    34% {
+    65% {
+        transform: scale(0.95);
+    }
+
+    /* Regresa a su tamaño normal */
+    76% {
         transform: scale(1);
     }
 
-    /* PAUSA */
+    /* Pausa antes del siguiente latido */
     100% {
         transform: scale(1);
     }
