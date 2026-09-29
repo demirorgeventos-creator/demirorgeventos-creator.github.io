@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tu invitación</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+
+<body>
+
+    <main class="intro">
+
+        <!-- =========================
+             SOBRE
+        ========================== -->
+
+        <div class="sobre" id="sobre">
+
+            <div class="solapa"></div>
+
+            <div class="cuerpo-sobre"></div>
+
+            <button
+                class="sello"
+                id="sello"
+                aria-label="Abrir invitación">
+
+                <img
+                    src="recursos/sello.png"
+                    alt="Abrir invitación">
+
+            </button>
+
+        </div>
+
+
+        <!-- =========================
+             TARJETA PERSONALIZADA
+        ========================== -->
+
+        <div
+            class="tarjeta-container"
+            id="tarjetaContainer">
+
+            <div class="tarjeta">
+
+                <div class="tarjeta-linea"></div>
+
+                <div
+                    class="nombre-invitado"
+                    id="nombreInvitado">
+                    Cargando...
+                </div>
+
+                <div class="texto-pase">
+                    Tu pase es para
+                </div>
+
+                <div
+                    class="numero-pase"
+                    id="numeroPase">
+                </div>
+
+                <button
+                    class="abrir-invitacion"
+                    id="abrirInvitacion">
+                    ABRIR INVITACIÓN
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             VIDEO
+        ========================== -->
+
+        <div
+            class="video-container"
+            id="videoContainer">
+
+            <video id="video">
+                <source
+                    src="recursos/video.mp4"
+                    type="video/mp4">
+
+                Tu navegador no puede reproducir este video.
+            </video>
+
+        </div>
+
+    </main>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
