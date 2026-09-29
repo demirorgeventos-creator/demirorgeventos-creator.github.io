@@ -17,34 +17,45 @@ sello.addEventListener("click", () => {
 
     sello.disabled = true;
 
-    /* Detenemos visualmente el latido */
+    /* Detener el latido */
     sello.querySelector("img").style.animation = "none";
 
-    /* Abrimos la solapa */
+    /* Abrir la solapa */
     solapa.style.transform = "rotateX(180deg)";
 
-    /* Desaparece el sello */
+    /* Desaparecer el sello */
     sello.style.opacity = "0";
 
 
-    /* =========================
-       DESPUÉS DE ABRIR
-    ========================== */
+    /*
+       Esperamos a que termine
+       la apertura de la solapa.
+    */
 
     setTimeout(() => {
 
-        /* El sobre comienza a desaparecer */
+        /*
+           El sobre desaparece
+           suavemente.
+        */
+
         sobre.classList.add("desapareciendo");
 
 
-        /* Esperamos a que desaparezca */
+        /*
+           Esperamos parte de la
+           desaparición para que
+           no haya un corte brusco.
+        */
+
         setTimeout(() => {
 
             sobre.style.display = "none";
 
-            /* =========================
-               APARECE LA TARJETA
-            ========================== */
+
+            /*
+               Ahora aparece la tarjeta.
+            */
 
             tarjetaContainer.classList.add("visible");
 
@@ -61,16 +72,29 @@ sello.addEventListener("click", () => {
 
 abrirInvitacion.addEventListener("click", () => {
 
-    /* La tarjeta desaparece */
+    /*
+       Primero desaparece la tarjeta.
+    */
+
     tarjetaContainer.classList.add("saliendo");
 
 
-    /* Después aparece el video */
+    /*
+       Después aparece el video.
+    */
+
     setTimeout(() => {
 
         tarjetaContainer.style.display = "none";
 
         videoContainer.style.display = "flex";
+
+
+        /*
+           Damos un pequeño margen para
+           que el navegador registre la
+           transición de opacidad.
+        */
 
         setTimeout(() => {
 
@@ -80,7 +104,7 @@ abrirInvitacion.addEventListener("click", () => {
 
         }, 50);
 
-    }, 700);
+    }, 650);
 
 });
 
