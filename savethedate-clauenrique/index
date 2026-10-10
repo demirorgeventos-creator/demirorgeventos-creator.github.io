@@ -1,1 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Save the Date | Clau & Enrique</title>
 
+<meta property="og:type" content="website">
+<meta property="og:title" content="Save the Date | Clau & Enrique">
+<meta property="og:description" content="Aparta la fecha, ¡nos casamos! 💍">
+<meta property="og:image" content="https://demir.com.mx/savethedate-clauenrique/preview.jpg">
+<meta property="og:url" content="https://demir.com.mx/savethedate-clauenrique/">
+<meta name="twitter:card" content="summary_large_image">
+
+<style>
+  body{margin:0;min-height:100vh;display:flex;align-items:center;
+       justify-content:center;background:#111;}
+  .video{width:100%;max-width:900px;aspect-ratio:16/9;}
+  iframe{width:100%;height:100%;border:0;}
+</style>
+</head>
+<body>
+  <div class="video">
+    <iframe title="Save the Date" 
+      src="https://player.vimeo.com/video/1234678159?h=486f396809"
+      allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+      referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+  </div>
+</body>
+</html>
