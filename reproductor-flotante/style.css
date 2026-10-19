@@ -1,0 +1,110 @@
+/* DEMIR · botón flotante transparente con símbolos blancos */
+:root {
+  --icon-color: #ffffff;
+  --button-size: 46px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+}
+
+.music-button {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 9999;
+  width: var(--button-size);
+  height: var(--button-size);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--icon-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.35));
+}
+
+.music-button:focus-visible {
+  outline: 2px solid var(--icon-color);
+  outline-offset: 3px;
+}
+
+.icon {
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  fill: currentColor;
+  display: none;
+}
+
+.icon-play { display: block; }
+.music-button.is-playing .icon-play { display: none; }
+.music-button.is-playing .icon-pause { display: block; }
+
+.equalizer {
+  position: absolute;
+  left: 50%;
+  bottom: 3px;
+  transform: translateX(-50%);
+  height: 10px;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+}
+
+.equalizer i {
+  display: block;
+  width: 2px;
+  height: 3px;
+  border-radius: 2px;
+  background: currentColor;
+  transform-origin: bottom;
+}
+
+.music-button.is-playing .equalizer { display: flex; }
+.music-button.is-playing .icon-pause {
+  transform: translateY(-3px);
+  width: 21px;
+  height: 21px;
+}
+.music-button.is-playing .equalizer i {
+  animation: barras 650ms ease-in-out infinite alternate;
+}
+.music-button.is-playing .equalizer i:nth-child(2) { animation-delay: 180ms; }
+.music-button.is-playing .equalizer i:nth-child(3) { animation-delay: 330ms; }
+
+@keyframes barras {
+  from { height: 3px; }
+  to { height: 10px; }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .music-button.is-playing .equalizer i {
+    animation: none;
+    height: 6px;
+  }
+}
