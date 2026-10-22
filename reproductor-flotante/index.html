@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reproductor flotante DEMIR</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <audio id="musica" preload="auto" loop playsinline>
+    <source src="recursos/cancion.mp3" type="audio/mpeg">
+  </audio>
+
+  <button id="controlMusica" class="music-button"
+          type="button" aria-label="Reproducir música" aria-pressed="false">
+    <svg class="icon icon-play" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M8 5.5v13L19 12 8 5.5Z"></path>
+    </svg>
+    <svg class="icon icon-pause" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M7.5 5.5h3.5v13H7.5zM13 5.5h3.5v13H13z"></path>
+    </svg>
+    <span class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span>
+  </button>
+
+  <p id="estado" class="sr-only" aria-live="polite">Música pausada</p>
+  <script src="script.js"></script>
+</body>
+</html>
