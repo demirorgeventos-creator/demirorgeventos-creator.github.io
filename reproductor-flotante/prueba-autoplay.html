@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prueba de música DEMIR</title>
+</head>
+<body>
+  <p>Prueba de reproducción automática DEMIR</p>
+
+  <audio id="musica" autoplay loop playsinline>
+    <source src="recursos/cancion.mp3" type="audio/mpeg">
+  </audio>
+
+  <p id="estado">Intentando reproducir música...</p>
+
+  <script>
+    const audio = document.getElementById('musica');
+    const estado = document.getElementById('estado');
+
+    audio.play()
+      .then(() => {
+        estado.textContent = 'La reproducción automática funcionó.';
+      })
+      .catch(() => {
+        estado.textContent =
+          'El navegador bloqueó la reproducción automática.';
+      });
+  </script>
+</body>
+</html>
