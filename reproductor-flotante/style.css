@@ -6,14 +6,15 @@ html, body {
 margin: 0;
 padding: 0;
 width: 100%;
-background: transparent;
+background: transparent !important;
 font-family: Arial, sans-serif;
+color: #fff !important;
 }
 
 .player {
 width: 100%;
 padding: 8px 12px;
-color: #fff;
+color: #fff !important;
 }
 
 .player-title {
@@ -22,7 +23,7 @@ text-align: center;
 font-size: 15px;
 font-weight: 400;
 letter-spacing: .4px;
-color: #fff;
+color: #fff !important;
 }
 
 .player-controls {
@@ -33,33 +34,38 @@ width: 100%;
 }
 
 .play-button {
-width: 30px;
-height: 30px;
+width: 32px;
+height: 32px;
 flex-shrink: 0;
-border: 0;
-padding: 3px;
-background: transparent;
-color: #fff;
+border: none !important;
+outline: none;
+padding: 4px;
+margin: 0;
+background: transparent !important;
+color: #fff !important;
 cursor: pointer;
+appearance: none;
+-webkit-appearance: none;
 }
 
 .play-button svg {
 display: block;
 width: 100%;
 height: 100%;
-fill: currentColor;
+fill: #fff !important;
+stroke: none !important;
 }
 
 .icon-pause {
-display: none;
+display: none !important;
 }
 
 .play-button.is-playing .icon-play {
-display: none;
+display: none !important;
 }
 
 .play-button.is-playing .icon-pause {
-display: block;
+display: block !important;
 }
 
 .timeline {
@@ -72,21 +78,19 @@ display: block;
 appearance: none;
 -webkit-appearance: none;
 height: 3px;
+border: none;
 border-radius: 10px;
 outline: none;
 cursor: pointer;
+background: rgba(255,255,255,.55) !important;
 }
 
 #progreso {
 width: 100%;
-background: rgba(255,255,255,.35);
-accent-color: #fff;
 }
 
 #volumen {
 width: 48px;
-background: rgba(255,255,255,.35);
-accent-color: #fff;
 }
 
 #progreso::-webkit-slider-thumb,
@@ -95,18 +99,18 @@ appearance: none;
 -webkit-appearance: none;
 width: 10px;
 height: 10px;
-border: 0;
+border: none;
 border-radius: 50%;
-background: #fff;
+background: #fff !important;
 }
 
 #progreso::-moz-range-thumb,
 #volumen::-moz-range-thumb {
 width: 10px;
 height: 10px;
-border: 0;
+border: none;
 border-radius: 50%;
-background: #fff;
+background: #fff !important;
 }
 
 .time-labels {
@@ -114,7 +118,7 @@ display: flex;
 justify-content: space-between;
 margin-top: 6px;
 font-size: 10px;
-color: #fff;
+color: #fff !important;
 font-variant-numeric: tabular-nums;
 }
 
@@ -128,8 +132,8 @@ flex-shrink: 0;
 .volume-control svg {
 width: 18px;
 height: 18px;
-fill: none;
-stroke: #fff;
+fill: none !important;
+stroke: #fff !important;
 stroke-width: 1.6;
 stroke-linecap: round;
 stroke-linejoin: round;
