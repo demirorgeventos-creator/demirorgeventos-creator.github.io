@@ -5,26 +5,26 @@
   <title>Reproductor DEMIR</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <div class="player">
+<body>  <div class="player">
     <p class="player-title">Nuestra canción</p><audio id="musica" preload="metadata">
   <source src="recursos/cancion.mp3" type="audio/mpeg">
 </audio>
 
 <div class="player-controls">
-  <button id="controlMusica" class="play-button" type="button"
-          aria-label="Reproducir música">
-    <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M8 5.5v13L19 12 8 5.5Z"/>
+
+  <button id="controlMusica" class="play-button" type="button" aria-label="Reproducir música">
+    <svg class="icon-play" viewBox="0 0 24 24">
+      <path d="M7 4.5 L19 12 L7 19.5 Z"/>
     </svg>
-    <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M7 5h4v14H7zM14 5h4v14h-4z"/>
+
+    <svg class="icon-pause" viewBox="0 0 24 24">
+      <path d="M6 4 H10 V20 H6 Z M14 4 H18 V20 H14 Z"/>
     </svg>
   </button>
 
   <div class="timeline">
-    <input type="range" id="progreso" min="0" max="100" value="0"
-           step="0.1" aria-label="Progreso de la canción">
+    <input type="range" id="progreso" min="0" max="100" value="0" step="0.1">
+
     <div class="time-labels">
       <span id="tiempoActual">00:00</span>
       <span id="duracion">00:00</span>
@@ -32,14 +32,15 @@
   </div>
 
   <div class="volume-control">
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M3 9v6h4l5 4V5L7 9H3Z"/>
-      <path d="M16 9a5 5 0 0 1 0 6"/>
-      <path d="M18.5 6.5a8.5 8.5 0 0 1 0 11"/>
+    <svg viewBox="0 0 24 24">
+      <path d="M3 9 V15 H7 L12 19 V5 L7 9 Z"/>
+      <path d="M16 9 A5 5 0 0 1 16 15"/>
+      <path d="M18.5 6.5 A8.5 8.5 0 0 1 18.5 17.5"/>
     </svg>
-    <input type="range" id="volumen" min="0" max="1" value="1"
-           step="0.01" aria-label="Volumen">
+
+    <input type="range" id="volumen" min="0" max="1" value="1" step="0.01">
   </div>
+
 </div>
 
   </div>  <script src="script.js"></script></body>
