@@ -33,7 +33,7 @@ if (audio.paused) {
 try {
 await audio.play();
 } catch (error) {
-actualizarBoton();
+console.error('No se pudo reproducir el audio:', error);
 }
 } else {
 audio.pause();
@@ -45,7 +45,7 @@ actualizarBoton();
 
 audio.addEventListener('loadedmetadata', () => {
 duracion.textContent = formatoTiempo(audio.duration);
-progreso.max = Number.isFinite(audio.duration) ? audio.duration : 100;
+progreso.max = audio.duration;
 });
 
 audio.addEventListener('timeupdate', () => {
