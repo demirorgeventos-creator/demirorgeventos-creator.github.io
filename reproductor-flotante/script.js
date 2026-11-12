@@ -1,40 +1,76 @@
 (() => {
-  const audio = document.getElementById('musica');
-  const button = document.getElementById('controlMusica');
-  const status = document.getElementById('estado');
+const audio = document.getElementById('musica');
+const button = document.getElementById('controlMusica');
+const progreso = document.getElementById('progreso');
+const tiempoActual = document.getElementById('tiempoActual');
+const duracion = document.getElementById('duracion');
+const volumen = document.getElementById('volumen');
 
-  function updatePlaying(isPlaying) {
-    button.classList.toggle('is-playing', isPlaying);
-    button.setAttribute('aria-pressed', String(isPlaying));
-    button.setAttribute('aria-label', isPlaying ? 'Pausar música' : 'Reproducir música');
-    status.textContent = isPlaying ? 'Música reproduciéndose' : 'Música pausada';
-  }
+function formatoTiempo(segundos) {
+if (!Number.isFinite(segundos)) return '00:00';
 
-  async function playMusic() {
-    try {
-      await audio.play();
-      updatePlaying(true);
-    } catch (error) {
-      // El navegador puede bloquear el autoplay con sonido.
-      updatePlaying(false);
-      status.textContent = 'Toca el botón para reproducir la música';
-    }
-  }
+const minutos = Math.floor(segundos / 60);
+const segundosRestantes = Math.floor(segundos % 60);
 
-  button.addEventListener('click', async () => {
-    if (audio.paused) {
-      await playMusic();
-    } else {
-      audio.pause();
-      updatePlaying(false);
-    }
-  });
+return String(minutos).padStart(2, '0') + ':' +
+       String(segundosRestantes).padStart(2, '0');
 
-  audio.addEventListener('play', () => updatePlaying(true));
-  audio.addEventListener('pause', () => updatePlaying(false));
-  audio.addEventListener('ended', () => updatePlaying(false));
+}
 
-  // Se intenta reproducir al cargar; si el navegador lo bloquea,
-  // el invitado puede iniciar la canción tocando el botón.
-  window.addEventListener('load', playMusic);
+function actualizarBoton() {
+const reproduciendo = !audio.paused;
+
+button.classList.toggle('is-playing', reproduciendo);
+button.setAttribute(
+  'aria-label',
+  reproduciendo ? 'Pausar música' : 'Reproducir música'
+);
+
+}
+
+button.addEventListener('click', async () => {
+if (audio.paused) {
+try {
+await audio.play();
+} catch (error) {
+actualizarBoton();
+}
+} else {
+audio.pause();
+}
+
+actualizarBoton();
+
+});
+
+audio.addEventListener('loadedmetadata', () => {
+duracion.textContent = formatoTiempo(audio.duration);
+progreso.max = Number.isFinite(audio.duration) ? audio.duration : 100;
+});
+
+audio.addEventListener('timeupdate', () => {
+if (!audio.duration) return;
+
+progreso.value = audio.currentTime;
+tiempoActual.textContent = formatoTiempo(audio.currentTime);
+
+});
+
+progreso.addEventListener('input', () => {
+if (Number.isFinite(audio.duration)) {
+audio.currentTime = Number(progreso.value);
+}
+});
+
+volumen.addEventListener('input', () => {
+audio.volume = Number(volumen.value);
+audio.muted = audio.volume === 0;
+});
+
+audio.addEventListener('play', actualizarBoton);
+audio.addEventListener('pause', actualizarBoton);
+audio.addEventListener('ended', actualizarBoton);
+
+audio.volume = 1;
+actualizarBoton();
 })();
