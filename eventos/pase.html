@@ -178,6 +178,9 @@ body { font-family:'Montserrat',sans-serif; background:var(--crema); min-height:
       </div>
     </div>
 
+    <div id="rsvp-individual" style="display:none;">
+    </div>
+
     <div id="rsvp-confirmado" class="rsvp-confirmado" style="display:none;">
       <div class="rsvp-confirmado-icon">🎉</div>
       <div class="rsvp-confirmado-txt">¡Te esperamos!</div>
@@ -200,7 +203,7 @@ body { font-family:'Montserrat',sans-serif; background:var(--crema); min-height:
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, get, update, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 // Conexión a la base de datos de la plataforma DEMIR Eventos
 const firebaseConfig = {
