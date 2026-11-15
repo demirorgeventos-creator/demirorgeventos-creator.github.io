@@ -486,6 +486,12 @@ tbody td { padding:.75rem 1rem; color:var(--texto); vertical-align:middle; }
             <label class="form-label">Acompañantes (nombres)</label>
             <input class="form-input" id="add-acomp" placeholder="Mario López, Ana García">
           </div>
+          
+<div class="form-group" style="margin:0">
+  <label class="form-label">Total de adultos (incluye titular)</label>
+  <input class="form-input" type="number" min="1" id="add-adultos" placeholder="Ej. 2">
+  <p class="form-hint">Si lo dejas vacío, se calculará según los nombres registrados.</p>
+</div>    
           <div class="form-group" style="margin:0">
             <label class="form-label">Niños (de los acompañantes)</label>
             <input class="form-input" type="number" min="0" id="add-ninos" placeholder="0">
@@ -845,6 +851,14 @@ tbody td { padding:.75rem 1rem; color:var(--texto); vertical-align:middle; }
       <input class="form-input" id="ev-forms-url" placeholder="https://forms.gle/...">
     </div>
 
+    <div class="form-group" style="padding:1rem;background:var(--crema);border:1px solid var(--crema-dark);">
+      <label style="display:flex;align-items:center;gap:10px;font-size:11px;color:var(--vino-deep);font-weight:600;cursor:pointer;">
+        <input type="checkbox" id="ev-confirmacion-individual" style="width:16px;height:16px;accent-color:var(--vino);">
+        Activar confirmación individual por persona
+      </label>
+      <p class="form-hint">Cada adulto podrá confirmar su asistencia por separado desde su pase digital.</p>
+    </div>
+    
     <button class="btn-submit" id="modal-evento-submit" onclick="crearEvento()">Crear Evento</button>
   </div>
 </div>
@@ -952,9 +966,18 @@ tbody td { padding:.75rem 1rem; color:var(--texto); vertical-align:middle; }
         </div>
       </div>
       <div class="form-group" style="margin:0">
-        <label class="form-label">Acompañantes (nombres)</label>
-        <input class="form-input" id="edit-acomp">
-      </div>
+  <label class="form-label">Total de adultos (incluye titular)</label>
+  <input class="form-input" type="number" min="1" id="edit-adultos">
+  <p class="form-hint">Incluye al titular y a todos sus acompañantes.</p>
+</div>
+
+<div class="form-group" style="margin:0">
+  <label class="form-label">Acompañantes</label>
+  <div id="edit-personas-list"></div>
+  <p class="form-hint">
+    Aquí podrás corregir nombres, reemplazar personas y agregar o eliminar acompañantes sin alterar las respuestas de los demás.
+  </p>
+</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
         <div class="form-group" style="margin:0">
           <label class="form-label">Niños (de los acompañantes)</label>
@@ -1195,6 +1218,7 @@ function abrirModalEvento() {
    'ev-pin-admin','ev-pin-staff','ev-respuesta','ev-base-url','ev-forms-url'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
+  document.getElementById('ev-confirmacion-individual').checked = false;
   document.getElementById('ev-pregunta').value='';
   document.getElementById('ev-tipo').value='Boda';
   document.getElementById('ev-color-fondo').value='#4A1C2A';
@@ -1205,34 +1229,181 @@ function abrirModalEvento() {
   _wireColorPreviews();
 }
 
-function abrirModalEditarEvento() {
-  const ev = eventos[eventoActual];
-  if(!ev){ toast('No se encontró el evento'); return; }
-  modalEventoModo = 'editar';
-  document.getElementById('modal-evento-titulo').textContent = 'Editar Evento';
-  document.getElementById('modal-evento-sub').textContent = 'Actualiza los datos — no se perderán invitados ni pases';
-  document.getElementById('modal-evento-submit').textContent = 'Guardar cambios';
-  document.getElementById('ev-nombre').value = ev.nombre||'';
-  document.getElementById('ev-fecha').value = ev.fecha||'';
-  document.getElementById('ev-hora').value = ev.hora||'';
-  document.getElementById('ev-tipo').value = ev.tipo||'Boda';
-  document.getElementById('ev-venue').value = ev.venue||'';
-  document.getElementById('ev-ubicacion-ceremonia').value = ev.ubicacionCeremonia||'';
-  document.getElementById('ev-ubicacion-salon').value = ev.ubicacionSalon||'';
-  document.getElementById('ev-pin-admin').value = ev.pinAdmin||'';
-  document.getElementById('ev-pin-staff').value = ev.pinStaff||'';
-  document.getElementById('ev-pregunta').value = ev.pregunta||'';
-  document.getElementById('ev-respuesta').value = ev.respuesta||'';
-  document.getElementById('ev-color-fondo').value = ev.colorFondo||'#4A1C2A';
-  document.getElementById('ev-color-acento').value = ev.colorAcento||'#C9A84C';
-  document.getElementById('ev-color-preview').style.background = ev.colorFondo||'#4A1C2A';
-  document.getElementById('ev-acento-preview').style.background = ev.colorAcento||'#C9A84C';
-  document.getElementById('ev-base-url').value = ev.baseUrl||'';
-  document.getElementById('ev-forms-url').value = ev.formsUrl||'';
-  document.getElementById('modal-evento').classList.add('open');
-  _wireColorPreviews();
+function abrirModalEditar(id) {
+  const inv = invitados[id];
+  if (!inv) return;
+
+  _editandoId = id;
+
+  document.getElementById('edit-nombre').value = inv.nombre || '';
+  document.getElementById('edit-mesa').value = inv.mesa || '';
+  document.getElementById('edit-grupo').value = inv.grupo || '';
+  document.getElementById('edit-ninos').value = inv.ninos || 0;
+  document.getElementById('edit-tel').value = inv.telefono || '';
+  document.getElementById('edit-idioma').value = inv.idioma || 'es';
+
+  let personas = [];
+
+  if (inv.personas && Object.keys(inv.personas).length > 0) {
+
+    personas = Object.entries(inv.personas)
+      .filter(([id, p]) => p.activo !== false && p.tipo !== 'titular')
+      .map(([id, p]) => ({
+        id,
+        nombre: p.nombre || '',
+        tipo: p.tipo || 'acompanante',
+        respuesta: p.respuesta || null,
+        nuevo: false,
+        eliminado: false,
+        accion: 'corregir'
+      }));
+
+  } else {
+
+    const nombres = (inv.acompanantes || '')
+      .split(',')
+      .map(n => n.trim())
+      .filter(Boolean);
+
+    const adultos = Math.max(
+      Number(inv.adultos) || 1 + nombres.length,
+      1 + nombres.length
+    );
+
+    nombres.forEach(nombre => {
+      personas.push({
+        id: push(ref(db)).key,
+        nombre,
+        tipo: 'acompanante',
+        respuesta: null,
+        nuevo: true,
+        eliminado: false,
+        accion: 'corregir'
+      });
+    });
+
+    const sinNombre = adultos - 1 - nombres.length;
+
+    for (let i = 0; i < sinNombre; i++) {
+      personas.push({
+        id: push(ref(db)).key,
+        nombre: '',
+        tipo: 'acompanante_sin_nombre',
+        respuesta: null,
+        nuevo: true,
+        eliminado: false,
+        accion: 'corregir'
+      });
+    }
+  }
+
+  window._editPersonas = personas;
+
+  document.getElementById('edit-adultos').value =
+    personas.length + 1;
+
+  renderPersonasEdicion();
+
+  document.getElementById('modal-editar-invitado')
+    .classList.add('open');
 }
 window.abrirModalEditarEvento = abrirModalEditarEvento;
+
+  function renderPersonasEdicion() {
+
+  const contenedor = document.getElementById('edit-personas-list');
+
+  contenedor.innerHTML = '';
+
+  const personas = window._editPersonas || [];
+
+  personas.forEach((persona, indice) => {
+
+    if (persona.eliminado) return;
+
+    const fila = document.createElement('div');
+
+    fila.style.cssText =
+      'padding:12px;margin-bottom:10px;border:1px solid var(--crema-dark);border-radius:8px;';
+
+    const titulo = document.createElement('div');
+    titulo.textContent = `Acompañante ${indice + 1}`;
+    titulo.style.cssText =
+      'font-size:11px;font-weight:600;margin-bottom:8px;color:var(--vino-deep);';
+
+    const input = document.createElement('input');
+    input.className = 'form-input';
+    input.placeholder = 'Nombre del acompañante';
+    input.value = persona.nombre;
+
+    input.oninput = () => {
+      persona.nombre = input.value.trim();
+    };
+
+    const selector = document.createElement('select');
+    selector.className = 'form-input';
+    selector.style.marginTop = '8px';
+
+    selector.innerHTML = `
+      <option value="corregir">Corregir nombre (misma persona)</option>
+      <option value="reemplazar">Reemplazar por otra persona</option>
+    `;
+
+    selector.value = persona.accion || 'corregir';
+
+    selector.onchange = () => {
+      persona.accion = selector.value;
+    };
+
+    const eliminar = document.createElement('button');
+    eliminar.type = 'button';
+    eliminar.textContent = 'Eliminar acompañante';
+    eliminar.className = 'btn-sm btn-outline';
+    eliminar.style.marginTop = '8px';
+
+    eliminar.onclick = () => {
+      persona.eliminado = true;
+      renderPersonasEdicion();
+    };
+
+    fila.appendChild(titulo);
+    fila.appendChild(input);
+    fila.appendChild(selector);
+    fila.appendChild(eliminar);
+
+    contenedor.appendChild(fila);
+
+  });
+
+  const agregar = document.createElement('button');
+
+  agregar.type = 'button';
+  agregar.className = 'btn-sm btn-outline';
+  agregar.textContent = '+ Agregar acompañante';
+  agregar.style.marginTop = '8px';
+
+  agregar.onclick = () => {
+
+    window._editPersonas.push({
+      id: push(ref(db)).key,
+      nombre: '',
+      tipo: 'acompanante_sin_nombre',
+      respuesta: null,
+      nuevo: true,
+      eliminado: false,
+      accion: 'corregir'
+    });
+
+    renderPersonasEdicion();
+
+  };
+
+  contenedor.appendChild(agregar);
+
+  const activos = personas.filter(p => !p.eliminado).length;
+
+  document.getElementById('edit-adultos').value = activos + 1;
+}
 
 function _wireColorPreviews(){
   document.getElementById('ev-color-fondo').oninput=function(){document.getElementById('ev-color-preview').style.background=this.value;};
@@ -1262,8 +1433,9 @@ async function crearEvento() {
     colorAcento: document.getElementById('ev-color-acento').value,
     baseUrl:     document.getElementById('ev-base-url').value.trim() || 'https://demir.com.mx/eventos/pase.html',
     formsUrl:    document.getElementById('ev-forms-url').value.trim(),
+    confirmacionIndividual: document.getElementById('ev-confirmacion-individual').checked
   };
-
+  
   try {
     if(modalEventoModo==='editar'){
       await update(ref(db,`eventos/${eventoActual}`), datosComunes);
@@ -1584,26 +1756,116 @@ async function cambiarRsvp(id, valor) {
 
 async function agregarInvitado() {
   const nombre = document.getElementById('add-nombre').value.trim();
-  if(!nombre){ toast('⚠️ El nombre es obligatorio'); return; }
-  
-  
+
+  if (!nombre) {
+    toast('⚠️ El nombre es obligatorio');
+    return;
+  }
+
+  const acompanantesTexto = document.getElementById('add-acomp').value.trim();
+
+  const nombresAcompanantes = acompanantesTexto
+    ? acompanantesTexto.split(',').map(n => n.trim()).filter(Boolean)
+    : [];
+
+  const adultosDeclarados = parseInt(
+    document.getElementById('add-adultos').value
+  ) || 0;
+
+  // Siempre debe existir al menos el titular.
+  // Si hay más nombres que adultos declarados, prevalecen los nombres.
+  const adultos = Math.max(
+    1 + nombresAcompanantes.length,
+    adultosDeclarados || 1
+  );
+
+  const ninos = parseInt(
+    document.getElementById('add-ninos').value
+  ) || 0;
+
+  const confirmacionIndividual =
+    eventos[eventoActual]?.confirmacionIndividual === true;
+
   const inv = {
     nombre,
-    mesa:         document.getElementById('add-mesa').value.trim(),
-    grupo:        document.getElementById('add-grupo').value.trim(),
-    acompanantes: document.getElementById('add-acomp').value.trim(),
-    ninos:        parseInt(document.getElementById('add-ninos').value)||0,
-    telefono:     document.getElementById('add-tel').value.trim(),
-    rsvp:         'pendiente',
-    ingresado:    false,
-    creadoEn:     Date.now()
+    mesa: document.getElementById('add-mesa').value.trim(),
+    grupo: document.getElementById('add-grupo').value.trim(),
+    acompanantes: acompanantesTexto,
+    adultos,
+    ninos,
+    telefono: document.getElementById('add-tel').value.trim(),
+    rsvp: 'pendiente',
+    ingresado: false,
+    creadoEn: Date.now()
   };
+
+  // Crear identidades individuales únicamente
+  // cuando el evento utiliza confirmación individual.
+  if (confirmacionIndividual) {
+
+    const personas = {};
+
+    // Titular
+    const idTitular = push(ref(db)).key;
+
+    personas[idTitular] = {
+      nombre: nombre,
+      tipo: 'titular'
+    };
+
+    // Acompañantes identificados
+    nombresAcompanantes.forEach(nombreAcompanante => {
+
+      const idAcompanante = push(ref(db)).key;
+
+      personas[idAcompanante] = {
+        nombre: nombreAcompanante,
+        tipo: 'acompanante'
+      };
+
+    });
+
+    // Acompañantes sin nombre
+    const sinNombre = adultos - 1 - nombresAcompanantes.length;
+
+    for (let i = 0; i < sinNombre; i++) {
+
+      const idAcompanante = push(ref(db)).key;
+
+      personas[idAcompanante] = {
+        nombre: '',
+        tipo: 'acompanante_sin_nombre'
+      };
+
+    }
+
+    inv.personas = personas;
+  }
+
   try {
-    
-    await push(ref(db,`invitados/${eventoActual}`), inv);
-    ['add-nombre','add-mesa','add-grupo','add-acomp','add-ninos','add-tel'].forEach(i=>document.getElementById(i).value='');
+
+    await push(ref(db, `invitados/${eventoActual}`), inv);
+
+    [
+      'add-nombre',
+      'add-mesa',
+      'add-grupo',
+      'add-acomp',
+      'add-adultos',
+      'add-ninos',
+      'add-tel'
+    ].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+
     toast('✓ Invitado agregado');
-  } catch(e) { toast('❌ Error al guardar'); }
+
+  } catch (e) {
+
+    console.error(e);
+    toast('❌ Error al guardar');
+
+  }
 }
 
 async function eliminarInvitado(id) {
