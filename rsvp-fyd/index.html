@@ -25,7 +25,64 @@ import {getDatabase,ref,get,update,push} from 'https://www.gstatic.com/firebasej
 const firebaseConfig={apiKey:'AIzaSyB45I1lwpPZmUJxFB5hu_xtXAwX709PPxc',authDomain:'demirqr-cb84d.firebaseapp.com',databaseURL:'https://demirqr-cb84d-default-rtdb.firebaseio.com',projectId:'demirqr-cb84d',storageBucket:'demirqr-cb84d.appspot.com',messagingSenderId:'172090319379',appId:'1:172090319379:web:b9577cb84f0e6c2c4495e6'};
 const db=getDatabase(initializeApp(firebaseConfig));
 // Lee parámetros directos; como alternativa intenta leerlos del referrer (si el navegador los envía).
-function params(){const q=new URLSearchParams(location.search);let id=q.get('id'),evento=q.get('evento');if((!id||!evento)&&document.referrer){try{const r=new URL(document.referrer),p=new URLSearchParams(r.search);id=id||p.get('id');evento=evento||p.get('evento')}catch(e){}}return{id,evento}}
+function params() {
+  const q = new URLSearchParams(location.search);
+
+  let id = q.get('id');
+  let evento = q.get('evento');
+
+  // 1. Intentar leer los parámetros directamente.
+  if (id && evento) {
+    try {
+      localStorage.setItem('demir_rsvp_context', JSON.stringify({
+        id,
+        evento,
+        guardadoEn: Date.now()
+      }));
+    } catch (e) {}
+
+    return { id, evento };
+  }
+
+  // 2. Intentar recuperar el contexto guardado.
+  try {
+    const raw = localStorage.getItem('demir_rsvp_context');
+
+    if (raw) {
+      const saved = JSON.parse(raw);
+      const age = Date.now() - Number(saved.guardadoEn || 0);
+
+      const valid =
+        saved.id &&
+        saved.evento &&
+        age >= 0 &&
+        age <= 24 * 60 * 60 * 1000;
+
+      if (valid) {
+        return {
+          id: saved.id,
+          evento: saved.evento
+        };
+      }
+
+      localStorage.removeItem('demir_rsvp_context');
+    }
+  } catch (e) {
+    console.warn('No se pudo recuperar el contexto RSVP.', e);
+  }
+
+  // 3. Último intento: recuperar los parámetros del referrer.
+  if (document.referrer) {
+    try {
+      const r = new URL(document.referrer);
+
+      id = r.searchParams.get('id');
+      evento = r.searchParams.get('evento');
+    } catch (e) {}
+  }
+
+  return { id, evento };
+}
 const {id:invId,evento:eventoId}=params();let personas={},invitado={};const $=id=>document.getElementById(id);const ruta=()=>`invitados/${eventoId}/${invId}`;const hide=id=>$(id).classList.add('hidden');
 function error(){hide('loading');hide('content');$('error').classList.remove('hidden')}function fatal(e){console.error('DEMIR RSVP',e);hide('loading');hide('content');$('fatal').classList.remove('hidden')}
 async function start(){if(!invId||!eventoId){error();return}try{const [evS,invS]=await Promise.all([get(ref(db,`eventos/${eventoId}`)),get(ref(db,ruta()))]);if(!evS.exists()||!invS.exists()){error();return}invitado=invS.val();if(evS.val().confirmacionIndividual===true){await preparePeople();renderPeople()}else renderGroup();hide('loading');$('content').classList.remove('hidden')}catch(e){fatal(e)}}
