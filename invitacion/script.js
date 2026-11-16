@@ -59,16 +59,19 @@ const DESTINOS = {
 
 function guardarContextoRSVP() {
     try {
-        localStorage.setItem("demir_rsvp_context", JSON.stringify({
+        const contexto = encodeURIComponent(JSON.stringify({
             id: invId,
             evento: eventoId,
             guardadoEn: Date.now()
         }));
+
+        document.cookie =
+            `demir_rsvp_context=${contexto}; Domain=.demir.com.mx; Path=/; Max-Age=86400; SameSite=Lax; Secure`;
+
     } catch (e) {
         console.warn("No fue posible guardar el contexto RSVP:", e);
     }
 }
-
 
 /* =========================
    CARGAR DATOS DEL INVITADO
