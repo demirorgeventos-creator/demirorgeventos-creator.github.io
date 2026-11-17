@@ -1,97 +1,998 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DEMIR · Confirmación de asistencia</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#eee4d7">
+<title>Confirmación de asistencia</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+
 <style>
-:root{--vino:#6B2D3E;--oscuro:#4A1C2A;--dorado:#C9A84C;--crema:#FAF6F0;--verde:#2D6B4A;--rojo:#C0392B;--borde:#e9e0d8}
-*{box-sizing:border-box}html,body{margin:0;padding:0;width:100%;background:transparent}body{font-family:Montserrat,Arial,sans-serif;color:#34242a;padding:10px}
-.shell{width:100%;max-width:560px;margin:0 auto;background:var(--crema);border:1px solid var(--borde);padding:clamp(18px,4vw,30px);box-shadow:0 8px 28px #4a1c2a14}
-.head{text-align:center;margin-bottom:22px}.brand{font:15px 'Cormorant Garamond',serif;letter-spacing:5px;color:var(--dorado);margin-bottom:8px}.title{font:500 clamp(25px,5vw,32px) 'Cormorant Garamond',serif;color:var(--oscuro)}.sub{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#927d7d;margin-top:6px}.divider{height:1px;background:linear-gradient(90deg,transparent,var(--dorado),transparent);margin:18px 0 22px}
-.person{background:#fff;border:1px solid var(--borde);padding:16px;margin:12px 0}.person-name{font:22px 'Cormorant Garamond',serif;color:var(--oscuro);margin-bottom:8px;overflow-wrap:anywhere}.status{font-size:10px;letter-spacing:.5px;margin-bottom:13px;font-weight:600}.pending{color:#8a6d00}.yes-status{color:var(--verde)}.no-status{color:var(--rojo)}
-.buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px}button{font-family:Montserrat,Arial,sans-serif;cursor:pointer}.choice{min-height:44px;padding:11px 8px;border:1px solid var(--vino);background:#fff;color:var(--vino);font-size:10px;font-weight:600;letter-spacing:.4px}.choice.yes{background:var(--verde);border-color:var(--verde);color:#fff}.choice.no{border-color:var(--rojo);color:var(--rojo)}.choice:disabled{opacity:.55;cursor:wait}.notice,.message{text-align:center;font-size:11px;line-height:1.7;color:#806f70;margin-top:16px}.loading{text-align:center;padding:22px 10px;font-size:12px}.spinner{width:25px;height:25px;border:2px solid #eadfda;border-top-color:var(--vino);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}@keyframes spin{to{transform:rotate(360deg)}}.error-title{font:23px 'Cormorant Garamond',serif;color:var(--oscuro);margin-bottom:6px}.hidden{display:none!important}
-@media(max-width:360px){.buttons{grid-template-columns:1fr}.choice{min-height:40px}}
-</style></head>
-<body><section class="shell" aria-live="polite">
-<header class="head"><div class="brand">DEMIR</div><div class="title">Confirmación de asistencia</div><div class="sub" id="subtitle">Nos encantará contar contigo</div></header><div class="divider"></div>
-<div id="loading" class="loading"><div class="spinner"></div>Preparando tu confirmación…</div><div id="content" class="hidden"></div>
-<div id="error" class="message hidden"><div class="error-title">No pudimos localizar tu invitación</div>Verifica que hayas ingresado desde el enlace personal que te compartieron.</div>
-<div id="fatal" class="message hidden"><div class="error-title">No fue posible cargar la confirmación</div>Intenta nuevamente en unos minutos.</div>
+:root {
+  --fondo:#eee4d7;
+  --marfil:#fbf8f2;
+  --blanco:#fffefa;
+  --cafe:#514033;
+  --cafe-suave:#806d5c;
+  --tierra:#9b795d;
+  --tierra-oscuro:#74563f;
+  --borde:#d9c8b5;
+  --verde:#526c55;
+  --rojo:#98605a;
+  --dorado:#b69a70;
+}
+
+* { box-sizing:border-box; }
+
+body {
+  margin:0;
+  min-height:100vh;
+  padding:22px 14px 34px;
+  color:var(--cafe);
+  font-family:Montserrat,Arial,sans-serif;
+  background:
+    radial-gradient(ellipse at 10% 5%,rgba(255,255,255,.72),transparent 38%),
+    radial-gradient(ellipse at 90% 90%,rgba(190,162,132,.18),transparent 42%),
+    var(--fondo);
+}
+
+.page {
+  width:100%;
+  max-width:620px;
+  margin:0 auto;
+}
+
+.card {
+  position:relative;
+  overflow:hidden;
+  background:var(--marfil);
+  border:1px solid var(--borde);
+  padding:clamp(25px,6vw,48px);
+  box-shadow:0 14px 38px rgba(75,55,38,.10);
+}
+
+.card:before,
+.card:after {
+  content:"";
+  position:absolute;
+  pointer-events:none;
+  inset:10px;
+  border:1px solid rgba(182,154,112,.45);
+}
+
+.card:after {
+  inset:15px;
+  border-color:rgba(182,154,112,.20);
+}
+
+.content {
+  position:relative;
+  z-index:1;
+}
+
+.ornament {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  margin:0 auto 17px;
+  color:var(--dorado);
+}
+
+.ornament:before,
+.ornament:after {
+  content:"";
+  width:54px;
+  height:1px;
+  background:var(--dorado);
+}
+
+.eyebrow {
+  margin:0 0 8px;
+  text-align:center;
+  color:var(--tierra);
+  font-size:11px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+}
+
+h1 {
+  margin:0;
+  text-align:center;
+  color:var(--cafe);
+  font:500 clamp(30px,7vw,43px)/1.04 "Cormorant Garamond",Georgia,serif;
+}
+
+.intro {
+  max-width:390px;
+  margin:13px auto 0;
+  text-align:center;
+  color:var(--cafe-suave);
+  font:16px/1.65 "Cormorant Garamond",Georgia,serif;
+}
+
+.rule {
+  width:min(220px,65%);
+  height:1px;
+  margin:24px auto;
+  background:linear-gradient(90deg,transparent,var(--dorado),transparent);
+}
+
+.instruction {
+  margin:0 auto 20px;
+  max-width:440px;
+  text-align:center;
+  color:var(--cafe-suave);
+  font-size:11px;
+  line-height:1.8;
+}
+
+#people {
+  display:grid;
+  gap:13px;
+}
+
+.person {
+  background:var(--blanco);
+  border:1px solid var(--borde);
+  padding:17px 16px;
+  box-shadow:0 3px 12px rgba(81,64,51,.035);
+}
+
+.person-name {
+  margin:0 0 5px;
+  text-align:center;
+  overflow-wrap:anywhere;
+  color:var(--cafe);
+  font:500 25px/1.15 "Cormorant Garamond",Georgia,serif;
+}
+
+.person-status {
+  margin:0 0 13px;
+  text-align:center;
+  color:var(--cafe-suave);
+  font-size:9px;
+  letter-spacing:1.2px;
+  text-transform:uppercase;
+}
+
+.person-status.confirmado { color:var(--verde); }
+.person-status.declinado { color:var(--rojo); }
+
+.choices {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}
+
+.choice {
+  min-height:44px;
+  padding:10px 8px;
+  border:1px solid var(--borde);
+  background:var(--marfil);
+  color:var(--cafe-suave);
+  font:500 10px/1.35 Montserrat,Arial,sans-serif;
+  cursor:pointer;
+  transition:.18s ease;
+}
+
+.choice:hover {
+  border-color:var(--tierra);
+}
+
+.choice[aria-pressed="true"].yes {
+  color:white;
+  background:var(--verde);
+  border-color:var(--verde);
+}
+
+.choice[aria-pressed="true"].no {
+  color:white;
+  background:var(--rojo);
+  border-color:var(--rojo);
+}
+
+.actions {
+  margin-top:22px;
+  text-align:center;
+}
+
+.save {
+  width:100%;
+  max-width:330px;
+  min-height:49px;
+  padding:13px 18px;
+  border:1px solid var(--tierra-oscuro);
+  background:var(--tierra-oscuro);
+  color:white;
+  font:500 10px Montserrat,Arial,sans-serif;
+  letter-spacing:2px;
+  cursor:pointer;
+}
+
+.save:hover {
+  background:var(--cafe);
+}
+
+.save:disabled {
+  opacity:.6;
+  cursor:wait;
+}
+
+.helper,
+.feedback {
+  margin:13px auto 0;
+  max-width:420px;
+  text-align:center;
+  color:var(--cafe-suave);
+  font-size:10px;
+  line-height:1.7;
+}
+
+.feedback {
+  padding:18px;
+  background:#f2ece3;
+  border:1px solid var(--borde);
+}
+
+.feedback strong {
+  display:block;
+  margin-bottom:4px;
+  color:var(--cafe);
+  font:500 26px "Cormorant Garamond",Georgia,serif;
+}
+
+.loading {
+  padding:28px 10px;
+  text-align:center;
+  color:var(--cafe-suave);
+  font-size:11px;
+}
+
+.spinner {
+  width:25px;
+  height:25px;
+  margin:0 auto 12px;
+  border:2px solid var(--fondo);
+  border-top-color:var(--tierra-oscuro);
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform:rotate(360deg); }
+}
+
+.error {
+  padding:25px 10px;
+  text-align:center;
+  color:var(--cafe-suave);
+  font-size:11px;
+  line-height:1.8;
+}
+
+.error strong {
+  display:block;
+  margin-bottom:7px;
+  color:var(--cafe);
+  font:500 26px "Cormorant Garamond",Georgia,serif;
+}
+
+.footer {
+  margin-top:18px;
+  text-align:center;
+  color:#8c7967;
+  font:13px "Cormorant Garamond",Georgia,serif;
+  letter-spacing:2px;
+}
+
+.hidden {
+  display:none!important;
+}
+
+@media(max-width:390px) {
+  body { padding:10px 8px 24px; }
+  .card { padding:27px 20px; }
+  .choices { grid-template-columns:1fr; }
+}
+
+</style>
+</head>
+
+<body>
+
+<main class="page">
+<section class="card" aria-live="polite">
+
+<div class="content">
+
+<div class="ornament">✧</div>
+
+<p class="eyebrow">Un día para compartir</p>
+
+<h1>Confirmación de asistencia</h1>
+
+<p class="intro">
+Nos encantará compartir este momento contigo.
+</p>
+
+<div class="rule"></div>
+
+<p class="instruction" id="instruction">
+Por favor, selecciona una respuesta para cada integrante de tu pase.
+</p>
+
+<div id="loading" class="loading">
+<div class="spinner"></div>
+Preparando tu confirmación…
+</div>
+
+<div id="people" class="hidden"></div>
+<div id="group" class="hidden"></div>
+
+<div id="error" class="error hidden">
+<strong>No encontramos tu invitación</strong>
+Abre esta página desde el botón de confirmación de tu invitación personal.
+</div>
+
+<div id="fatal" class="error hidden">
+<strong>No fue posible cargar tus datos</strong>
+Intenta nuevamente en unos minutos.
+</div>
+
+<div id="feedback" class="feedback hidden">
+<strong>¡Muchas gracias!</strong>
+Tus respuestas quedaron registradas.
+</div>
+
+<div id="actions" class="actions hidden">
+<button id="save" class="save" type="button">
+CONFIRMAR RESPUESTAS
+</button>
+<p class="helper" id="helper">
+Revisa las respuestas antes de guardarlas.
+</p>
+</div>
+
+</div>
 </section>
+
+<div class="footer">Con cariño · DEMIR</div>
+</main>
+
 <script type="module">
-import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import {getDatabase,ref,get,update,push} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
-const firebaseConfig={apiKey:'AIzaSyB45I1lwpPZmUJxFB5hu_xtXAwX709PPxc',authDomain:'demirqr-cb84d.firebaseapp.com',databaseURL:'https://demirqr-cb84d-default-rtdb.firebaseio.com',projectId:'demirqr-cb84d',storageBucket:'demirqr-cb84d.appspot.com',messagingSenderId:'172090319379',appId:'1:172090319379:web:b9577cb84f0e6c2c4495e6'};
-const db=getDatabase(initializeApp(firebaseConfig));
-// Lee parámetros directos; como alternativa intenta leerlos del referrer (si el navegador los envía).
-function params() {
-  const q = new URLSearchParams(location.search);
 
-  let id = q.get('id');
-  let evento = q.get('evento');
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 
-  // 1. Intentar leer los parámetros directamente.
+import {
+  getDatabase,
+  ref,
+  get,
+  update,
+  push
+}
+from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB45I1lwpPZmUJxFB5hu_xtXAwX709PPxc",
+  authDomain: "demirqr-cb84d.firebaseapp.com",
+  databaseURL: "https://demirqr-cb84d-default-rtdb.firebaseio.com",
+  projectId: "demirqr-cb84d",
+  storageBucket: "demirqr-cb84d.appspot.com",
+  messagingSenderId: "172090319379",
+  appId: "1:172090319379:web:b9577cb84f0e6c2c4495e6"
+};
+
+const db = getDatabase(initializeApp(firebaseConfig));
+
+const $ = id => document.getElementById(id);
+
+
+// IDENTIFICACIÓN DEL INVITADO
+
+function readCookie(name) {
+  const prefix = name + "=";
+  const item = document.cookie
+    .split(";")
+    .map(x => x.trim())
+    .find(x => x.startsWith(prefix));
+
+  if (!item) return null;
+
+  try {
+    return decodeURIComponent(item.substring(prefix.length));
+  } catch(e) {
+    return null;
+  }
+}
+
+function getInviteParams() {
+
+  const query = new URLSearchParams(location.search);
+
+  let id = query.get("id");
+  let evento = query.get("evento");
+
   if (id && evento) {
-    try {
-      localStorage.setItem('demir_rsvp_context', JSON.stringify({
-        id,
-        evento,
-        guardadoEn: Date.now()
-      }));
-    } catch (e) {}
-
     return { id, evento };
   }
 
-  // 2. Intentar recuperar el contexto guardado.
   try {
-    const raw = localStorage.getItem('demir_rsvp_context');
+    const raw = readCookie("demir_rsvp_context");
 
     if (raw) {
       const saved = JSON.parse(raw);
+
       const age = Date.now() - Number(saved.guardadoEn || 0);
 
-      const valid =
+      if (
         saved.id &&
         saved.evento &&
         age >= 0 &&
-        age <= 24 * 60 * 60 * 1000;
-
-      if (valid) {
+        age <= 24 * 60 * 60 * 1000
+      ) {
         return {
           id: saved.id,
           evento: saved.evento
         };
       }
-
-      localStorage.removeItem('demir_rsvp_context');
     }
-  } catch (e) {
-    console.warn('No se pudo recuperar el contexto RSVP.', e);
+
+  } catch(e) {
+    console.warn("DEMIR RSVP: error leyendo cookie", e);
   }
 
-  // 3. Último intento: recuperar los parámetros del referrer.
-  if (document.referrer) {
-    try {
-      const r = new URL(document.referrer);
-
-      id = r.searchParams.get('id');
-      evento = r.searchParams.get('evento');
-    } catch (e) {}
-  }
-
-  return { id, evento };
+  return { id:null, evento:null };
 }
-const {id:invId,evento:eventoId}=params();let personas={},invitado={};const $=id=>document.getElementById(id);const ruta=()=>`invitados/${eventoId}/${invId}`;const hide=id=>$(id).classList.add('hidden');
-function error(){hide('loading');hide('content');$('error').classList.remove('hidden')}function fatal(e){console.error('DEMIR RSVP',e);hide('loading');hide('content');$('fatal').classList.remove('hidden')}
-async function start(){if(!invId||!eventoId){error();return}try{const [evS,invS]=await Promise.all([get(ref(db,`eventos/${eventoId}`)),get(ref(db,ruta()))]);if(!evS.exists()||!invS.exists()){error();return}invitado=invS.val();if(evS.val().confirmacionIndividual===true){await preparePeople();renderPeople()}else renderGroup();hide('loading');$('content').classList.remove('hidden')}catch(e){fatal(e)}}
-// Misma estructura de personas que utiliza el pase DEMIR; solo crea registros si faltan.
-async function preparePeople(){personas=invitado.personas&&typeof invitado.personas==='object'?{...invitado.personas}:{};if(!Object.keys(personas).length){const names=(invitado.acompanantes||'').split(',').map(n=>n.trim()).filter(Boolean);const adults=Math.max(Number(invitado.adultos)||(1+names.length),1+names.length);const titular=push(ref(db,`${ruta()}/personas`)).key;personas[titular]={nombre:invitado.nombre||'',tipo:'titular',respuesta:null};names.forEach(nombre=>{const key=push(ref(db,`${ruta()}/personas`)).key;personas[key]={nombre,tipo:'acompanante',respuesta:null}});for(let i=0;i<adults-1-names.length;i++){const key=push(ref(db,`${ruta()}/personas`)).key;personas[key]={nombre:'',tipo:'acompanante_sin_nombre',respuesta:null}}await update(ref(db,ruta()),{personas});invitado.personas=personas}else if(!Object.values(personas).some(p=>p&&p.tipo==='titular'&&p.activo!==false)){const key=push(ref(db,`${ruta()}/personas`)).key;personas[key]={nombre:invitado.nombre||'',tipo:'titular',respuesta:null};await update(ref(db,ruta()),{personas})}}
-function button(label,cls,fn){const b=document.createElement('button');b.type='button';b.className=`choice ${cls}`;b.textContent=label;b.addEventListener('click',fn);return b}
-function renderPeople(){ $('subtitle').textContent='Confirma la asistencia de cada adulto';const box=$('content');box.innerHTML='';Object.entries(personas).forEach(([pid,p])=>{if(!p||p.activo===false)return;const answer=p.respuesta||'pendiente',card=document.createElement('article');card.className='person';const name=document.createElement('div');name.className='person-name';name.textContent=p.nombre||(p.tipo==='titular'?(invitado.nombre||'Titular'):'Acompañante');const status=document.createElement('div');status.className='status '+(answer==='confirmado'?'yes-status':answer==='declinado'?'no-status':'pending');status.textContent=answer==='confirmado'?'✓ Asistencia confirmada':answer==='declinado'?'✕ No asistirá':'Pendiente de respuesta';const actions=document.createElement('div');actions.className='buttons';const yes=button('Sí asistiré','yes',()=>answerPerson(pid,'confirmado'));const no=button('No podré asistir','no',()=>answerPerson(pid,'declinado'));yes.disabled=busy.has(pid)&&answer==='confirmado';no.disabled=busy.has(pid)&&answer==='declinado';actions.append(yes,no);card.append(name,status,actions);box.append(card)});const note=document.createElement('p');note.className='notice';note.textContent='Si necesitas cambiar alguna respuesta, puedes seleccionar la otra opción.';box.append(note)}
-const busy=new Set();async function answerPerson(pid,value){if(busy.has(pid))return;const p=personas[pid];if(!p||p.activo===false)return;busy.add(pid);renderPeople();const now=Date.now(),historyId=push(ref(db,`${ruta()}/historialRespuestas`)).key;const answers=Object.entries(personas).filter(([k,v])=>v&&v.activo!==false).map(([k,v])=>k===pid?value:(v.respuesta||'pendiente'));let summary='pendiente';if(answers.length&&answers.every(x=>x==='confirmado'))summary='confirmado';else if(answers.length&&answers.every(x=>x==='declinado'))summary='declinado';const changes={};changes[`personas/${pid}/respuesta`]=value;changes[`personas/${pid}/respondidoEn`]=now;changes[`personas/${pid}/ultimaRespuestaEn`]=now;changes[`historialRespuestas/${historyId}`]={personaId:pid,nombre:p.nombre||(p.tipo==='titular'?(invitado.nombre||'Titular'):'Acompañante'),respuestaAnterior:p.respuesta||null,respuesta:value,fecha:now};changes.rsvp=summary;try{await update(ref(db,ruta()),changes);p.respuesta=value;p.respondidoEn=now;invitado.rsvp=summary}catch(e){console.error(e);alert('No pudimos guardar tu respuesta. Intenta nuevamente.')}finally{busy.delete(pid);renderPeople()}}
-function renderGroup(){ $('subtitle').textContent='¿Nos acompañarás?';const box=$('content');box.innerHTML='';const answer=invitado.rsvp||'pendiente',status=document.createElement('div');status.className='status '+(answer==='confirmado'?'yes-status':answer==='declinado'?'no-status':'pending');status.style.textAlign='center';status.textContent=answer==='confirmado'?'✓ Asistencia confirmada':answer==='declinado'?'✕ No asistirá':'Pendiente de respuesta';const actions=document.createElement('div');actions.className='buttons';const yes=button('Sí asistiré','yes',()=>answerGroup('confirmado'));const no=button('No podré asistir','no',()=>answerGroup('declinado'));yes.disabled=answer==='confirmado';no.disabled=answer==='declinado';actions.append(yes,no);box.append(status,actions)}
-async function answerGroup(value){try{await update(ref(db,ruta()),{rsvp:value});invitado.rsvp=value;renderGroup()}catch(e){console.error(e);alert('No pudimos guardar tu respuesta. Intenta nuevamente.')}}
+
+
+const params = getInviteParams();
+
+const invId = params.id;
+const eventoId = params.evento;
+
+const invitePath = () =>
+  `invitados/${eventoId}/${invId}`;
+
+let invitado = {};
+let personas = {};
+let selected = {};
+let individual = false;
+let saving = false;
+
+
+// MENSAJES
+
+function showError(which) {
+  $("loading").classList.add("hidden");
+  $("people").classList.add("hidden");
+  $("group").classList.add("hidden");
+  $(which).classList.remove("hidden");
+}
+
+
+// CREAR BOTONES
+
+function makeChoice(label, value, kind, personId, card) {
+
+  const button = document.createElement("button");
+
+  button.type = "button";
+  button.className = `choice ${kind}`;
+  button.textContent = label;
+  button.dataset.value = value;
+
+  button.setAttribute("aria-pressed", "false");
+
+  button.addEventListener("click", () => {
+
+    selected[personId] = value;
+
+    card.querySelectorAll(".choice").forEach(b => {
+      b.setAttribute(
+        "aria-pressed",
+        String(b.dataset.value === value)
+      );
+    });
+
+    const status = card.querySelector(".person-status");
+
+    status.textContent =
+      value === "confirmado"
+        ? "Respuesta seleccionada · Sí asistiré"
+        : "Respuesta seleccionada · No podré asistir";
+
+    status.className = `person-status ${value}`;
+
+  });
+
+  return button;
+}
+
+
+// PREPARAR PERSONAS
+
+async function preparePeople() {
+
+  personas =
+    invitado.personas &&
+    typeof invitado.personas === "object"
+      ? { ...invitado.personas }
+      : {};
+
+  if (!Object.keys(personas).length) {
+
+    const names = (invitado.acompanantes || "")
+      .split(",")
+      .map(n => n.trim())
+      .filter(Boolean);
+
+    const adults = Math.max(
+      Number(invitado.adultos) || (1 + names.length),
+      1 + names.length
+    );
+
+    const additions = {};
+
+    const titular = push(
+      ref(db, `${invitePath()}/personas`)
+    ).key;
+
+    additions[titular] = {
+      nombre: invitado.nombre || "",
+      tipo: "titular",
+      respuesta: null
+    };
+
+    names.forEach(nombre => {
+
+      const key = push(
+        ref(db, `${invitePath()}/personas`)
+      ).key;
+
+      additions[key] = {
+        nombre,
+        tipo: "acompanante",
+        respuesta: null
+      };
+
+    });
+
+    for (
+      let i = 0;
+      i < adults - 1 - names.length;
+      i++
+    ) {
+
+      const key = push(
+        ref(db, `${invitePath()}/personas`)
+      ).key;
+
+      additions[key] = {
+        nombre: "",
+        tipo: "acompanante_sin_nombre",
+        respuesta: null
+      };
+
+    }
+
+    await update(ref(db, invitePath()), {
+      personas: additions
+    });
+
+    personas = additions;
+
+  } else if (
+    !Object.values(personas).some(
+      p => p &&
+      p.tipo === "titular" &&
+      p.activo !== false
+    )
+  ) {
+
+    const key = push(
+      ref(db, `${invitePath()}/personas`)
+    ).key;
+
+    const titular = {
+      nombre: invitado.nombre || "",
+      tipo: "titular",
+      respuesta: null
+    };
+
+    await update(ref(db, invitePath()), {
+      [`personas/${key}`]: titular
+    });
+
+    personas[key] = titular;
+
+  }
+
+}
+
+
+// MOSTRAR CONFIRMACIÓN INDIVIDUAL
+
+function renderPeople() {
+
+  const container = $("people");
+
+  container.innerHTML = "";
+  selected = {};
+
+  Object.entries(personas).forEach(([personId, person]) => {
+
+    if (!person || person.activo === false) return;
+
+    const card = document.createElement("article");
+    card.className = "person";
+
+    const name = document.createElement("h2");
+    name.className = "person-name";
+
+    name.textContent =
+      person.nombre ||
+      (
+        person.tipo === "titular"
+          ? (invitado.nombre || "Titular")
+          : "Acompañante"
+      );
+
+    const status = document.createElement("p");
+    status.className = "person-status";
+
+    const previous =
+      person.respuesta === "confirmado" ||
+      person.respuesta === "declinado"
+        ? person.respuesta
+        : null;
+
+    status.textContent =
+      previous === "confirmado"
+        ? "Respuesta anterior · Sí asistiré"
+        : previous === "declinado"
+          ? "Respuesta anterior · No podré asistir"
+          : "Pendiente de respuesta";
+
+    if (previous) status.classList.add(previous);
+
+    const choices = document.createElement("div");
+    choices.className = "choices";
+
+    const yes = makeChoice(
+      "Sí, asistiré",
+      "confirmado",
+      "yes",
+      personId,
+      card
+    );
+
+    const no = makeChoice(
+      "No podré asistir",
+      "declinado",
+      "no",
+      personId,
+      card
+    );
+
+    choices.append(yes, no);
+
+    card.append(name, status, choices);
+
+    container.append(card);
+
+    if (previous) {
+
+      selected[personId] = previous;
+
+      card.querySelector(
+        `[data-value="${previous}"]`
+      ).setAttribute("aria-pressed", "true");
+
+    }
+
+  });
+
+  $("instruction").textContent =
+    "Selecciona una respuesta para cada integrante de tu pase.";
+
+  $("people").classList.remove("hidden");
+  $("actions").classList.remove("hidden");
+
+  $("save").textContent = "CONFIRMAR RESPUESTAS";
+
+  $("helper").textContent =
+    "Puedes revisar o cambiar las respuestas antes de guardarlas.";
+
+}
+
+
+// CONFIRMACIÓN CONJUNTA PARA EVENTOS ANTIGUOS
+
+function renderGroup() {
+
+  individual = false;
+
+  const box = $("group");
+
+  box.innerHTML = "";
+
+  const card = document.createElement("article");
+  card.className = "person";
+
+  const name = document.createElement("h2");
+  name.className = "person-name";
+  name.textContent = invitado.nombre || "Tu invitación";
+
+  const status = document.createElement("p");
+  status.className = "person-status";
+
+  const choices = document.createElement("div");
+  choices.className = "choices";
+
+  const yes = makeChoice(
+    "Sí, asistiré",
+    "confirmado",
+    "yes",
+    "grupo",
+    card
+  );
+
+  const no = makeChoice(
+    "No podré asistir",
+    "declinado",
+    "no",
+    "grupo",
+    card
+  );
+
+  choices.append(yes, no);
+
+  card.append(name, status, choices);
+
+  box.append(card);
+
+  if (
+    invitado.rsvp === "confirmado" ||
+    invitado.rsvp === "declinado"
+  ) {
+
+    selected.grupo = invitado.rsvp;
+
+    const chosen = card.querySelector(
+      `[data-value="${invitado.rsvp}"]`
+    );
+
+    chosen.setAttribute("aria-pressed", "true");
+
+    status.textContent =
+      invitado.rsvp === "confirmado"
+        ? "Respuesta anterior · Sí asistiré"
+        : "Respuesta anterior · No podré asistir";
+
+  } else {
+
+    status.textContent = "Pendiente de respuesta";
+
+  }
+
+  $("instruction").textContent =
+    "Por favor, indícanos si podrás acompañarnos.";
+
+  box.classList.remove("hidden");
+  $("actions").classList.remove("hidden");
+
+  $("save").textContent = "GUARDAR RESPUESTA";
+
+  $("helper").textContent =
+    "Tu respuesta se guardará para toda la invitación.";
+
+}
+
+
+// GUARDAR TODAS LAS RESPUESTAS
+
+async function saveAnswers() {
+
+  if (saving) return;
+
+  const activePeople = Object.entries(personas)
+    .filter(([, p]) => p && p.activo !== false);
+
+  if (individual) {
+
+    const missing = activePeople.filter(
+      ([personId]) => !selected[personId]
+    );
+
+    if (missing.length) {
+
+      $("helper").textContent =
+        "Falta seleccionar una respuesta para cada integrante.";
+
+      return;
+    }
+
+  } else if (!selected.grupo) {
+
+    $("helper").textContent =
+      "Selecciona una opción antes de guardar.";
+
+    return;
+
+  }
+
+  saving = true;
+
+  $("save").disabled = true;
+  $("save").textContent = "GUARDANDO…";
+
+  try {
+
+    const now = Date.now();
+    const changes = {};
+
+    if (individual) {
+
+      const finalAnswers = activePeople.map(
+        ([personId, person]) => ({
+          personId,
+          person,
+          answer: selected[personId]
+        })
+      );
+
+      finalAnswers.forEach(
+        ({ personId, person, answer }) => {
+
+          const historyId = push(
+            ref(db, `${invitePath()}/historialRespuestas`)
+          ).key;
+
+          changes[`personas/${personId}/respuesta`] = answer;
+
+          changes[`personas/${personId}/respondidoEn`] = now;
+
+          changes[`personas/${personId}/ultimaRespuestaEn`] = now;
+
+          changes[`historialRespuestas/${historyId}`] = {
+            personaId: personId,
+            nombre: person.nombre ||
+              (
+                person.tipo === "titular"
+                  ? (invitado.nombre || "Titular")
+                  : "Acompañante"
+              ),
+            respuestaAnterior: person.respuesta || null,
+            respuesta: answer,
+            fecha: now
+          };
+
+        }
+      );
+
+      const answers = finalAnswers.map(x => x.answer);
+
+      let summary = "pendiente";
+
+      if (
+        answers.length &&
+        answers.every(x => x === "confirmado")
+      ) {
+        summary = "confirmado";
+      } else if (
+        answers.length &&
+        answers.every(x => x === "declinado")
+      ) {
+        summary = "declinado";
+      }
+
+      changes.rsvp = summary;
+
+    } else {
+
+      changes.rsvp = selected.grupo;
+
+    }
+
+    // Solo actualiza las respuestas y el resumen.
+    // No reemplaza el registro completo del invitado.
+
+    await update(ref(db, invitePath()), changes);
+
+    $("people").classList.add("hidden");
+    $("group").classList.add("hidden");
+    $("actions").classList.add("hidden");
+
+    $("feedback").classList.remove("hidden");
+
+  } catch(error) {
+
+    console.error("DEMIR RSVP:", error);
+
+    $("helper").textContent =
+      "No pudimos guardar tus respuestas. Revisa tu conexión e inténtalo de nuevo.";
+
+    $("save").disabled = false;
+
+    $("save").textContent =
+      individual
+        ? "CONFIRMAR RESPUESTAS"
+        : "GUARDAR RESPUESTA";
+
+    saving = false;
+
+  }
+
+}
+
+$("save").addEventListener("click", saveAnswers);
+
+
+// INICIAR
+
+async function start() {
+
+  if (!invId || !eventoId) {
+    showError("error");
+    return;
+  }
+
+  try {
+
+    const [eventSnapshot, inviteSnapshot] =
+      await Promise.all([
+
+        get(ref(db, `eventos/${eventoId}`)),
+
+        get(ref(db, invitePath()))
+
+      ]);
+
+    if (
+      !eventSnapshot.exists() ||
+      !inviteSnapshot.exists()
+    ) {
+
+      showError("error");
+      return;
+
+    }
+
+    invitado = inviteSnapshot.val() || {};
+
+    individual =
+      eventSnapshot.val().confirmacionIndividual === true;
+
+    if (individual) {
+
+      await preparePeople();
+      renderPeople();
+
+    } else {
+
+      renderGroup();
+
+    }
+
+    $("loading").classList.add("hidden");
+
+  } catch(error) {
+
+    console.error("DEMIR RSVP:", error);
+    showError("fatal");
+
+  }
+
+}
+
 start();
-</script></body></html>
+
+</script>
+</body>
+</html>
