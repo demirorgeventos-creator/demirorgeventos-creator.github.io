@@ -1,0 +1,388 @@
+<!DOCTYPE html><html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#eee4d7"><title>Mesa de regalos</title><link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet"><style>
+
+:root {
+  --fondo:#eee4d7;
+  --marfil:#fbf8f2;
+  --blanco:#fffefa;
+  --cafe:#514033;
+  --cafe-suave:#806d5c;
+  --tierra:#9b795d;
+  --tierra-oscuro:#74563f;
+  --borde:#d9c8b5;
+  --dorado:#b69a70;
+}
+
+* {
+  box-sizing:border-box;
+}
+
+body {
+  margin:0;
+  min-height:100vh;
+  padding:22px 14px 34px;
+  color:var(--cafe);
+  font-family:Montserrat,Arial,sans-serif;
+
+  background:
+    radial-gradient(ellipse at 10% 5%,rgba(255,255,255,.72),transparent 38%),
+    radial-gradient(ellipse at 90% 90%,rgba(190,162,132,.18),transparent 42%),
+    var(--fondo);
+}
+
+.page {
+  width:100%;
+  max-width:620px;
+  margin:0 auto;
+}
+
+.card {
+  position:relative;
+  overflow:hidden;
+  background:var(--marfil);
+  border:1px solid var(--borde);
+  padding:clamp(30px,6vw,50px);
+  box-shadow:0 14px 38px rgba(75,55,38,.10);
+}
+
+.card:before,
+.card:after {
+  content:"";
+  position:absolute;
+  pointer-events:none;
+  inset:10px;
+  border:1px solid rgba(182,154,112,.45);
+}
+
+.card:after {
+  inset:15px;
+  border-color:rgba(182,154,112,.20);
+}
+
+.content {
+  position:relative;
+  z-index:1;
+}
+
+.ornament {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  margin:0 auto 17px;
+  color:var(--dorado);
+  font-size:20px;
+}
+
+.ornament:before,
+.ornament:after {
+  content:"";
+  width:54px;
+  height:1px;
+  background:var(--dorado);
+}
+
+.eyebrow {
+  margin:0 0 8px;
+  text-align:center;
+  color:var(--tierra);
+  font-size:11px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+}
+
+h1 {
+  margin:0;
+  text-align:center;
+  color:var(--cafe);
+  font:500 clamp(36px,8vw,48px)/1.05 "Cormorant Garamond",Georgia,serif;
+}
+
+.intro {
+  max-width:420px;
+  margin:15px auto 0;
+  text-align:center;
+  color:var(--cafe-suave);
+  font:17px/1.7 "Cormorant Garamond",Georgia,serif;
+}
+
+.rule {
+  width:min(220px,65%);
+  height:1px;
+  margin:28px auto;
+  background:linear-gradient(90deg,transparent,var(--dorado),transparent);
+}
+
+/* TARJETAS */
+
+.option-card {
+  position:relative;
+  margin:0 auto 23px;
+  padding:32px 25px;
+  background:var(--blanco);
+  border:1px solid var(--borde);
+  box-shadow:0 3px 12px rgba(81,64,51,.035);
+  text-align:center;
+}
+
+.option-number {
+  margin:0 0 13px;
+  color:var(--tierra);
+  font-size:10px;
+  letter-spacing:3px;
+}
+
+.option-card h2 {
+  margin:0 0 14px;
+  color:var(--cafe);
+  font:500 31px/1.15 "Cormorant Garamond",Georgia,serif;
+}
+
+.description {
+  max-width:400px;
+  margin:0 auto 24px;
+  color:var(--cafe-suave);
+  font:15px/1.8 "Cormorant Garamond",Georgia,serif;
+}
+
+/* LIVERPOOL */
+
+.liverpool-button {
+  display:inline-block;
+  width:100%;
+  max-width:290px;
+  padding:16px 20px;
+  border:1px solid var(--tierra-oscuro);
+  background:var(--tierra-oscuro);
+  color:white;
+  text-decoration:none;
+  font:500 10px Montserrat,Arial,sans-serif;
+  letter-spacing:2px;
+  transition:.25s ease;
+}
+
+.liverpool-button:hover {
+  background:var(--cafe);
+  border-color:var(--cafe);
+}
+
+.liverpool-name {
+  margin:23px 0 0;
+  color:var(--cafe);
+  font:500 18px Georgia,serif;
+  letter-spacing:5px;
+}
+
+/* TRANSFERENCIA */
+
+.bank-box {
+  margin-top:24px;
+  padding:25px 15px;
+  background:var(--marfil);
+  border:1px solid var(--borde);
+}
+
+.bank-name {
+  margin:0 0 24px;
+  color:var(--cafe);
+  font:600 23px Montserrat,Arial,sans-serif;
+  letter-spacing:3px;
+}
+
+.bank-label {
+  margin:18px 0 7px;
+  color:var(--tierra);
+  font-size:9px;
+  letter-spacing:2px;
+}
+
+.bank-value {
+  margin:0;
+  color:var(--cafe);
+  font:500 19px "Cormorant Garamond",Georgia,serif;
+}
+
+.card-number {
+  margin:0;
+  color:var(--cafe);
+  font:500 clamp(16px,4vw,20px) Montserrat,Arial,sans-serif;
+  letter-spacing:1px;
+  overflow-wrap:anywhere;
+}
+
+.copy-button {
+  display:inline-block;
+  margin-top:21px;
+  padding:14px 23px;
+  border:1px solid var(--tierra);
+  background:transparent;
+  color:var(--tierra-oscuro);
+  font:500 10px Montserrat,Arial,sans-serif;
+  letter-spacing:1.7px;
+  cursor:pointer;
+  transition:.25s ease;
+}
+
+.copy-button:hover {
+  background:var(--tierra-oscuro);
+  color:white;
+}
+
+.copy-message {
+  min-height:16px;
+  margin:12px 0 0;
+  color:var(--tierra-oscuro);
+  font-size:10px;
+}
+
+/* PIE */
+
+.footer {
+  margin-top:29px;
+  text-align:center;
+}
+
+.footer p {
+  max-width:390px;
+  margin:0 auto 12px;
+  color:var(--cafe-suave);
+  font:italic 17px/1.7 "Cormorant Garamond",Georgia,serif;
+}
+
+.footer span {
+  color:var(--dorado);
+  font-size:23px;
+}
+
+.back-button {
+  display:block;
+  width:100%;
+  max-width:240px;
+  margin:30px auto 0;
+  padding:14px 18px;
+  border:1px solid var(--borde);
+  background:transparent;
+  color:var(--cafe-suave);
+  font:500 10px Montserrat,Arial,sans-serif;
+  letter-spacing:1.5px;
+  cursor:pointer;
+  transition:.25s ease;
+}
+
+.back-button:hover {
+  background:var(--tierra-oscuro);
+  border-color:var(--tierra-oscuro);
+  color:white;
+}
+
+@media(max-width:390px) {
+
+  body {
+    padding:12px 9px 25px;
+  }
+
+  .card {
+    padding:30px 20px;
+  }
+
+  .option-card {
+    padding:29px 17px;
+  }
+
+  .option-card h2 {
+    font-size:28px;
+  }
+
+}
+
+</style></head><body><main class="page"><section class="card"><div class="content"><!-- ENCABEZADO --><div class="ornament">♡</div><p class="eyebrow">UN DETALLE PARA NOSOTROS</p><h1>Mesa de regalos</h1><p class="intro">
+Tu presencia es nuestro mejor regalo. Si deseas tener un detalle con nosotros, hemos preparado estas opciones con mucho cariño.
+</p><div class="rule"></div><!-- OPCIÓN 01: LIVERPOOL --><section class="option-card"><p class="option-number">OPCIÓN 01</p><h2>Mesa de regalos</h2><p class="description">
+Hemos seleccionado algunos detalles para esta nueva etapa de nuestra historia.
+</p><a
+class="liverpool-button"
+href="https://mesaderegalos.liverpool.com.mx/milistaderegalos/60007377"
+target="_blank"
+rel="noopener noreferrer">
+
+VER MESA DE REGALOS ↗
+
+</a><p class="liverpool-name">LIVERPOOL</p></section><!-- OPCIÓN 02: TRANSFERENCIA --><section class="option-card"><p class="option-number">OPCIÓN 02</p><h2>Regalo por transferencia</h2><p class="description">
+Si prefieres hacernos llegar tu regalo mediante transferencia, te compartimos nuestros datos:
+</p><div class="bank-box"><p class="bank-name">BBVA</p><p class="bank-label">BENEFICIARIA</p><p class="bank-value">Flor Pérez Cota</p><p class="bank-label">NÚMERO DE TARJETA</p><p class="card-number" id="cardNumber">
+4152314486799854
+</p><button
+type="button"
+class="copy-button"
+id="copyButton">
+
+COPIAR NÚMERO
+
+</button><p class="copy-message" id="copyMessage" aria-live="polite"></p></div></section><!-- DESPEDIDA --><footer class="footer"><p>
+Gracias por acompañarnos y ser parte de este momento tan especial.
+</p><span>♡</span>
+
+</footer><!-- REGRESAR --><button
+type="button"
+class="back-button"
+onclick="history.back()">
+
+← VOLVER A LA INVITACIÓN
+
+</button></div>
+</section><div class="footer">
+  <p>Con cariño · DEMIR</p>
+</div></main><script>
+
+const copyButton = document.getElementById("copyButton");
+const copyMessage = document.getElementById("copyMessage");
+
+copyButton.addEventListener("click", async function() {
+
+  const number = "4152314486799854";
+
+  try {
+
+    if (navigator.clipboard && window.isSecureContext) {
+
+      await navigator.clipboard.writeText(number);
+
+    } else {
+
+      const input = document.createElement("textarea");
+
+      input.value = number;
+      input.style.position = "fixed";
+      input.style.opacity = "0";
+
+      document.body.appendChild(input);
+
+      input.select();
+
+      const copied = document.execCommand("copy");
+
+      input.remove();
+
+      if (!copied) {
+        throw new Error("No se pudo copiar");
+      }
+
+    }
+
+    copyMessage.textContent = "¡Número copiado correctamente!";
+
+  } catch(error) {
+
+    copyMessage.textContent =
+      "No fue posible copiarlo. Puedes seleccionarlo manualmente.";
+
+  }
+
+});
+
+</script></body>
+</html>
